@@ -1,3 +1,5 @@
 /.vs
 /exec
 /__build_obj
+/PredictedInputCache_Debug_x86.dat
+/PredictedInputCache_Release_x86.dat
