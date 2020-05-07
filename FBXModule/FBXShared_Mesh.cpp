@@ -13,22 +13,22 @@
 
 template<typename LHS, typename RHS>
 static inline void ins_copyData(LHS& lhs, const RHS& rhs){
-    lhs = rhs;
+    lhs = static_cast<LHS>(rhs);
 }
 template<typename LHS_TYPE, typename RHS>
 static inline void ins_copyData(FbxVectorTemplate2<LHS_TYPE>& lhs, const RHS& rhs){
-    for(size_t i = 0, e = eastl::size(lhs.mData); i < e; ++i)
-        lhs[i] = rhs[i];
+    for(int i = 0, e = (decltype(e))eastl::size(lhs.mData); i < e; ++i)
+        lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
 }
 template<typename LHS_TYPE, typename RHS>
 static inline void ins_copyData(FbxVectorTemplate3<LHS_TYPE>& lhs, const RHS& rhs){
-    for(size_t i = 0, e = eastl::size(lhs.mData); i < e; ++i)
-        lhs[i] = rhs[i];
+    for(int i = 0, e = (decltype(e))eastl::size(lhs.mData); i < e; ++i)
+        lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
 }
 template<typename LHS_TYPE, typename RHS>
 static inline void ins_copyData(FbxVectorTemplate4<LHS_TYPE>& lhs, const RHS& rhs){
-    for(size_t i = 0, e = eastl::size(lhs.mData); i < e; ++i)
-        lhs[i] = rhs[i];
+    for(int i = 0, e = (decltype(e))eastl::size(lhs.mData); i < e; ++i)
+        lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
 }
 
 

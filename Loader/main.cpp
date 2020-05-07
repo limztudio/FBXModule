@@ -1,8 +1,8 @@
 #include <cstdio>
 #include <windows.h>
 
-#include <eastl/string.h>
-#include <eastl/unordered_map.h>
+#include <string>
+#include <unordered_map>
 
 #include <FBXModule.hpp>
 
@@ -18,10 +18,10 @@
 static HMODULE library = nullptr;
 
 
-static inline eastl::string getLastError(){
+static inline std::string getLastError(){
     auto len = FBXGetLastError(nullptr);
     if(len > 0){
-        eastl::string msg;
+        std::string msg;
         msg.resize(len);
         FBXGetLastError(&msg[0]);
     }
@@ -180,7 +180,7 @@ static inline void storeNode(const char* name){
             const auto& commonVert = pMesh->Vertices;
             const auto& layeredVert = pMesh->LayeredVertices.Values[0];
 
-            eastl::unordered_map<FBXNode*, DirectX::XMFLOAT4X4> skinDeforms;
+            std::unordered_map<FBXNode*, DirectX::XMFLOAT4X4> skinDeforms;
             for(const auto* i = pMesh->SkinDeforms.Values; size_t(i - pMesh->SkinDeforms.Values) < pMesh->SkinDeforms.Length; ++i){
                 auto matDeform = DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)i->DeformMatrix.Values);
 
