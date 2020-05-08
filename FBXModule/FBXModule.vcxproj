@@ -24,6 +24,7 @@
     <ClCompile Include="FBXModule_Error.cpp" />
     <ClCompile Include="FBXModule_IO.cpp" />
     <ClCompile Include="FBXModule_Scene.cpp" />
+    <ClCompile Include="FBXShared.cpp" />
     <ClCompile Include="FBXShared_Animation.cpp" />
     <ClCompile Include="FBXShared_FbxSdk.cpp" />
     <ClCompile Include="FBXShared_Error.cpp" />
@@ -40,6 +41,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\FBXAllocate.hpp" />
     <ClInclude Include="..\include\FBXAnimation.hpp" />
     <ClInclude Include="..\include\FBXAssign.hpp" />
     <ClInclude Include="..\include\FBXBase.hpp" />
@@ -47,8 +49,10 @@
     <ClInclude Include="..\include\FBXMesh.hpp" />
     <ClInclude Include="..\include\FBXModule.hpp" />
     <ClInclude Include="..\include\FBXNode.hpp" />
+    <ClInclude Include="..\include\FBXRoot.hpp" />
     <ClInclude Include="..\include\FBXSkinnedMesh.hpp" />
     <ClInclude Include="..\include\FBXType.hpp" />
+    <ClInclude Include="..\include\FBXUtilites.hpp" />
     <ClInclude Include="FBXShared.h" />
     <ClInclude Include="FBXUtilites.h" />
     <ClInclude Include="stdafx.h" />
