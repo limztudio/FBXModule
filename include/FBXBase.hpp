@@ -11,33 +11,29 @@
 #include "FBXType.hpp"
 
 
-enum class FBXType : unsigned char{
-    FBXType_Node,
+// abd0 ef00 0000 0000 0000 0000 c000 0000
+// a: root identifier
+// b: node identifier
+// - d: bone identifier
+// - e: mesh identifier
+// - - f: skinned mesh identifier
+// c: animation identifier
 
-    FBXType_Bone,
-    FBXType_Mesh,
-    FBXType_SkinnedMesh,
 
-    FBXType_Animation,
+enum class FBXType : unsigned long{
+    FBXType_Root = 1 << 31,
+
+    FBXType_Node = 1 << 30,
+
+    FBXType_Bone = FBXType_Node | (1 << 29),
+    FBXType_Mesh = FBXType_Node | (1 << 27),
+    FBXType_SkinnedMesh = FBXType_Mesh | (1 << 26),
+
+    FBXType_Animation = 1 << 7,
 };
 
 
 class FBXBase{
 public:
     virtual FBXType getID()const = 0;
-
-
-public:
-    FBXBase()
-        :
-        Name(nullptr)
-    {}
-    virtual ~FBXBase(){
-        if(Name)
-            free(Name);
-    }
-
-
-public:
-    char* Name;
 };

@@ -8,7 +8,9 @@
 #pragma once
 
 
+#include "FBXUtilites.hpp"
 #include "FBXType.hpp"
+
 #include "FBXBase.hpp"
 
 
@@ -21,14 +23,28 @@ public:
     FBXNode()
         :
         Child(nullptr),
-        Sibling(nullptr)
+        Sibling(nullptr),
+
+        Name(nullptr)
     {}
-    virtual ~FBXNode(){}
+    virtual ~FBXNode(){
+        auto del = [](FBXNode* p){
+            FBXDelete(p);
+        };
+        FBXUtilites::IterateNode(Child, del);
+        FBXUtilites::IterateNode(Sibling, del);
+
+        if(Name)
+            FBXFree(Name);
+    }
 
 
 public:
     FBXNode* Child;
     FBXNode* Sibling;
+
+public:
+    char* Name;
 
 public:
     FBXStaticArray<float, 16> TransformMatrix;

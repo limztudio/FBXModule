@@ -19,6 +19,11 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
     static const char __name_of_this_func[] = "FBXReadScene(void)";
 
 
+    if(shr_root){
+        SHRPushErrorMessage("this function is only available in read mode", __name_of_this_func);
+        return false;
+    }
+
     if(!shr_scene){
         SHRPushErrorMessage("scene must be opened before read", __name_of_this_func);
         return false;
@@ -57,8 +62,4 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
     }
 
     return true;
-}
-
-__FBXM_MAKE_FUNC(void*, FBXGetRootNode, void){
-    return shr_rootNode;
 }

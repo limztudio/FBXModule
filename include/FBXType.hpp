@@ -8,18 +8,7 @@
 #pragma once
 
 
-#include <malloc.h>
-
-
-#ifdef _WIN64
-typedef __int64 FBX_PTRDIFF;
-typedef unsigned __int64 FBX_PTRDIFFU;
-typedef unsigned __int64 FBX_SIZE;
-#else
-typedef int FBX_PTRDIFF;
-typedef unsigned int FBX_PTRDIFFU;
-typedef unsigned long FBX_SIZE;
-#endif
+#include "FBXAssign.hpp"
 
 
 template<typename T>
@@ -30,26 +19,74 @@ public:
         Length(0),
         Values(nullptr)
     {}
+    FBXDynamicArray(const FBXDynamicArray<T>& rhs)
+        :
+        Length(rhs.Length),
+        Values(FBXAllocate<T>(rhs.Length))
+    {
+        auto* d = Values;
+        const auto* s = rhs.Values;
+        for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
+            ::new(d) T(*s);
+    }
+    FBXDynamicArray(FBXDynamicArray<T>&& rhs)
+        :
+        Length(rhs.Length),
+        Values(rhs.Values)
+    {
+        rhs.Length = 0;
+        rhs.Values = nullptr;
+    }
+
     virtual ~FBXDynamicArray(){
         Clear();
     }
 
 
 public:
+    FBXDynamicArray<T>& operator=(const FBXDynamicArray<T>& rhs){
+        if(Length != rhs.Length){
+            Length = rhs.Length;
+            if(Values){
+                FBXFree(Values);
+                Values = FBXAllocate<T>(Length);
+            }
+        }
+
+        if(Length){
+            auto* d = Values;
+            const auto* s = rhs.Values;
+            for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
+                ::new(d) T(*s);
+        }
+    }
+    FBXDynamicArray<T>& operator=(FBXDynamicArray<T>&& rhs){
+        if(Values)
+            FBXFree(Values);
+
+        Length = rhs.Length;
+        Values = rhs.Values;
+
+        rhs.Length = 0;
+        rhs.Values = nullptr;
+    }
+
+
+public:
     inline void Assign(FBX_SIZE length){
         if(Values)
-            free(Values);
+            FBXFree(Values);
 
         Length = length;
         if(Length){
-            Values = reinterpret_cast<T*>(malloc(Length * sizeof(T)));
+            Values = FBXAllocate<T>(Length);
             for(auto* p = Values; FBX_PTRDIFFU(p - Values) < Length; ++p)
                 ::new(p) T();
         }
     }
     inline void Clear(){
         if(Values)
-            free(Values);
+            FBXFree(Values);
 
         Length = 0;
         Values = nullptr;
@@ -63,6 +100,27 @@ public:
 
 
 template<typename T, unsigned long LEN>
-struct FBXStaticArray{
+class FBXStaticArray{
+public:
+    FBXStaticArray(){}
+    FBXStaticArray(const FBXStaticArray<T, LEN>& rhs){
+        auto* d = Values;
+        const auto* s = rhs.Values;
+        for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
+            (*d) = (*s);
+    }
+
+
+public:
+    FBXStaticArray<T, LEN>& operator=(const FBXStaticArray<T, LEN>& rhs){
+        auto* d = Values;
+        const auto* s = rhs.Values;
+        for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
+            (*d) = (*s);
+    }
+
+
+public:
+    static const FBX_SIZE Length = LEN;
     T Values[LEN];
 };

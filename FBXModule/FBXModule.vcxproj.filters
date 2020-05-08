@@ -45,7 +45,9 @@
     <ClInclude Include="..\include\FBXSkinnedMesh.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="def.h" />
+    <ClInclude Include="..\include\FBXAssign.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

@@ -104,6 +104,8 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode){
         }
 
         kImporter->Destroy();
+
+        SHRCreateRoot();
     }
 
     return true;
@@ -117,7 +119,10 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
         return false;
     }
 
-    if(ins_fileMode == 2){
+    if(ins_fileMode == 1){
+        SHRDeleteRoot();
+    }
+    else if(ins_fileMode == 2){
         if(ins_fileName.empty()){
             SHRPushErrorMessage("file name must be set before export", __name_of_this_func);
             return false;
@@ -156,8 +161,6 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
     }
 
     SHRDestroyFbxSdkObjects();
-    SHRDeleteAllNodes();
-    SHRDeleteAllAnimations();
 
     ins_IOSettings = nullptr;
 

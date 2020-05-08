@@ -40,7 +40,8 @@ static inline void loadLib(){
 
     __FBXM_BIND_FUNC(library, FBXReadScene);
 
-    __FBXM_BIND_FUNC(library, FBXGetRootNode);
+    __FBXM_BIND_FUNC(library, FBXGetRoot);
+    __FBXM_BIND_FUNC(library, FBXCopyRoot);
 }
 static inline void closeLib(){
     if(!FBXCloseFile()){
@@ -89,7 +90,7 @@ template<typename FUNC> static void _iterateNode(const FBXNode* pNode, DirectX::
         _iterateNode(pNode->Child, matCurrent, func);
 }
 static inline void storeNode(const char* name){
-    auto* pRootNode = reinterpret_cast<FBXNode*>(FBXGetRootNode());
+    auto* pRootNode = reinterpret_cast<FBXRoot*>(FBXGetRoot())->Nodes;
 
     FILE* pFile;
     fopen_s(&pFile, name, "wb");

@@ -8,6 +8,8 @@
 #pragma once
 
 
+#include "FBXUtilites.hpp"
+
 #include "FBXBase.hpp"
 
 
@@ -21,7 +23,11 @@ public:
         :
         Next(nullptr)
     {}
-    virtual ~FBXAnimation(){}
+    virtual ~FBXAnimation(){
+        FBXUtilites::IterateAnimation(Next, [](FBXAnimation* p){
+            FBXDelete(p);
+        });
+    }
 
 
 public:

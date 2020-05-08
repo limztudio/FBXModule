@@ -10,14 +10,13 @@
 #include <eastl/set.h>
 #include <eastl/unordered_map.h>
 
+#include <FBXAssign.hpp>
+
 #include "FBXUtilites.h"
 #include "FBXShared.h"
 
 
 using namespace fbxsdk;
-
-
-FBXAnimation* shr_firstAnimation = nullptr;
 
 
 struct _AnimationData_wrapper{
@@ -106,20 +105,8 @@ static void ins_addAnimationRecursive(
 }
 
 
-void SHRDeleteAllAnimations(){
-    SHRDeleteAnimation(shr_firstAnimation);
-    shr_firstAnimation = nullptr;
-}
-void SHRDeleteAnimation(FBXAnimation* animation){
-    if(animation){
-        SHRDeleteAnimation(animation->Next);
-
-        deleteC(animation);
-    }
-}
-
 bool SHRLoadAnimation(FbxManager* kSDKManager, fbxsdk::FbxScene* kScene){
-    auto** pAnim = &shr_firstAnimation;
+    auto** pAnim = &shr_root->Animations;
     for(auto eAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>(), iAnimStack = 0; iAnimStack < eAnimStack; ++iAnimStack){
         auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(iAnimStack);
         if(!kAnimStack)
@@ -156,7 +143,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, fbxsdk::FbxScene* kScene){
         {
             _AnimationData_wrapper _new;
 
-            (*pAnim) = newC<FBXAnimation>();
+            (*pAnim) = FBXNew<FBXAnimation>();
 
             _new.ExportAnimations = (*pAnim);
             _new.AnimationData = eastl::move(genAnimData);

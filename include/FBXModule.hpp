@@ -12,6 +12,8 @@
 
 #include "FBXBase.hpp"
 
+#include "FBXRoot.hpp"
+
 #include "FBXNode.hpp"
 
 #include "FBXBone.hpp"
@@ -44,4 +46,5 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void);
 
 __FBXM_MAKE_FUNC(bool, FBXReadScene, void);
 
-__FBXM_MAKE_FUNC(void*, FBXGetRootNode, void);
+__FBXM_MAKE_FUNC(void*, FBXGetRoot, void);
+__FBXM_MAKE_FUNC(void, FBXCopyRoot, void* dest, const void* src);

@@ -9,6 +9,8 @@
 
 #include <eastl/unordered_map.h>
 
+#include <FBXAssign.hpp>
+
 #include "FBXUtilites.h"
 #include "FBXShared.h"
 
@@ -19,8 +21,6 @@ using namespace fbxsdk;
 #define _ERROR_INSIDE_ADD_MESH -1
 #define _ERROR_INDSID_BIND_SKIN -2
 
-
-FBXNode* shr_rootNode = nullptr;
 
 eastl::unordered_map<FbxNode*, FBXNode*> shr_fbxNodeToExportNode;
 
@@ -42,7 +42,7 @@ static inline bool ins_addBoneNode(
     if(!kBone)
         return false;
 
-    auto* pBone = newC<FBXBone>();
+    auto* pBone = FBXNew<FBXBone>();
     pNode = pBone;
 
     return true;
@@ -72,9 +72,9 @@ static inline bool ins_addMeshNode(
 
     {
         if(pNodeData->bufSkinData.empty())
-            pNode = newC<FBXMesh>();
+            pNode = FBXNew<FBXMesh>();
         else
-            pNode = newC<FBXSkinnedMesh>();
+            pNode = FBXNew<FBXSkinnedMesh>();
     }
 
     {
@@ -271,7 +271,7 @@ static void ins_addNodeRecursive(
             goto _ADD_NODE_AFTER_ALLOCATE;
 
         _ADD_NODE_UNKNOWN_TYPE:
-            pNode = newC<FBXNode>();
+            pNode = FBXNew<FBXNode>();
         }
 
     _ADD_NODE_AFTER_ALLOCATE:
@@ -348,24 +348,11 @@ static void ins_bindSkinningInfoRecursive(FBXNode* pNode){
 }
 
 
-void SHRDeleteAllNodes(){
-    SHRDeleteNode(shr_rootNode);
-    shr_rootNode = nullptr;
-}
-void SHRDeleteNode(FBXNode* node){
-    if(node){
-        SHRDeleteNode(node->Sibling);
-        SHRDeleteNode(node->Child);
-
-        deleteC(node);
-    }
-}
-
 bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
     static const char __name_of_this_func[] = "SHRGenerateNodeTree(FbxManager*, FbxScene*)";
 
 
-    if(shr_rootNode){
+    if(shr_root->Nodes){
         SHRPushErrorMessage("scene must be destroyed before create", __name_of_this_func);
         return false;
     }
@@ -386,10 +373,10 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
                 kSDKManager,
                 kPose,
                 kRootNode,
-                shr_rootNode
+                shr_root->Nodes
             );
 
-            ins_bindSkinningInfoRecursive(shr_rootNode);
+            ins_bindSkinningInfoRecursive(shr_root->Nodes);
         }
         catch(int ret){
             switch(ret){
