@@ -32,7 +32,7 @@ static inline void ins_copyData(FbxVectorTemplate4<LHS_TYPE>& lhs, const RHS& rh
 }
 
 
-bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData){
+bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
     static const char __name_of_this_func[] = "SHRLoadMeshFromNode(FbxNode*, ControlPointRemap&)";
 
 

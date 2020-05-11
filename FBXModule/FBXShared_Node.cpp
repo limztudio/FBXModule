@@ -23,7 +23,7 @@ using namespace fbxsdk;
 
 
 eastl::unordered_map<FbxNode*, FBXNode*> shr_fbxNodeToExportNode;
-eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*> shr_ImportedNodeToFbxNode;
+eastl::unordered_map<const FBXNode*, FbxNode*> shr_ImportedNodeToFbxNode;
 
 
 struct _NodeData_wrapper{
@@ -396,7 +396,7 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
 }
 
 bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRootNode){
-    static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, const FBXNode*, fbxsdk::FbxScene*)";
+    static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, const FBXNode*, FbxScene*)";
 
 
     shr_ImportedNodeToFbxNode.clear();
@@ -439,7 +439,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRo
 
     return true;
 }
-fbxsdk::FbxNode* SHRStoreNode(FbxManager* kSDKManager, FbxNode* kParentNode, const FBXNode* pNode){
+FbxNode* SHRStoreNode(FbxManager* kSDKManager, FbxNode* kParentNode, const FBXNode* pNode){
     static const char __name_of_this_func[] = "SHRStoreNode(FbxManager*, FbxNode*, const FBXNode*)";
 
 

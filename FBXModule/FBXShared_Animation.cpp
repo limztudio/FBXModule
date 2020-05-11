@@ -105,7 +105,7 @@ static void ins_addAnimationRecursive(
 }
 
 
-bool SHRLoadAnimation(FbxManager* kSDKManager, fbxsdk::FbxScene* kScene){
+bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene){
     auto** pAnim = &shr_root->Animations;
     for(auto eAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>(), iAnimStack = 0; iAnimStack < eAnimStack; ++iAnimStack){
         auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(iAnimStack);

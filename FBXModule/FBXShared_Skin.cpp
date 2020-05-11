@@ -29,7 +29,7 @@ FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count){
     return matOut;
 }
 
-bool SHRLoadSkinFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData){
+bool SHRLoadSkinFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
     static const char __name_of_this_func[] = "SHRLoadSkinFromNode(FbxNode*, ControlPointRemap&)";
 
 
@@ -54,7 +54,7 @@ bool SHRLoadSkinFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* 
     }
 
     eastl::vector<FbxCluster*> clusterFinder(clusterCount, nullptr);
-    eastl::vector<eastl::unordered_map<int, fbxsdk::FbxDouble>> boneMapList(clusterCount);
+    eastl::vector<eastl::unordered_map<int, FbxDouble>> boneMapList(clusterCount);
     eastl::vector<eastl::multimap<double, int>> vertexBoneList(pNodeData->bufPositions.size());
 
     auto ctrlPointCount = kMesh->GetControlPointsCount();
