@@ -16,6 +16,7 @@
 
 
 static HMODULE library = nullptr;
+static FBXRoot* fbxRoot = nullptr;
 
 
 static inline std::string getLastError(){
@@ -44,11 +45,6 @@ static inline void loadLib(){
     __FBXM_BIND_FUNC(library, FBXCopyRoot);
 }
 static inline void closeLib(){
-    if(!FBXCloseFile()){
-        printf_s("%s", getLastError().c_str());
-        return;
-    }
-
     FreeLibrary(library);
 }
 
@@ -63,6 +59,21 @@ static inline void loadFile(const char* name){
         printf_s("%s", getLastError().c_str());
         return;
     }
+
+    {
+        auto* pRootNode = reinterpret_cast<FBXRoot*>(FBXGetRoot());
+
+        fbxRoot = FBXAllocateRoot(pRootNode);
+        FBXCopyRoot(fbxRoot, pRootNode);
+    }
+
+    if(!FBXCloseFile()){
+        printf_s("%s", getLastError().c_str());
+        return;
+    }
+}
+static inline void deleteFBXObjects(){
+    FBXDelete(fbxRoot);
 }
 
 static inline size_t _getTriangleCount(const FBXNode* pNode){
@@ -90,7 +101,7 @@ template<typename FUNC> static void _iterateNode(const FBXNode* pNode, DirectX::
         _iterateNode(pNode->Child, matCurrent, func);
 }
 static inline void storeNode(const char* name){
-    auto* pRootNode = reinterpret_cast<FBXRoot*>(FBXGetRoot())->Nodes;
+    auto* pRootNode = fbxRoot->Nodes;
 
     FILE* pFile;
     fopen_s(&pFile, name, "wb");
@@ -297,6 +308,7 @@ int main(int argc, char* argv[]){
     loadFile(argv[1]);
     storeNode(argv[2]);
 
+    deleteFBXObjects();
     closeLib();
     return 0;
 }

@@ -22,7 +22,7 @@ public:
     FBXDynamicArray(const FBXDynamicArray<T>& rhs)
         :
         Length(rhs.Length),
-        Values(FBXAllocate<T>(rhs.Length))
+        Values(rhs.Length ? FBXAllocate<T>(rhs.Length) : nullptr)
     {
         auto* d = Values;
         const auto* s = rhs.Values;
@@ -39,7 +39,12 @@ public:
     }
 
     virtual ~FBXDynamicArray(){
-        Clear();
+        if(Values){
+            for(auto* p = Values; FBX_PTRDIFFU(p - Values) < Length; ++p)
+                p->~T();
+
+            FBXFree(Values);
+        }
     }
 
 
@@ -48,34 +53,58 @@ public:
         if(Length != rhs.Length){
             Length = rhs.Length;
             if(Values){
-                FBXFree(Values);
-                Values = FBXAllocate<T>(Length);
-            }
-        }
+                for(auto* p = Values; FBX_PTRDIFFU(p - Values) < Length; ++p)
+                    p->~T();
 
-        if(Length){
+                FBXFree(Values);
+            }
+
+            if(Length){
+                Values = FBXAllocate<T>(Length);
+
+                auto* d = Values;
+                const auto* s = rhs.Values;
+                for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
+                    ::new(d) T(*s);
+            }
+            else
+                Values = nullptr;
+        }
+        else{
             auto* d = Values;
             const auto* s = rhs.Values;
             for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
-                ::new(d) T(*s);
+                (*d) = (*s);
         }
+
+        return *this;
     }
     FBXDynamicArray<T>& operator=(FBXDynamicArray<T>&& rhs){
-        if(Values)
+        if(Values){
+            for(auto* p = Values; FBX_PTRDIFFU(p - Values) < Length; ++p)
+                p->~T();
+
             FBXFree(Values);
+        }
 
         Length = rhs.Length;
         Values = rhs.Values;
 
         rhs.Length = 0;
         rhs.Values = nullptr;
+
+        return *this;
     }
 
 
 public:
     inline void Assign(FBX_SIZE length){
-        if(Values)
+        if(Values){
+            for(auto* p = Values; FBX_PTRDIFFU(p - Values) < Length; ++p)
+                p->~T();
+
             FBXFree(Values);
+        }
 
         Length = length;
         if(Length){
@@ -85,8 +114,12 @@ public:
         }
     }
     inline void Clear(){
-        if(Values)
+        if(Values){
+            for(auto* p = Values; FBX_PTRDIFFU(p - Values) < Length; ++p)
+                p->~T();
+
             FBXFree(Values);
+        }
 
         Length = 0;
         Values = nullptr;
@@ -117,6 +150,8 @@ public:
         const auto* s = rhs.Values;
         for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
             (*d) = (*s);
+
+        return *this;
     }
 
 

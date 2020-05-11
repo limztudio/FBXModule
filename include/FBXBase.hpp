@@ -11,26 +11,32 @@
 #include "FBXType.hpp"
 
 
-// abd0 ef00 0000 0000 0000 0000 c000 0000
+// abde f000 0000 0000 0000 0000 c000 0000
 // a: root identifier
 // b: node identifier
-// - d: bone identifier
-// - e: mesh identifier
-// - - f: skinned mesh identifier
+// b d: bone identifier
+// b e: mesh identifier
+// b e f: skinned mesh identifier
 // c: animation identifier
 
 
 enum class FBXType : unsigned long{
-    FBXType_Root = 1 << 31,
+    FBXType_Root = 1u << 31,
 
-    FBXType_Node = 1 << 30,
+    FBXType_Node = 1u << 30,
 
-    FBXType_Bone = FBXType_Node | (1 << 29),
-    FBXType_Mesh = FBXType_Node | (1 << 27),
-    FBXType_SkinnedMesh = FBXType_Mesh | (1 << 26),
+    FBXType_Bone = FBXType_Node | (1u << 29),
+    FBXType_Mesh = FBXType_Node | (1u << 28),
+    FBXType_SkinnedMesh = FBXType_Mesh | (1u << 27),
 
-    FBXType_Animation = 1 << 7,
+    FBXType_Animation = 1u << 7,
 };
+static inline bool FBXTypeHasMember(FBXType target, FBXType find){
+    const auto t = (unsigned long)target;
+    const auto f = (unsigned long)find;
+
+    return (t & f) == f;
+}
 
 
 class FBXBase{

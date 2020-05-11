@@ -28,11 +28,10 @@ public:
         Name(nullptr)
     {}
     virtual ~FBXNode(){
-        auto del = [](FBXNode* p){
-            FBXDelete(p);
-        };
-        FBXUtilites::IterateNode(Child, del);
-        FBXUtilites::IterateNode(Sibling, del);
+        if(Child)
+            FBXDelete(Child);
+        if(Sibling)
+            FBXDelete(Sibling);
 
         if(Name)
             FBXFree(Name);

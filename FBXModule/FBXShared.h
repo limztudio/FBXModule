@@ -143,6 +143,12 @@ extern eastl::unordered_map<fbxsdk::FbxNode*, FBXNode*> shr_fbxNodeToExportNode;
 extern void SHRCreateRoot();
 extern void SHRDeleteRoot();
 
+extern void SHRNodeBinder(FBXNode* dest, const FBXNode* src);
+
+extern void SHRCopyRoot(FBXRoot* dest, const FBXRoot* src);
+extern void SHRCopyNode(FBXNode* dest, const FBXNode* src);
+extern void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src);
+
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
 extern void SHRPushErrorMessage(const char* strMessage, const char* strCallPos);

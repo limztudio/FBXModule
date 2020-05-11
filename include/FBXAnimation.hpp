@@ -24,9 +24,8 @@ public:
         Next(nullptr)
     {}
     virtual ~FBXAnimation(){
-        FBXUtilites::IterateAnimation(Next, [](FBXAnimation* p){
-            FBXDelete(p);
-        });
+        if(Next)
+            FBXDelete(Next);
     }
 
 

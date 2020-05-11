@@ -56,12 +56,11 @@ namespace __hidden_FBXModule{
                 dest->Name[i] = 0;
             }
 
-            if((unsigned long)srcID & (unsigned long)FBXType::FBXType_Bone){
+            if(FBXTypeHasMember(srcID, FBXType::FBXType_Bone)){
                 auto* dest_c = static_cast<FBXBone*>(dest);
                 const auto* src_c = static_cast<const FBXBone*>(src);
-                // reserved
             }
-            if((unsigned long)srcID & (unsigned long)FBXType::FBXType_Mesh){
+            if(FBXTypeHasMember(srcID, FBXType::FBXType_Mesh)){
                 auto* dest_c = static_cast<FBXMesh*>(dest);
                 const auto* src_c = static_cast<const FBXMesh*>(src);
 
@@ -71,7 +70,7 @@ namespace __hidden_FBXModule{
 
                 dest_c->LayeredVertices = src_c->LayeredVertices;
             }
-            if((unsigned long)srcID & (unsigned long)FBXType::FBXType_SkinnedMesh){
+            if(FBXTypeHasMember(srcID, FBXType::FBXType_SkinnedMesh)){
                 auto* dest_c = static_cast<FBXSkinnedMesh*>(dest);
                 const auto* src_c = static_cast<const FBXSkinnedMesh*>(src);
 
@@ -87,6 +86,9 @@ namespace __hidden_FBXModule{
     void allocateAnimation(FBXAnimation*& dest, const FBXAnimation* src){
         if(src){
             dest = FBXNew<FBXAnimation>();
+
+
+
             allocateAnimation(dest->Next, src->Next);
         }
     }
@@ -97,7 +99,7 @@ FBXRoot* FBXAllocateRoot(const FBXRoot* src){
     if(!src)
         return nullptr;
 
-    auto* dest = FBXNew<FBXRoot>(src);
+    auto* dest = FBXNew<FBXRoot>();
 
     __hidden_FBXModule::allocateNode(dest->Nodes, src->Nodes);
     __hidden_FBXModule::allocateAnimation(dest->Animations, src->Animations);
