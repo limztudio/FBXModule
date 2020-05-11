@@ -16,6 +16,7 @@
     <ClCompile Include="FBXShared_Skin.cpp" />
     <ClCompile Include="FBXShared_Animation.cpp" />
     <ClCompile Include="FBXShared.cpp" />
+    <ClCompile Include="FBXShared_Bone.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

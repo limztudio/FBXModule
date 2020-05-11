@@ -95,14 +95,15 @@ namespace __hidden_FBXModule{
 };
 
 
-FBXRoot* FBXAllocateRoot(const FBXRoot* src){
-    if(!src)
-        return nullptr;
+void FBXAllocateRoot(void** pDest, const void* pSrc){
+    if(!pSrc)
+        return;
 
+    auto* src = reinterpret_cast<const FBXRoot*>(pSrc);
     auto* dest = FBXNew<FBXRoot>();
 
     __hidden_FBXModule::allocateNode(dest->Nodes, src->Nodes);
     __hidden_FBXModule::allocateAnimation(dest->Animations, src->Animations);
 
-    return dest;
+    (*pDest) = dest;
 }

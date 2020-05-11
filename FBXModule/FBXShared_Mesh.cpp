@@ -17,17 +17,17 @@ static inline void ins_copyData(LHS& lhs, const RHS& rhs){
 }
 template<typename LHS_TYPE, typename RHS>
 static inline void ins_copyData(FbxVectorTemplate2<LHS_TYPE>& lhs, const RHS& rhs){
-    for(int i = 0, e = (decltype(e))eastl::size(lhs.mData); i < e; ++i)
+    for(int i = 0, e = (decltype(e))_countof(lhs.mData); i < e; ++i)
         lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
 }
 template<typename LHS_TYPE, typename RHS>
 static inline void ins_copyData(FbxVectorTemplate3<LHS_TYPE>& lhs, const RHS& rhs){
-    for(int i = 0, e = (decltype(e))eastl::size(lhs.mData); i < e; ++i)
+    for(int i = 0, e = (decltype(e))_countof(lhs.mData); i < e; ++i)
         lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
 }
 template<typename LHS_TYPE, typename RHS>
 static inline void ins_copyData(FbxVectorTemplate4<LHS_TYPE>& lhs, const RHS& rhs){
-    for(int i = 0, e = (decltype(e))eastl::size(lhs.mData); i < e; ++i)
+    for(int i = 0, e = (decltype(e))_countof(lhs.mData); i < e; ++i)
         lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
 }
 
@@ -523,6 +523,18 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* 
             }
         }
     }
+
+    return true;
+}
+
+bool SHRInitMeshNode(FbxManager* kSDKManager, const FBXMesh* pNode, FbxNode* kNode){
+    auto* kMesh = kNode->GetMesh();
+
+    return true;
+}
+bool SHRInitSkinnedMeshNode(FbxManager* kSDKManager, const FBXSkinnedMesh* pNode, FbxNode* kNode){
+    auto* kMesh = kNode->GetMesh();
+    auto* kSkin = kMesh->GetDeformer(0);
 
     return true;
 }

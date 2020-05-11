@@ -63,3 +63,22 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
 
     return true;
 }
+
+__FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
+    static const char __name_of_this_func[] = "FBXWriteScene(const void*)";
+
+
+    const auto* ext_root = reinterpret_cast<const FBXRoot*>(pRoot);
+
+    if(!shr_scene){
+        SHRPushErrorMessage("scene must be created before write", __name_of_this_func);
+        return false;
+    }
+
+    if(!SHRStoreNodes(shr_SDKManager, shr_scene, ext_root->Nodes)){
+        SHRPushErrorMessage("an error occurred while storing object nodes", __name_of_this_func);
+        return false;
+    }
+
+    return true;
+}

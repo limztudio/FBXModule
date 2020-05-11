@@ -49,6 +49,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode);
 __FBXM_MAKE_FUNC(bool, FBXCloseFile, void);
 
 __FBXM_MAKE_FUNC(bool, FBXReadScene, void);
+__FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot);
 
 __FBXM_MAKE_FUNC(void*, FBXGetRoot, void);
-__FBXM_MAKE_FUNC(void, FBXCopyRoot, void* dest, const void* src);
+__FBXM_MAKE_FUNC(void, FBXCopyRoot, void* pDest, const void* pSrc);

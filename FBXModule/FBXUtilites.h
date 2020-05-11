@@ -83,22 +83,22 @@ static inline C* CopyString(const eastl::basic_string<C>& str){
     return ret;
 }
 
-template<typename LHS, typename RHS, size_t LEN_LHS, size_t LEN_RHS>
+template<size_t LEN_LHS, size_t LEN_RHS, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], RHS(&&rhs)[LEN_RHS]){
     for(size_t i = 0; i < LEN_LHS; ++i)
         lhs[i] = eastl::move(static_cast<LHS>(rhs[i]));
 }
-template<typename LHS, typename RHS, size_t LEN_LHS>
+template<size_t LEN_LHS, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], const RHS* rhs){
     for(size_t i = 0; i < LEN_LHS; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
-template<typename LHS, typename RHS, size_t LEN_RHS>
+template<size_t LEN_RHS, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS* lhs, RHS(&&rhs)[LEN_RHS]){
     for(size_t i = 0; i < LEN_RHS; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
-template<typename LHS, typename RHS, size_t LEN>
+template<size_t LEN, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS* lhs, const RHS* rhs){
     for(size_t i = 0; i < LEN; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);

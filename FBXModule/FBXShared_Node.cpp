@@ -23,6 +23,7 @@ using namespace fbxsdk;
 
 
 eastl::unordered_map<FbxNode*, FBXNode*> shr_fbxNodeToExportNode;
+eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*> shr_ImportedNodeToFbxNode;
 
 
 struct _NodeData_wrapper{
@@ -392,4 +393,147 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
     }
 
     return true;
+}
+
+bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRootNode){
+    static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, const FBXNode*, fbxsdk::FbxScene*)";
+
+
+    shr_ImportedNodeToFbxNode.clear();
+
+    if(pRootNode){
+        if(pRootNode->Child){
+            auto* kRootNode = kScene->GetRootNode();
+
+            auto* kNewNode = SHRStoreNode(kSDKManager, kRootNode, pRootNode->Child);
+            if(!kNewNode)
+                return false;
+
+            if(!kRootNode->AddChild(kNewNode)){
+                SHRPushErrorMessage("an error occurred while adding child node", __name_of_this_func);
+                return false;
+            }
+
+            shr_ImportedNodeToFbxNode.emplace(pRootNode, kRootNode);
+        }
+    }
+
+    for(auto i = shr_ImportedNodeToFbxNode.begin(), e = shr_ImportedNodeToFbxNode.end(); i != e; ++i){
+        switch(i->first->getID()){
+        case FBXType::FBXType_Bone:
+            if(!SHRInitBoneNode(kSDKManager, static_cast<const FBXBone*>(i->first), i->second))
+                return false;
+            break;
+
+        case FBXType::FBXType_Mesh:
+            if(!SHRInitMeshNode(kSDKManager, static_cast<const FBXMesh*>(i->first), i->second))
+                return false;
+            break;
+
+        case FBXType::FBXType_SkinnedMesh:
+            if(!SHRInitSkinnedMeshNode(kSDKManager, static_cast<const FBXSkinnedMesh*>(i->first), i->second))
+                return false;
+            break;
+        }
+    }
+
+    return true;
+}
+fbxsdk::FbxNode* SHRStoreNode(FbxManager* kSDKManager, FbxNode* kParentNode, const FBXNode* pNode){
+    static const char __name_of_this_func[] = "SHRStoreNode(FbxManager*, FbxNode*, const FBXNode*)";
+
+
+    if(pNode){
+        auto* kNode = FbxNode::Create(kSDKManager, pNode->Name);
+        if(!kNode){
+            SHRPushErrorMessage("failed to create FbxNode", __name_of_this_func);
+            return nullptr;
+        }
+
+        switch(pNode->getID()){
+        case FBXType::FBXType_Bone:
+        {
+            auto* kSkeleton = FbxSkeleton::Create(kSDKManager, pNode->Name);
+            if(!kSkeleton){
+                SHRPushErrorMessage("failed to create FbxSkeleton", __name_of_this_func);
+                return nullptr;
+            }
+
+            kNode->SetNodeAttribute(kSkeleton);
+            shr_ImportedNodeToFbxNode.emplace(pNode, kNode);
+            break;
+        }
+
+        case FBXType::FBXType_Mesh:
+        {
+            auto* kMesh = FbxMesh::Create(kSDKManager, pNode->Name);
+            if(!kMesh){
+                SHRPushErrorMessage("failed to create FbxMesh", __name_of_this_func);
+                return nullptr;
+            }
+
+            kNode->SetNodeAttribute(kMesh);
+            shr_ImportedNodeToFbxNode.emplace(pNode, kNode);
+            break;
+        }
+
+        case FBXType::FBXType_SkinnedMesh:
+        {
+            auto* kMesh = FbxMesh::Create(kSDKManager, pNode->Name);
+            if(!kMesh){
+                SHRPushErrorMessage("failed to create FbxMesh", __name_of_this_func);
+                return nullptr;
+            }
+
+            auto* kSkin = FbxSkin::Create(kSDKManager, pNode->Name);
+            if(!kSkin){
+                SHRPushErrorMessage("failed to create FbxSkin", __name_of_this_func);
+                return nullptr;
+            }
+
+            if(kMesh->AddDeformer(kSkin) < 0){
+                SHRPushErrorMessage("an error occurred while adding deformer", __name_of_this_func);
+                return nullptr;
+            }
+
+            kNode->SetNodeAttribute(kMesh);
+            shr_ImportedNodeToFbxNode.emplace(pNode, kNode);
+            break;
+        }
+        }
+
+        {
+            FbxAMatrix matTransform;
+            CopyArrayData<_countof(pNode->TransformMatrix.Values)>((double*)matTransform, pNode->TransformMatrix.Values);
+
+            kNode->LclTranslation.Set(matTransform.GetT());
+            kNode->LclRotation.Set(matTransform.GetR());
+            kNode->LclScaling.Set(matTransform.GetS());
+        }
+
+        if(pNode->Child){
+            auto* kNewNode = SHRStoreNode(kSDKManager, kNode, pNode->Child);
+            if(!kNewNode)
+                return nullptr;
+
+            if(!kNode->AddChild(kNewNode)){
+                SHRPushErrorMessage("an error occurred while adding child node", __name_of_this_func);
+                return nullptr;
+            }
+        }
+        if(pNode->Sibling){
+            auto* kNewNode = SHRStoreNode(kSDKManager, kParentNode, pNode->Sibling);
+            if(!kNewNode)
+                return nullptr;
+
+            if(!kParentNode->AddChild(kNewNode)){
+                SHRPushErrorMessage("an error occurred while adding sibling node", __name_of_this_func);
+                return nullptr;
+            }
+        }
+
+        return kNode;
+    }
+
+    return nullptr;
 }

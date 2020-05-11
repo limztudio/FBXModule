@@ -3,21 +3,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)exec\$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.stl</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.fbx</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)exec\$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.stl</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.fbx</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)exec\$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.stl</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.fbx</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)exec\$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.stl</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>b:\teapot2_noani.fbx b:\test.fbx</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

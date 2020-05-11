@@ -28,6 +28,8 @@
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
+// FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
+
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 struct TexcoordTable{
@@ -124,6 +126,8 @@ extern fbxsdk::FbxManager* shr_SDKManager;
 
 extern fbxsdk::FbxScene* shr_scene;
 
+// FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
+
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +135,7 @@ extern fbxsdk::FbxScene* shr_scene;
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
 extern eastl::unordered_map<fbxsdk::FbxNode*, FBXNode*> shr_fbxNodeToExportNode;
+extern eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*> shr_ImportedNodeToFbxNode;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
@@ -157,9 +162,16 @@ extern void SHRPushErrorMessage(const char* strMessage, const char* strCallPos);
 
 extern void SHRDestroyFbxSdkObjects();
 
+// FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
+
+extern bool SHRInitBoneNode(fbxsdk::FbxManager* kSDKManager, const FBXBone* pNode, fbxsdk::FbxNode* kNode);
+
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 extern bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
+
+extern bool SHRInitMeshNode(fbxsdk::FbxManager* kSDKManager, const FBXMesh* pNode, fbxsdk::FbxNode* kNode);
+extern bool SHRInitSkinnedMeshNode(fbxsdk::FbxManager* kSDKManager, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
 
@@ -169,10 +181,13 @@ extern bool SHRLoadSkinFromNode(ControlPointRemap& controlPointRemap, fbxsdk::Fb
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRGenerateNodeTree(FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+extern bool SHRGenerateNodeTree(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+
+extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXNode* pRootNode);
+extern fbxsdk::FbxNode* SHRStoreNode(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxNode* kParentNode, const FBXNode* pNode);
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRLoadAnimation(FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
