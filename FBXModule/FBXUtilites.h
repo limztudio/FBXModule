@@ -8,10 +8,24 @@
 #pragma once
 
 
+#include <intrin.h>
+
 #include <eastl/string.h>
 
 #include <fbxsdk.h>
 #include <FBXNode.hpp>
+
+
+struct alignas(16) XMMDouble{
+    union{
+        double d[2];
+        __m128d v;
+    };
+};
+
+static const XMMDouble XMMD_One = { { { 1., 1. } } };
+static const XMMDouble XMMD_Epsilon = { { { DBL_EPSILON, DBL_EPSILON } } };
+static const XMMDouble XMMD_EpsilonSq = { { { DBL_EPSILON * DBL_EPSILON, DBL_EPSILON * DBL_EPSILON } } };
 
 
 struct Int3{
@@ -133,27 +147,46 @@ static inline fbxsdk::FbxAMatrix GetGeometry(fbxsdk::FbxNode* kNode){
 }
 
 static inline fbxsdk::FbxDouble4x4 Scale44(const fbxsdk::FbxDouble4x4& kMatrix, const fbxsdk::FbxDouble& kFactor){
-    fbxsdk::FbxDouble4x4 kOut44;
+    alignas(16) fbxsdk::FbxDouble4x4 kOut44;
+
+    auto xmm_factor = _mm_set1_pd(kFactor);
 
     for(int i = 0; i < 4; ++i){
         const auto& kRow = kMatrix[i];
         auto& kOutRow = kOut44[i];
-        for(int j = 0; j < 4; ++j)
-            kOutRow[j] = kRow[j] * kFactor;
+
+        auto xmm_xy = _mm_loadu_pd(kRow.Buffer());
+        auto xmm_zw = _mm_loadu_pd(kRow.Buffer() + 2);
+
+        xmm_xy = _mm_mul_pd(xmm_xy, xmm_factor);
+        xmm_zw = _mm_mul_pd(xmm_zw, xmm_factor);
+
+        _mm_store_pd(kOutRow.Buffer(), xmm_xy);
+        _mm_store_pd(kOutRow.Buffer() + 2, xmm_zw);
     }
 
     return kOut44;
 }
 
 static inline fbxsdk::FbxDouble4x4 Add44(const fbxsdk::FbxDouble4x4& kLhs, const fbxsdk::FbxDouble4x4& kRhs){
-    fbxsdk::FbxDouble4x4 kOut44;
+    alignas(16) fbxsdk::FbxDouble4x4 kOut44;
 
     for(int i = 0; i < 4; ++i){
         const auto& kRowLhs = kLhs[i];
         const auto& kRowRhs = kRhs[i];
         auto& kOutRow = kOut44[i];
-        for(int j = 0; j < 4; ++j)
-            kOutRow[j] = kRowLhs[j] + kRowRhs[j];
+
+        auto xmm_xy_lhs = _mm_loadu_pd(kRowLhs.Buffer());
+        auto xmm_zw_lhs = _mm_loadu_pd(kRowLhs.Buffer() + 2);
+
+        auto xmm_xy_rhs = _mm_loadu_pd(kRowRhs.Buffer());
+        auto xmm_zw_rhs = _mm_loadu_pd(kRowRhs.Buffer() + 2);
+
+        auto xmm_xy = _mm_add_pd(xmm_xy_lhs, xmm_xy_rhs);
+        auto xmm_zw = _mm_add_pd(xmm_zw_lhs, xmm_zw_rhs);
+
+        _mm_store_pd(kOutRow.Buffer(), xmm_xy);
+        _mm_store_pd(kOutRow.Buffer() + 2, xmm_zw);
     }
 
     return kOut44;
@@ -198,29 +231,29 @@ static inline fbxsdk::FbxDouble3 Transform33(const fbxsdk::FbxDouble4x4& kMatrix
     return kOut3;
 }
 
-static inline fbxsdk::FbxDouble3 Normalize3(fbxsdk::FbxDouble3 kVector3){
-    auto x = kVector3[0];
-    auto y = kVector3[1];
-    auto z = kVector3[2];
+static inline fbxsdk::FbxDouble3 Normalize3(const fbxsdk::FbxDouble3& kVector3){
+    auto xmm_xy = _mm_loadu_pd(kVector3.Buffer());
+    auto xmm_zw = _mm_loadu_pd(kVector3.Buffer() + 2);
 
-    x *= x;
-    y *= y;
-    z *= z;
+    auto xmm_xySq = _mm_mul_pd(xmm_xy, xmm_xy);
+    auto xmm_zwSq = _mm_mul_pd(xmm_zw, xmm_zw);
 
-    auto lenSq = x + y + z;
+    auto xmm_lenSq = _mm_dp_pd(xmm_xySq, XMMD_One.v, 0xf1);
+    xmm_lenSq = _mm_add_pd(xmm_lenSq, xmm_zwSq);
 
-    if(lenSq < (DBL_EPSILON * DBL_EPSILON)){
-        kVector3[0] = 0;
-        kVector3[1] = 0;
-        kVector3[2] = 0;
+    if((_mm_movemask_pd(_mm_cmpge_pd(xmm_lenSq, XMMD_EpsilonSq.v)) & 1) == 1){
+        xmm_lenSq = _mm_shuffle_pd(xmm_lenSq, xmm_lenSq, _MM_SHUFFLE2(0, 0));
+        auto xmm_len = _mm_sqrt_pd(xmm_lenSq);
+
+        xmm_xy = _mm_div_pd(xmm_xySq, xmm_len);
+        xmm_zw = _mm_div_pd(xmm_zwSq, xmm_len);
+
+        alignas(16) fbxsdk::FbxDouble3 kRet;
+        _mm_store_pd(kRet.Buffer(), xmm_xy);
+        kRet[2] = _mm_cvtsd_f64(xmm_zw);
+
+        return kRet;
     }
-    else{
-        auto len = ::sqrt(lenSq);
 
-        kVector3[0] = x / len;
-        kVector3[1] = y / len;
-        kVector3[2] = z / len;
-    }
-
-    return kVector3;
+    return fbxsdk::FbxDouble3(0., 0., 0.);
 }
