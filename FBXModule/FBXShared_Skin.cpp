@@ -234,3 +234,64 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
 
     return true;
 }
+
+
+bool SHRInitSkinData(FbxManager* kSDKManager, const FBXNodeToFbxNode& nodeBinder, const FBXSkinnedMesh* pNode, FbxNode* kNode){
+    static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, const FBXNodeToFbxNode&, const FBXSkinnedMesh*, FbxNode*)";
+
+
+    const eastl::string strName = pNode->Name;
+
+    auto* kMesh = kNode->GetMesh();
+    auto* kSkin = kMesh->GetDeformer(0);
+
+    for(const auto* pDeform = pNode->SkinDeforms.Values; FBX_PTRDIFFU(pDeform - pNode->SkinDeforms.Values) < pNode->SkinDeforms.Length; ++pDeform){
+        if(!pDeform->TargetNode){
+            eastl::string msg = "skin deformer must have value not null";
+            msg += "(errored in \"";
+            msg += strName;
+            msg += "\")";
+            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            continue;
+        }
+
+        FbxNode* kTargetNode = nullptr;
+        {
+            auto f = nodeBinder.find(pDeform->TargetNode);
+            if(f == nodeBinder.cend()){
+                eastl::string msg = "failed to find bind node of ";
+                msg += pDeform->TargetNode->Name;
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                continue;
+            }
+
+            kTargetNode = f->second;
+        }
+
+        auto* kCluster = FbxCluster::Create(kSDKManager, "");
+        if(!kCluster){
+            eastl::string msg = "failed to create FbxCluster";
+            msg += "(errored in \"";
+            msg += strName;
+            msg += "\")";
+            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            continue;
+        }
+
+        kCluster->SetLink(kTargetNode);
+        kCluster->SetLinkMode(FbxCluster::eTotalOne);
+
+        auto kMatTransform = GetGlobalTransform(kTargetNode);
+        kCluster->SetTransformMatrix(kMatTransform);
+
+        FbxAMatrix kMatDeform;
+        CopyArrayData<pDeform->DeformMatrix.Length>((double*)kMatDeform, pDeform->DeformMatrix.Values);
+
+        auto kMatLink = kMatTransform * kMatDeform.Inverse();
+        kCluster->SetTransformLinkMatrix(kMatLink);
+
+        //kCluster->AddControlPointIndex();
+    }
+
+    return true;
+}

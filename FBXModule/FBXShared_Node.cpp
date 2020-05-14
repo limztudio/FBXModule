@@ -23,7 +23,7 @@ using namespace fbxsdk;
 
 
 eastl::unordered_map<FbxNode*, FBXNode*> shr_fbxNodeToExportNode;
-eastl::unordered_map<const FBXNode*, FbxNode*> shr_ImportedNodeToFbxNode;
+FBXNodeToFbxNode shr_importedNodeToFbxNode;
 
 
 struct _NodeData_wrapper{
@@ -385,7 +385,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRo
     static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, FbxScene*, const FBXNode*)";
 
 
-    shr_ImportedNodeToFbxNode.clear();
+    shr_importedNodeToFbxNode.clear();
 
     if(pRootNode){
         if(pRootNode->Child){
@@ -400,26 +400,26 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRo
                 return false;
             }
 
-            shr_ImportedNodeToFbxNode.emplace(pRootNode, kRootNode);
+            shr_importedNodeToFbxNode.emplace(pRootNode, kRootNode);
         }
     }
 
-    for(auto i = shr_ImportedNodeToFbxNode.begin(), e = shr_ImportedNodeToFbxNode.end(); i != e; ++i){
-        switch(i->first->getID()){
-        case FBXType::FBXType_Bone:
+    for(auto i = shr_importedNodeToFbxNode.begin(), e = shr_importedNodeToFbxNode.end(); i != e; ++i){
+        const auto curID = i->first->getID();
+
+        if(FBXTypeHasMember(curID, FBXType::FBXType_Bone)){
             if(!SHRInitBoneNode(kSDKManager, static_cast<const FBXBone*>(i->first), i->second))
                 return false;
-            break;
+        }
 
-        case FBXType::FBXType_Mesh:
+        if(FBXTypeHasMember(curID, FBXType::FBXType_Mesh)){
             if(!SHRInitMeshNode(kSDKManager, static_cast<const FBXMesh*>(i->first), i->second))
                 return false;
-            break;
+        }
 
-        case FBXType::FBXType_SkinnedMesh:
-            if(!SHRInitSkinnedMeshNode(kSDKManager, static_cast<const FBXSkinnedMesh*>(i->first), i->second))
+        if(FBXTypeHasMember(curID, FBXType::FBXType_SkinnedMesh)){
+            if(!SHRInitSkinData(kSDKManager, shr_importedNodeToFbxNode, static_cast<const FBXSkinnedMesh*>(i->first), i->second))
                 return false;
-            break;
         }
     }
 
@@ -446,7 +446,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, FbxNode* kParentNode, const FBXNo
             }
 
             kNode->SetNodeAttribute(kSkeleton);
-            shr_ImportedNodeToFbxNode.emplace(pNode, kNode);
+            shr_importedNodeToFbxNode.emplace(pNode, kNode);
             break;
         }
 
@@ -459,7 +459,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, FbxNode* kParentNode, const FBXNo
             }
 
             kNode->SetNodeAttribute(kMesh);
-            shr_ImportedNodeToFbxNode.emplace(pNode, kNode);
+            shr_importedNodeToFbxNode.emplace(pNode, kNode);
             break;
         }
 
@@ -483,14 +483,14 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, FbxNode* kParentNode, const FBXNo
             }
 
             kNode->SetNodeAttribute(kMesh);
-            shr_ImportedNodeToFbxNode.emplace(pNode, kNode);
+            shr_importedNodeToFbxNode.emplace(pNode, kNode);
             break;
         }
         }
 
         {
             FbxAMatrix matTransform;
-            CopyArrayData<_countof(pNode->TransformMatrix.Values)>((double*)matTransform, pNode->TransformMatrix.Values);
+            CopyArrayData<pNode->TransformMatrix.Length>((double*)matTransform, pNode->TransformMatrix.Values);
 
             kNode->LclTranslation.Set(matTransform.GetT());
             kNode->LclRotation.Set(matTransform.GetR());

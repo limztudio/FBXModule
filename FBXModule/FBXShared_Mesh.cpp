@@ -714,14 +714,3 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, const FBXMesh* pNode, FbxNode* kNo
 
     return true;
 }
-bool SHRInitSkinnedMeshNode(FbxManager* kSDKManager, const FBXSkinnedMesh* pNode, FbxNode* kNode){
-    static const char __name_of_this_func[] = "SHRInitSkinnedMeshNode(FbxManager*, const FBXSkinnedMesh*, FbxNode*)";
-
-
-    auto* kMesh = kNode->GetMesh();
-    auto* kSkin = kMesh->GetDeformer(0);
-
-    SHRInitMeshNode(kSDKManager, pNode, kNode);
-
-    return true;
-}
