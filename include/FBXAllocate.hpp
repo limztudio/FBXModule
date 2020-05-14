@@ -65,7 +65,6 @@ namespace __hidden_FBXModule{
                 const auto* src_c = static_cast<const FBXMesh*>(src);
 
                 dest_c->Indices = src_c->Indices;
-                dest_c->Edges = src_c->Edges;
                 dest_c->Vertices = src_c->Vertices;
 
                 dest_c->LayeredVertices = src_c->LayeredVertices;

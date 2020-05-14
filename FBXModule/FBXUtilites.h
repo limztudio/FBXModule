@@ -84,6 +84,43 @@ private:
 
 extern void ConvertObjects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
+template<size_t LEN, typename T>
+static inline size_t MakeHash(const T(&data)[LEN]){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto& i : data){
+        c = static_cast<size_t>(i);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+template<template<typename> typename C, typename T>
+static inline size_t MakeHash(const C<T>& data){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto& i : data){
+        c = static_cast<size_t>(i);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+template<size_t LEN, typename T>
+static inline size_t MakeHash(const T* data){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto* p = data; FBX_PTRDIFFU(p - data) < LEN; ++p){
+        c = static_cast<size_t>(*p);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+template<typename T>
+static inline size_t MakeHash(const T* data, size_t len){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto* p = data; FBX_PTRDIFFU(p - data) < len; ++p){
+        c = static_cast<size_t>(*p);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+
 template<typename C>
 static inline C* CopyString(const eastl::basic_string<C>& str){
     const auto last = str.length();
@@ -107,20 +144,40 @@ static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], const RHS* rhs){
     for(size_t i = 0; i < LEN_LHS; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
+template<size_t LEN_LHS, typename LHS, typename RHS>
+static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], const RHS& rhs){
+    for(size_t i = 0; i < LEN_LHS; ++i)
+        lhs[i] = static_cast<LHS>(rhs[i]);
+}
 template<size_t LEN_RHS, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS* lhs, RHS(&&rhs)[LEN_RHS]){
     for(size_t i = 0; i < LEN_RHS; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
+}
+template<size_t LEN_RHS, template<typename> typename LHS, typename LHS_T, typename RHS>
+static inline void CopyArrayData(LHS<LHS_T>& lhs, RHS(&&rhs)[LEN_RHS]){
+    for(size_t i = 0; i < LEN_RHS; ++i)
+        lhs[i] = static_cast<LHS_T>(rhs[i]);
 }
 template<size_t LEN, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS* lhs, const RHS* rhs){
     for(size_t i = 0; i < LEN; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
+template<size_t LEN, template<typename> typename LHS, typename LHS_T, typename RHS>
+static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs){
+    for(size_t i = 0; i < LEN; ++i)
+        lhs[i] = static_cast<LHS_T>(rhs[i]);
+}
 template<typename LHS, typename RHS>
 static inline void CopyArrayData(LHS* lhs, const RHS* rhs, size_t len){
     for(size_t i = 0; i < len; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
+}
+template<template<typename> typename LHS, typename LHS_T, typename RHS>
+static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs, size_t len){
+    for(size_t i = 0; i < len; ++i)
+        lhs[i] = static_cast<LHS_T>(rhs[i]);
 }
 
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode){
@@ -235,18 +292,26 @@ static inline fbxsdk::FbxDouble3 Normalize3(const fbxsdk::FbxDouble3& kVector3){
     auto xmm_xy = _mm_loadu_pd(kVector3.Buffer());
     auto xmm_zw = _mm_loadu_pd(kVector3.Buffer() + 2);
 
-    auto xmm_xySq = _mm_mul_pd(xmm_xy, xmm_xy);
+#ifdef _SIMD_FMA
+    auto xmm_lenSq = _mm_dp_pd(xmm_xy, xmm_xy, 0xf1);
+    xmm_lenSq = _mm_fmadd_pd(xmm_zw, xmm_zw, xmm_lenSq);
+#else
     auto xmm_zwSq = _mm_mul_pd(xmm_zw, xmm_zw);
 
-    auto xmm_lenSq = _mm_dp_pd(xmm_xySq, XMMD_One.v, 0xf1);
+    auto xmm_lenSq = _mm_dp_pd(xmm_xy, xmm_xy, 0xf1);
     xmm_lenSq = _mm_add_pd(xmm_lenSq, xmm_zwSq);
+#endif
 
     if((_mm_movemask_pd(_mm_cmpge_pd(xmm_lenSq, XMMD_EpsilonSq.v)) & 1) == 1){
+#ifdef _SIMD_AVX
+        xmm_lenSq = _mm_permute_pd(xmm_lenSq, _MM_SHUFFLE2(0, 0));
+#else
         xmm_lenSq = _mm_shuffle_pd(xmm_lenSq, xmm_lenSq, _MM_SHUFFLE2(0, 0));
+#endif
         auto xmm_len = _mm_sqrt_pd(xmm_lenSq);
 
-        xmm_xy = _mm_div_pd(xmm_xySq, xmm_len);
-        xmm_zw = _mm_div_pd(xmm_zwSq, xmm_len);
+        xmm_xy = _mm_div_pd(xmm_xy, xmm_len);
+        xmm_zw = _mm_div_pd(xmm_zw, xmm_len);
 
         alignas(16) fbxsdk::FbxDouble3 kRet;
         _mm_store_pd(kRet.Buffer(), xmm_xy);

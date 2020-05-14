@@ -15,7 +15,6 @@
 
 class FBXMeshLayerElement{
 public:
-    FBXDynamicArray<FBXStaticArray<long, 3>> Smoothing;
     FBXDynamicArray<long> Material;
 
 public:
@@ -43,7 +42,6 @@ public:
 
 public:
     FBXDynamicArray<FBXStaticArray<long, 3>> Indices;
-    FBXDynamicArray<FBXStaticArray<long, 3>> Edges;
     FBXDynamicArray<FBXStaticArray<float, 3>> Vertices;
 
 public:

@@ -21,3 +21,19 @@ void SHRPushErrorMessage(const char* strMessage, const char* strCallPos){
 
     shr_errorStack.emplace(eastl::move(_new));
 }
+void SHRPushErrorMessage(const eastl::string& strMessage, const char* strCallPos){
+    auto _new = strMessage;
+    _new += "\nfrom: ";
+    _new += strCallPos;
+    _new += '\n';
+
+    shr_errorStack.emplace(eastl::move(_new));
+}
+void SHRPushErrorMessage(eastl::string&& strMessage, const char* strCallPos){
+    auto _new = eastl::move(strMessage);
+    _new += "\nfrom: ";
+    _new += strCallPos;
+    _new += '\n';
+
+    shr_errorStack.emplace(eastl::move(_new));
+}

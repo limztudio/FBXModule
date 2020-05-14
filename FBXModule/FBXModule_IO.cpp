@@ -23,10 +23,14 @@ static FbxIOSettings* ins_IOSettings = nullptr;
 static eastl::string ins_fileName;
 static unsigned char ins_fileMode = 0;
 
+static FBXIOType ins_ioFlag = FBXIOType::FBXIOType_None;
 
-__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode){
-    static const char __name_of_this_func[] = "FBXOpenFile(const char*, const char*)";
 
+__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, unsigned long ioFlag){
+    static const char __name_of_this_func[] = "FBXOpenFile(const char*, const char*, unsigned long)";
+
+
+    ins_ioFlag = (FBXIOType)ioFlag;
 
     if((*mode == 'r') || (*mode == 'R')){
         ins_fileMode = 1;
@@ -128,11 +132,12 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             return false;
         }
 
+        const int writeFormat = FBXTypeHasMember(ins_ioFlag, FBXIOType::FBXIOType_BinaryExport) ? shr_SDKManager->GetIOPluginRegistry()->GetNativeWriterFormat() : -1;
         {
             //ins_IOSettings->SetBoolProp(EXP_FBX_CONSTRAINT, true);
             ins_IOSettings->SetBoolProp(EXP_FBX_MATERIAL, true);
             ins_IOSettings->SetBoolProp(EXP_FBX_TEXTURE, true);
-            ins_IOSettings->SetBoolProp(EXP_FBX_EMBEDDED, false);
+            ins_IOSettings->SetBoolProp(EXP_FBX_EMBEDDED, writeFormat != -1);
             ins_IOSettings->SetBoolProp(EXP_FBX_SHAPE, true);
             ins_IOSettings->SetBoolProp(EXP_FBX_GOBO, false);
             ins_IOSettings->SetBoolProp(EXP_FBX_ANIMATION, true);
@@ -148,7 +153,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
         CustomStream stream(shr_SDKManager, ins_fileName.c_str(), "wb");
 
         void* streamData = nullptr;
-        if(!kExporter->Initialize(&stream, streamData, -1, ins_IOSettings)){
+        if(!kExporter->Initialize(&stream, streamData, writeFormat, ins_IOSettings)){
             SHRPushErrorMessage("an error occurred from FbxExporter::Initialize(...)", __name_of_this_func);
             return false;
         }
@@ -163,6 +168,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
     SHRDestroyFbxSdkObjects();
 
     ins_IOSettings = nullptr;
+    ins_ioFlag = FBXIOType::FBXIOType_None;
 
     return true;
 }

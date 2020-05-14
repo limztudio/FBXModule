@@ -11,30 +11,11 @@
 #include "FBXShared.h"
 
 
-template<typename LHS, typename RHS>
-static inline void ins_copyData(LHS& lhs, const RHS& rhs){
-    lhs = static_cast<LHS>(rhs);
-}
-template<typename LHS_TYPE, typename RHS>
-static inline void ins_copyData(FbxVectorTemplate2<LHS_TYPE>& lhs, const RHS& rhs){
-    for(int i = 0, e = (decltype(e))_countof(lhs.mData); i < e; ++i)
-        lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
-}
-template<typename LHS_TYPE, typename RHS>
-static inline void ins_copyData(FbxVectorTemplate3<LHS_TYPE>& lhs, const RHS& rhs){
-    for(int i = 0, e = (decltype(e))_countof(lhs.mData); i < e; ++i)
-        lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
-}
-template<typename LHS_TYPE, typename RHS>
-static inline void ins_copyData(FbxVectorTemplate4<LHS_TYPE>& lhs, const RHS& rhs){
-    for(int i = 0, e = (decltype(e))_countof(lhs.mData); i < e; ++i)
-        lhs[i] = static_cast<LHS_TYPE>(rhs[i]);
-}
-
-
 bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
-    static const char __name_of_this_func[] = "SHRLoadMeshFromNode(FbxNode*, ControlPointRemap&)";
+    static const char __name_of_this_func[] = "SHRLoadMeshFromNode(ControlPointRemap&, FbxNode*, NodeData*)";
 
+
+    const eastl::string strName = kNode->GetName();
 
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();
 
@@ -59,7 +40,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(vertID != ctrlPointIndex){
-                SHRPushErrorMessage("vertex index and control point index are not matched", __name_of_this_func);
+                eastl::string msg = "vertex index and control point index are not matched";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                 return false;
             }
         }
@@ -75,7 +60,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
         auto polySize = kMesh->GetPolygonSize(iPoly);
 
         if(polySize != 3){
-            SHRPushErrorMessage("polygon size must be 3", __name_of_this_func);
+            eastl::string msg = "polygon size must be 3";
+            msg += "(errored in \"";
+            msg += strName;
+            msg += "\")";
+            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
             return false;
         }
 
@@ -83,13 +72,21 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(ctrlPointIndex < 0){
-                SHRPushErrorMessage("vertex index must be bigger than or equal to 0", __name_of_this_func);
+                eastl::string msg = "vertex index must be bigger than or equal to 0";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                 return false;
             }
 
             auto flatIndex = iPoly * 3 + iVert;
             if(t != flatIndex){
-                SHRPushErrorMessage("vertex index is invalid", __name_of_this_func);
+                eastl::string msg = "vertex index is invalid";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -103,7 +100,6 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
     { // load mesh
         auto& positions = pNodeData->bufPositions;
         auto& indices = pNodeData->bufIndices;
-        auto& edges = pNodeData->bufEdges;
 
         auto& layers = pNodeData->bufLayers;
 
@@ -111,7 +107,6 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             {
                 positions.resize(polyCount * 3);
                 indices.resize(polyCount);
-                edges.resize(polyCount);
 
                 layers.resize((size_t)layerCount);
             }
@@ -122,30 +117,6 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             for(auto& i : indices){
                 for(auto& k : i.raw)
                     k = cnt++;
-            }
-        }
-
-        {
-            for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
-                const auto& curIndex = indices[iPoly];
-                auto& curEdgeTable = edges[iPoly];
-
-                for(int iVert = 0; iVert < 3; ++iVert){
-                    int iVertNext = (iVert + 1) % 3;
-
-                    const auto vCtrlBegin = flatIndexToCtrlPoint[curIndex.raw[iVert]];
-                    const auto vCtrlEnd = flatIndexToCtrlPoint[curIndex.raw[iVertNext]];
-
-                    int edgeIndex;
-                    {
-                        bool bReserved;
-                        edgeIndex = kMesh->GetMeshEdgeIndex(vCtrlBegin, vCtrlEnd, bReserved);
-                        if(edgeIndex == -1)
-                            edgeIndex = kMesh->GetMeshEdgeIndex(vCtrlEnd, vCtrlBegin, bReserved);
-                    }
-
-                    curEdgeTable.raw[iVert] = edgeIndex;
-                }
             }
         }
 
@@ -172,7 +143,6 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             if(!kLayer)
                 continue;
 
-            const auto* kSmoothings = kLayer->GetSmoothing();
             const auto* kMaterials = kLayer->GetMaterials();
 
             const auto* kVertColors = kLayer->GetVertexColors();
@@ -182,69 +152,6 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             const auto* kTangents = kLayer->GetTangents();
 
             auto& pLayer = layers[iLayer];
-
-            if(kSmoothings){
-                auto& pObject = pLayer.smoothings;
-                auto* kObject = kSmoothings;
-
-                pObject.resize(polyCount, { -1, -1, -1 });
-
-                switch(kObject->GetMappingMode()){
-                case FbxLayerElement::eByEdge:
-                    for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
-                        const auto& curEdgeTable = edges[iPoly];
-
-                        for(int iEdge = 0; iEdge < 3; ++iEdge){
-                            auto edgeIndex = curEdgeTable.raw[iEdge];
-
-                            auto& edge = pObject[iPoly].raw[iEdge];
-
-                            switch(kObject->GetReferenceMode()){
-                            case FbxLayerElement::eDirect:
-                                edge = kObject->GetDirectArray().GetAt(edgeIndex);
-                                break;
-
-                            case FbxLayerElement::eIndexToDirect:
-                                edge = kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(edgeIndex));
-                                break;
-
-                            default:
-                                SHRPushErrorMessage("smoothing has unsupported reference mode", __name_of_this_func);
-                                return false;
-                            }
-                        }
-                    }
-                    break;
-
-                case FbxLayerElement::eByPolygon:
-                    for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
-                        int smoothIndex;
-
-                        switch(kObject->GetReferenceMode()){
-                        case FbxLayerElement::eDirect:
-                            smoothIndex = kObject->GetDirectArray().GetAt(iPoly);
-                            break;
-
-                        case FbxLayerElement::eIndexToDirect:
-                            smoothIndex = kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(iPoly));
-                            break;
-
-                        default:
-                            SHRPushErrorMessage("smoothing has unsupported reference mode", __name_of_this_func);
-                            return false;
-                        }
-
-                        auto& poly = pObject[iPoly];
-                        for(auto& i : poly.raw)
-                            i = smoothIndex;
-                    }
-                    break;
-
-                default:
-                    SHRPushErrorMessage("smoothing has unsupported mapping mode", __name_of_this_func);
-                    return false;
-                }
-            }
 
             if(kMaterials){
                 auto& pObject = pLayer.materials;
@@ -270,8 +177,14 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                     break;
 
                 default:
-                    SHRPushErrorMessage("material has unsupported mapping mode", __name_of_this_func);
+                {
+                    eastl::string msg = "material has unsupported mapping mode";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                     return false;
+                }
                 }
             }
 
@@ -292,16 +205,22 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(ctrlPointIndex));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
                                 break;
 
                             default:
-                                SHRPushErrorMessage("vertex color has unsupported reference mode", __name_of_this_func);
+                            {
+                                eastl::string msg = "vertex color has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                                 return false;
+                            }
                             }
                         }
                     }
@@ -316,24 +235,36 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:
-                                SHRPushErrorMessage("vertex color has unsupported reference mode", __name_of_this_func);
+                            {
+                                eastl::string msg = "vertex color has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                                 return false;
+                            }
                             }
                         }
                     }
                     break;
 
                 default:
-                    SHRPushErrorMessage("vertex color has unsupported mapping mode", __name_of_this_func);
+                {
+                    eastl::string msg = "vertex color has unsupported mapping mode";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                     return false;
+                }
                 }
             }
 
@@ -357,16 +288,22 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(ctrlPointIndex));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
                                 break;
 
                             default:
-                                SHRPushErrorMessage("vertex color has unsupported reference mode", __name_of_this_func);
+                            {
+                                eastl::string msg = "vertex color has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                                 return false;
+                            }
                             }
                         }
                     }
@@ -383,12 +320,18 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
                             case FbxLayerElement::eIndexToDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(uvIndex));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(uvIndex));
                                 break;
 
                             default:
-                                SHRPushErrorMessage("vertex color has unsupported reference mode", __name_of_this_func);
+                            {
+                                eastl::string msg = "vertex color has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                                 return false;
+                            }
                             }
 
                             vert[1] = 1. - vert[1];
@@ -397,8 +340,19 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                     break;
 
                 default:
-                    SHRPushErrorMessage("texcoord has unsupported mapping mode", __name_of_this_func);
+                {
+                    eastl::string msg = "texcoord has unsupported mapping mode";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                     return false;
+                }
+                }
+
+                for(auto& val : pObject.table){
+                    auto& y = val[1];
+                    y = 1. - y;
                 }
             }
 
@@ -418,16 +372,22 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:
-                                SHRPushErrorMessage("vertex normal has unsupported reference mode", __name_of_this_func);
+                            {
+                                eastl::string msg = "vertex normal has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                                 return false;
+                            }
                             }
 
                             vert = Transform33(kRefGeometry, vert);
@@ -437,8 +397,14 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                     break;
 
                 default:
-                    SHRPushErrorMessage("vertex normal has unsupported mapping mode", __name_of_this_func);
+                {
+                    eastl::string msg = "vertex normal has unsupported mapping mode";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                     return false;
+                }
                 }
             }
 
@@ -458,16 +424,22 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:
-                                SHRPushErrorMessage("vertex binormal has unsupported reference mode", __name_of_this_func);
+                            {
+                                eastl::string msg = "vertex binormal has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                                 return false;
+                            }
                             }
 
                             vert = Transform33(kRefGeometry, vert);
@@ -477,8 +449,14 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                     break;
 
                 default:
-                    SHRPushErrorMessage("vertex binormal has unsupported mapping mode", __name_of_this_func);
+                {
+                    eastl::string msg = "vertex binormal has unsupported mapping mode";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                     return false;
+                }
                 }
             }
 
@@ -498,16 +476,22 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                ins_copyData(vert, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:
-                                SHRPushErrorMessage("vertex tangent has unsupported reference mode", __name_of_this_func);
+                            {
+                                eastl::string msg = "vertex tangent has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                                 return false;
+                            }
                             }
 
                             vert = Transform33(kRefGeometry, vert);
@@ -517,8 +501,14 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                     break;
 
                 default:
-                    SHRPushErrorMessage("vertex tangent has unsupported mapping mode", __name_of_this_func);
+                {
+                    eastl::string msg = "vertex tangent has unsupported mapping mode";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                     return false;
+                }
                 }
             }
         }
@@ -528,13 +518,210 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 }
 
 bool SHRInitMeshNode(FbxManager* kSDKManager, const FBXMesh* pNode, FbxNode* kNode){
+    static const char __name_of_this_func[] = "SHRInitMeshNode(FbxManager*, const FBXMesh*, FbxNode*)";
+
+
+    const eastl::string strName = pNode->Name;
     auto* kMesh = kNode->GetMesh();
+
+    {
+        kMesh->SetControlPointCount((int)pNode->Vertices.Length);
+
+        auto* kPoints = kMesh->GetControlPoints();
+        for(auto* pVert = pNode->Vertices.Values; FBX_PTRDIFFU(pVert - pNode->Vertices.Values) < pNode->Vertices.Length; ++pVert, ++kPoints){
+            CopyArrayData<pVert->Length>(kPoints->mData, pVert->Values);
+            (*kPoints)[3] = 1.;
+        }
+    }
+
+    {
+        for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
+            kMesh->BeginPolygon();
+
+            for(const auto& iPolyIndex : pPoly->Values)
+                kMesh->AddPolygon(iPolyIndex);
+
+            kMesh->EndPolygon();
+        }
+    }
+
+    int iLayer = 0;
+    for(auto* pLayer = pNode->LayeredVertices.Values; FBX_PTRDIFFU(pLayer - pNode->LayeredVertices.Values) < pNode->LayeredVertices.Length; ++pLayer, ++iLayer){
+        auto* kLayer = kMesh->GetLayer(iLayer);
+        if(!kLayer){
+            const auto iNewLayer = kMesh->CreateLayer();
+            if(iNewLayer < 0){
+                eastl::string msg = "failed to create layer";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                continue;
+            }
+            else if(iLayer != iNewLayer){
+                eastl::string msg = "the created layer has unexpected index number";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                continue;
+            }
+            
+            kLayer = kMesh->GetLayer(iNewLayer);
+        }
+
+        //const auto layerName = "Layer" + eastl::to_string(FBX_PTRDIFFU(pLayer - pNode->LayeredVertices.Values));
+
+        if(pLayer->Material.Length){
+            //
+        }
+
+        if(pLayer->Color.Length){
+            auto* kColor = FbxLayerElementVertexColor::Create(kMesh, "");
+            if(kColor){
+                kColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
+                kColor->SetReferenceMode(FbxGeometryElement::eDirect);
+
+                auto& kArray = kColor->GetDirectArray();
+                for(auto* pVert = pLayer->Color.Values; FBX_PTRDIFFU(pVert - pLayer->Color.Values) < pLayer->Color.Length; ++pVert){
+                    FbxVector4 kValue;
+
+                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
+
+                    kArray.Add(kValue);
+                }
+
+                kLayer->SetVertexColors(kColor);
+            }
+            else{
+                eastl::string msg = "failed to create element vertex color in the layer " + eastl::to_string(iLayer);
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            }
+        }
+
+        if(pLayer->Normal.Length){
+            auto* kNormal = FbxLayerElementNormal::Create(kMesh, "");
+            if(kNormal){
+                kNormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
+                kNormal->SetReferenceMode(FbxGeometryElement::eDirect);
+
+                auto& kArray = kNormal->GetDirectArray();
+                for(auto* pVert = pLayer->Normal.Values; FBX_PTRDIFFU(pVert - pLayer->Normal.Values) < pLayer->Normal.Length; ++pVert){
+                    FbxVector4 kValue;
+
+                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
+                    kValue[3] = 1.;
+                    kValue.Normalize();
+
+                    kArray.Add(kValue);
+                }
+
+                kLayer->SetNormals(kNormal);
+            }
+            else{
+                eastl::string msg = "failed to create element normal in the layer " + eastl::to_string(iLayer);
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            }
+        }
+        if(pLayer->Binormal.Length){
+            auto* kBinormal = FbxLayerElementBinormal::Create(kMesh, "");
+            if(kBinormal){
+                kBinormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
+                kBinormal->SetReferenceMode(FbxGeometryElement::eDirect);
+
+                auto& kArray = kBinormal->GetDirectArray();
+                for(auto* pVert = pLayer->Binormal.Values; FBX_PTRDIFFU(pVert - pLayer->Binormal.Values) < pLayer->Binormal.Length; ++pVert){
+                    FbxVector4 kValue;
+
+                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
+                    kValue[3] = 1.;
+                    kValue.Normalize();
+
+                    kArray.Add(kValue);
+                }
+
+                kLayer->SetBinormals(kBinormal);
+            }
+            else{
+                eastl::string msg = "failed to create element binormal in the layer " + eastl::to_string(iLayer);
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            }
+        }
+        if(pLayer->Tangent.Length){
+            auto* kTangent = FbxLayerElementTangent::Create(kMesh, "");
+            if(kTangent){
+                kTangent->SetMappingMode(FbxGeometryElement::eByControlPoint);
+                kTangent->SetReferenceMode(FbxGeometryElement::eDirect);
+
+                auto& kArray = kTangent->GetDirectArray();
+                for(auto* pVert = pLayer->Tangent.Values; FBX_PTRDIFFU(pVert - pLayer->Tangent.Values) < pLayer->Tangent.Length; ++pVert){
+                    FbxVector4 kValue;
+
+                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
+                    kValue[3] = 1.;
+                    kValue.Normalize();
+
+                    kArray.Add(kValue);
+                }
+
+                kLayer->SetTangents(kTangent);
+            }
+            else{
+                eastl::string msg = "failed to create element tangent in the layer " + eastl::to_string(iLayer);
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            }
+        }
+
+        if(pLayer->Texcoord.Length){
+            auto* kUV = FbxLayerElementUV::Create(kMesh, "");
+            if(kUV){
+                kUV->SetMappingMode(FbxGeometryElement::eByControlPoint);
+                kUV->SetReferenceMode(FbxGeometryElement::eDirect);
+
+                auto& kArray = kUV->GetDirectArray();
+                for(auto* pVert = pLayer->Texcoord.Values; FBX_PTRDIFFU(pVert - pLayer->Texcoord.Values) < pLayer->Texcoord.Length; ++pVert){
+                    FbxVector2 kValue;
+
+                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
+                    kValue[1] = 1. - kValue[1];
+
+                    kArray.Add(kValue);
+                }
+
+                kLayer->SetUVs(kUV);
+            }
+            else{
+                eastl::string msg = "failed to create element UV in the layer " + eastl::to_string(iLayer);
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            }
+        }
+    }
 
     return true;
 }
 bool SHRInitSkinnedMeshNode(FbxManager* kSDKManager, const FBXSkinnedMesh* pNode, FbxNode* kNode){
+    static const char __name_of_this_func[] = "SHRInitSkinnedMeshNode(FbxManager*, const FBXSkinnedMesh*, FbxNode*)";
+
+
     auto* kMesh = kNode->GetMesh();
     auto* kSkin = kMesh->GetDeformer(0);
+
+    SHRInitMeshNode(kSDKManager, pNode, kNode);
 
     return true;
 }

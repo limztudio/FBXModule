@@ -31,12 +31,6 @@ enum class FBXType : unsigned long{
 
     FBXType_Animation = 1u << 7,
 };
-static inline bool FBXTypeHasMember(FBXType target, FBXType find){
-    const auto t = (unsigned long)target;
-    const auto f = (unsigned long)find;
-
-    return (t & f) == f;
-}
 
 
 class FBXBase{

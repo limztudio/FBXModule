@@ -7,6 +7,9 @@
     <Filter Include="Sources\EASTL">
       <UniqueIdentifier>{7bdc5425-0bb9-4b74-a9cd-8497cbd48f3f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\EAStdC">
+      <UniqueIdentifier>{bfdc4dd3-5d6e-4e9c-bf58-185d8c110ffa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\EASTL\allocator_eastl.cpp">
@@ -37,6 +40,54 @@
       <Filter>Sources\EASTL</Filter>
     </ClCompile>
     <ClCompile Include="defaultAllocator.cpp" />
+    <ClCompile Include="Sources\EAStdC\EACallback.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EACType.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAFixedPoint.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAHashCRC.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAHashString.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAMemory.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EARandom.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAScanf.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAScanfCore.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EASprintf.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EASprintfCore.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EASprintfOrdered.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAStdC.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EAString.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EATextUtil.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\EAStdC\Int128_t.cpp">
+      <Filter>Sources\EAStdC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EASTL.natvis" />

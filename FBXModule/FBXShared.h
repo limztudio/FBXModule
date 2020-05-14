@@ -10,6 +10,7 @@
 
 #include <eastl/stack.h>
 #include <eastl/vector.h>
+#include <eastl/fixed_vector.h>
 #include <eastl/unordered_set.h>
 #include <eastl/unordered_map.h>
 #include <eastl/string.h>
@@ -24,6 +25,12 @@
 // structures
 // Common ////////////////////////////////////////////////////////////////////////////////////////////
 
+using IntContainer = eastl::vector<int>;
+using Int3Container = eastl::vector<Int3>;
+using Vector3Container = eastl::vector<fbxsdk::FbxDouble3>;
+using Vector4Container = eastl::vector<fbxsdk::FbxDouble4>;
+using Unit3Container = eastl::vector<fbxsdk::FbxDouble3>;
+
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
@@ -37,16 +44,9 @@ struct TexcoordTable{
     eastl::vector<fbxsdk::FbxDouble2> table;
 };
 
-using IntContainer = eastl::vector<int>;
-using Int3Container = eastl::vector<Int3>;
-using Vector3Container = eastl::vector<fbxsdk::FbxDouble3>;
-using Vector4Container = eastl::vector<fbxsdk::FbxDouble4>;
-using Unit3Container = eastl::vector<fbxsdk::FbxDouble3>;
-
 using ControlPointRemap = eastl::vector<eastl::unordered_set<int>>;
 
 struct LayerElement{
-    Int3Container smoothings;
     IntContainer materials;
 
     Vector4Container colors;
@@ -80,7 +80,6 @@ struct NodeData{
 
     Vector3Container bufPositions;
     Int3Container bufIndices;
-    Int3Container bufEdges;
 
     eastl::vector<LayerElement> bufLayers;
 
@@ -104,6 +103,8 @@ struct AnimationData{
 
     AnimationList animationList;
 };
+
+// FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -139,6 +140,8 @@ extern eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*> shr_ImportedNodeTo
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
+// FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -157,6 +160,8 @@ extern void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src);
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
 extern void SHRPushErrorMessage(const char* strMessage, const char* strCallPos);
+extern void SHRPushErrorMessage(const eastl::string& strMessage, const char* strCallPos);
+extern void SHRPushErrorMessage(eastl::string&& strMessage, const char* strCallPos);
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
@@ -177,7 +182,7 @@ extern bool SHRInitSkinnedMeshNode(fbxsdk::FbxManager* kSDKManager, const FBXSki
 
 extern fbxsdk::FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count);
 
-extern bool SHRLoadSkinFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
+extern bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
@@ -189,5 +194,9 @@ extern fbxsdk::FbxNode* SHRStoreNode(fbxsdk::FbxManager* kSDKManager, fbxsdk::Fb
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
 extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+
+// FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
+
+extern void SHROptimizeMesh(ControlPointRemap& controlPointRemap, NodeData* pNodeData);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

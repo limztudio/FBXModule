@@ -11,6 +11,13 @@
 #include "FBXAssign.hpp"
 
 
+enum class FBXIOType : unsigned long{
+    FBXIOType_None = 0,
+
+    FBXIOType_BinaryExport = 1,
+};
+
+
 template<typename T>
 class FBXDynamicArray{
 public:
@@ -159,3 +166,12 @@ public:
     static const FBX_SIZE Length = LEN;
     T Values[LEN];
 };
+
+
+template<typename T>
+static inline bool FBXTypeHasMember(T target, T find){
+    const auto t = (unsigned long)target;
+    const auto f = (unsigned long)find;
+
+    return (t & f) == f;
+}

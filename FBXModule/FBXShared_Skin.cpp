@@ -29,8 +29,8 @@ FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count){
     return matOut;
 }
 
-bool SHRLoadSkinFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
-    static const char __name_of_this_func[] = "SHRLoadSkinFromNode(FbxNode*, ControlPointRemap&)";
+bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
+    static const char __name_of_this_func[] = "SHRLoadSkinFromNode(const ControlPointRemap&, FbxNode*, NodeData*)";
 
 
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();

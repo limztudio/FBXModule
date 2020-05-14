@@ -29,6 +29,22 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Sources\EAStdC\EACallback.cpp" />
+    <ClCompile Include="Sources\EAStdC\EACType.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAFixedPoint.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAHashCRC.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAHashString.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAMemory.cpp" />
+    <ClCompile Include="Sources\EAStdC\EARandom.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAScanf.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAScanfCore.cpp" />
+    <ClCompile Include="Sources\EAStdC\EASprintf.cpp" />
+    <ClCompile Include="Sources\EAStdC\EASprintfCore.cpp" />
+    <ClCompile Include="Sources\EAStdC\EASprintfOrdered.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAStdC.cpp" />
+    <ClCompile Include="Sources\EAStdC\EAString.cpp" />
+    <ClCompile Include="Sources\EAStdC\EATextUtil.cpp" />
+    <ClCompile Include="Sources\EAStdC\Int128_t.cpp" />
     <ClCompile Include="Sources\EASTL\allocator_eastl.cpp" />
     <ClCompile Include="Sources\EASTL\assert.cpp" />
     <ClCompile Include="Sources\EASTL\fixed_pool.cpp" />

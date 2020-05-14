@@ -17,6 +17,8 @@
     <ClCompile Include="FBXShared_Animation.cpp" />
     <ClCompile Include="FBXShared.cpp" />
     <ClCompile Include="FBXShared_Bone.cpp" />
+    <ClCompile Include="FBXShared_Optimizer.cpp" />
+    <ClCompile Include="FBXModule_Compatible.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

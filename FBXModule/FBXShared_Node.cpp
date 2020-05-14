@@ -67,6 +67,8 @@ static inline bool ins_addMeshNode(
         if(!SHRLoadMeshFromNode(controlPointRemap, kNode, pNodeData))
             throw _ERROR_INSIDE_ADD_MESH;
 
+        SHROptimizeMesh(controlPointRemap, pNodeData);
+
         if(!SHRLoadSkinFromNode(controlPointRemap, kNode, pNodeData))
             throw _ERROR_INSIDE_ADD_MESH;
     }
@@ -88,13 +90,6 @@ static inline bool ins_addMeshNode(
             CopyArrayData(iInd.Values, pNodeData->bufIndices[idxInd].raw);
         }
 
-        pMesh->Edges.Assign(pNodeData->bufEdges.size());
-        for(size_t idxInd = 0; idxInd < pMesh->Edges.Length; ++idxInd){
-            auto& iEdge = pMesh->Edges.Values[idxInd];
-
-            CopyArrayData(iEdge.Values, pNodeData->bufEdges[idxInd].raw);
-        }
-
         pMesh->Vertices.Assign(pNodeData->bufPositions.size());
         for(size_t idxVert = 0; idxVert < pMesh->Vertices.Length; ++idxVert){
             auto& iVert = pMesh->Vertices.Values[idxVert];
@@ -106,15 +101,6 @@ static inline bool ins_addMeshNode(
         for(size_t idxLayer = 0; idxLayer < pMesh->LayeredVertices.Length; ++idxLayer){
             auto& iLayer = pMesh->LayeredVertices.Values[idxLayer];
             const auto& nodeLayer = pNodeData->bufLayers[idxLayer];
-
-            {
-                auto& iObject = iLayer.Smoothing;
-                const auto& nodeObject = nodeLayer.smoothings;
-
-                iObject.Assign(nodeObject.size());
-                for(size_t idxElem = 0; idxElem < iObject.Length; ++idxElem)
-                    CopyArrayData(iObject.Values[idxElem].Values, nodeObject[idxElem].raw);
-            }
 
             {
                 auto& iObject = iLayer.Material;
@@ -396,7 +382,7 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
 }
 
 bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRootNode){
-    static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, const FBXNode*, FbxScene*)";
+    static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, FbxScene*, const FBXNode*)";
 
 
     shr_ImportedNodeToFbxNode.clear();

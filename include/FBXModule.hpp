@@ -43,9 +43,10 @@
 #endif
 
 
+__FBXM_MAKE_FUNC(bool, FBXIsCompetible, void);
 __FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage);
 
-__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode);
+__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, unsigned long ioFlag);
 __FBXM_MAKE_FUNC(bool, FBXCloseFile, void);
 
 __FBXM_MAKE_FUNC(bool, FBXReadScene, void);
