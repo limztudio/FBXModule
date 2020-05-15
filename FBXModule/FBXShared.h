@@ -87,7 +87,8 @@ struct NodeData{
     BoneOffsetMatrixMap mapBoneDeformMatrices;
 };
 
-using FBXNodeToFbxNode = eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*>;
+using FbxNodeToExportNode = eastl::unordered_map<FbxNode*, FBXNode*>;
+using ImportNodeToFbxNode = eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*>;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
@@ -137,9 +138,6 @@ extern fbxsdk::FbxScene* shr_scene;
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
-extern eastl::unordered_map<fbxsdk::FbxNode*, FBXNode*> shr_fbxNodeToExportNode;
-extern FBXNodeToFbxNode shr_importedNodeToFbxNode;
-
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
@@ -185,7 +183,7 @@ extern fbxsdk::FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count)
 
 extern bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
-extern bool SHRInitSkinData(fbxsdk::FbxManager* kSDKManager, const FBXNodeToFbxNode& nodeBinder, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
+extern bool SHRInitSkinData(fbxsdk::FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 

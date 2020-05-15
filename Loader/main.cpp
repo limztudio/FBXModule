@@ -75,7 +75,7 @@ static inline void loadFile(const char* name){
 }
 
 static inline void storeNode(const char* name){
-    if(!FBXOpenFile(name, "wb", (unsigned long)FBXIOType::FBXIOType_BinaryExport)){
+    if(!FBXOpenFile(name, "wb", (unsigned long)FBXIOType::FBXIOType_None)){
         printf_s("%s", getLastError().c_str());
         return;
     }

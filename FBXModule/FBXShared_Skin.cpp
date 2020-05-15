@@ -236,14 +236,25 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
 }
 
 
-bool SHRInitSkinData(FbxManager* kSDKManager, const FBXNodeToFbxNode& nodeBinder, const FBXSkinnedMesh* pNode, FbxNode* kNode){
+bool SHRInitSkinData(FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const FBXSkinnedMesh* pNode, FbxNode* kNode){
     static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, const FBXNodeToFbxNode&, const FBXSkinnedMesh*, FbxNode*)";
 
 
     const eastl::string strName = pNode->Name;
 
+    eastl::unordered_map<const FBXNode*, FbxCluster*> clusterFinder;
+
     auto* kMesh = kNode->GetMesh();
-    auto* kSkin = kMesh->GetDeformer(0);
+
+    auto* kSkin = FbxSkin::Create(kSDKManager, "");
+    if(!kSkin){
+        eastl::string msg = "failed to create FbxSkin";
+        msg += "(errored in \"";
+        msg += strName;
+        msg += "\")";
+        SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+        return false;
+    }
 
     for(const auto* pDeform = pNode->SkinDeforms.Values; FBX_PTRDIFFU(pDeform - pNode->SkinDeforms.Values) < pNode->SkinDeforms.Length; ++pDeform){
         if(!pDeform->TargetNode){
@@ -252,7 +263,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, const FBXNodeToFbxNode& nodeBinder
             msg += strName;
             msg += "\")";
             SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
-            continue;
+            return false;
         }
 
         FbxNode* kTargetNode = nullptr;
@@ -262,7 +273,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, const FBXNodeToFbxNode& nodeBinder
                 eastl::string msg = "failed to find bind node of ";
                 msg += pDeform->TargetNode->Name;
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
-                continue;
+                return false;
             }
 
             kTargetNode = f->second;
@@ -275,7 +286,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, const FBXNodeToFbxNode& nodeBinder
             msg += strName;
             msg += "\")";
             SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
-            continue;
+            return false;
         }
 
         kCluster->SetLink(kTargetNode);
@@ -290,7 +301,48 @@ bool SHRInitSkinData(FbxManager* kSDKManager, const FBXNodeToFbxNode& nodeBinder
         auto kMatLink = kMatTransform * kMatDeform.Inverse();
         kCluster->SetTransformLinkMatrix(kMatLink);
 
-        //kCluster->AddControlPointIndex();
+        if(!kSkin->AddCluster(kCluster)){
+            eastl::string msg = "failed to add cluster";
+            msg += "(errored in \"";
+            msg += strName;
+            msg += "\")";
+            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            return false;
+        }
+
+        clusterFinder.emplace(pDeform->TargetNode, kCluster);
+    }
+
+    for(size_t idxVert = 0, edxVert = pNode->SkinInfos.Length; idxVert < edxVert; ++idxVert){
+        const auto& iVert = pNode->SkinInfos.Values[idxVert];
+
+        for(const auto* iCluster = iVert.Values; FBX_PTRDIFFU(iCluster - iVert.Values) < iVert.Length; ++iCluster){
+            FbxCluster* kCluster = nullptr;
+            {
+                auto f = clusterFinder.find(iCluster->BindNode);
+                if(f == clusterFinder.end()){
+                    eastl::string msg = "failed to link cluster";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    return false;
+                }
+
+                kCluster = f->second;
+            }
+
+            kCluster->AddControlPointIndex(idxVert, iCluster->Weight);
+        }
+    }
+
+    if(kMesh->AddDeformer(kSkin) < 0){
+        eastl::string msg = "an error occurred while adding deformer";
+        msg += "(errored in \"";
+        msg += strName;
+        msg += "\")";
+        SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+        return false;
     }
 
     return true;
