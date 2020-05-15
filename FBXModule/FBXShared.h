@@ -56,6 +56,8 @@ struct LayerElement{
     TexcoordTable texcoords;
 };
 
+using ControlPointMergeMap = eastl::vector<size_t>;
+
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
 
 struct SkinInfo{
@@ -175,7 +177,7 @@ extern bool SHRInitBoneNode(fbxsdk::FbxManager* kSDKManager, const FBXBone* pNod
 
 extern bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
-extern bool SHRInitMeshNode(fbxsdk::FbxManager* kSDKManager, const FBXMesh* pNode, fbxsdk::FbxNode* kNode);
+extern bool SHRInitMeshNode(fbxsdk::FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, fbxsdk::FbxNode* kNode);
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
 
@@ -183,7 +185,7 @@ extern fbxsdk::FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count)
 
 extern bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
-extern bool SHRInitSkinData(fbxsdk::FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
+extern bool SHRInitSkinData(fbxsdk::FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const ControlPointMergeMap& ctrlPointMergeMap, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
@@ -198,6 +200,6 @@ extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* 
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
-extern void SHROptimizeMesh(ControlPointRemap& controlPointRemap, NodeData* pNodeData);
+extern void SHROptimizeMesh(NodeData* pNodeData);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

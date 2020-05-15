@@ -236,8 +236,8 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
 }
 
 
-bool SHRInitSkinData(FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const FBXSkinnedMesh* pNode, FbxNode* kNode){
-    static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, const FBXNodeToFbxNode&, const FBXSkinnedMesh*, FbxNode*)";
+bool SHRInitSkinData(FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const ControlPointMergeMap& ctrlPointMergeMap, const FBXSkinnedMesh* pNode, FbxNode* kNode){
+    static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, const FBXNodeToFbxNode&, const ControlPointMergeMap&, const FBXSkinnedMesh*, FbxNode*)";
 
 
     const eastl::string strName = pNode->Name;

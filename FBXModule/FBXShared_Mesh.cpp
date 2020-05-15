@@ -11,6 +11,79 @@
 #include "FBXShared.h"
 
 
+class _PositionSkin{
+public:
+    _PositionSkin(const Float3& _position, const FBXDynamicArray<FBXSkinElement>* _skinInfos)
+        :
+        position(_position),
+        skinInfos(_skinInfos)
+    {}
+    _PositionSkin(const _PositionSkin& rhs)
+        :
+        position(rhs.position),
+        skinInfos(rhs.skinInfos)
+    {}
+
+
+public:
+    inline bool operator==(const _PositionSkin& rhs)const{
+        if(position != rhs.position)
+            return false;
+
+
+        if(skinInfos && (!rhs.skinInfos))
+            return false;
+        if((!skinInfos) && rhs.skinInfos)
+            return false;
+        if(skinInfos && rhs.skinInfos){
+            if(skinInfos->Length != rhs.skinInfos->Length)
+                return false;
+            for(size_t idx = 0; idx < skinInfos->Length; ++idx){
+                const auto& lhsInfo = skinInfos->Values[idx];
+                const auto& rhsInfo = rhs.skinInfos->Values[idx];
+
+                if(lhsInfo.BindNode != rhsInfo.BindNode)
+                    return false;
+                if(lhsInfo.Weight != rhsInfo.Weight)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+
+public:
+    inline size_t makeHash()const{
+        size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+
+#define __CAL_RESULT result = (result * 16777619) ^ c;
+
+        c = MakeHash(position.raw);
+        __CAL_RESULT;
+
+        if(skinInfos){
+            for(const auto* pSkinInfo = skinInfos->Values; FBX_PTRDIFFU(pSkinInfo - skinInfos->Values) < skinInfos->Length; ++pSkinInfo){
+                c = reinterpret_cast<size_t>(pSkinInfo->BindNode);
+                __CAL_RESULT;
+
+                c = MakeHash<1>(&pSkinInfo->Weight);
+                __CAL_RESULT;
+            }
+        }
+
+#undef __CAL_RESULT
+
+        return result;
+    }
+
+
+public:
+    Float3 position;
+    const FBXDynamicArray<FBXSkinElement>* skinInfos;
+};
+
+
 bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
     static const char __name_of_this_func[] = "SHRLoadMeshFromNode(ControlPointRemap&, FbxNode*, NodeData*)";
 
@@ -517,198 +590,295 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
     return true;
 }
 
-bool SHRInitMeshNode(FbxManager* kSDKManager, const FBXMesh* pNode, FbxNode* kNode){
-    static const char __name_of_this_func[] = "SHRInitMeshNode(FbxManager*, const FBXMesh*, FbxNode*)";
+bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, FbxNode* kNode){
+    static const char __name_of_this_func[] = "SHRInitMeshNode(FbxManager*, ControlPointMergeMap&, const FBXMesh*, FbxNode*)";
 
+
+    const FBXSkinnedMesh* pSkinnedNode = nullptr;
+    if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_SkinnedMesh))
+        pSkinnedNode = static_cast<decltype(pSkinnedNode)>(pNode);
 
     const eastl::string strName = pNode->Name;
     auto* kMesh = kNode->GetMesh();
 
-    {
-        kMesh->SetControlPointCount((int)pNode->Vertices.Length);
+    { // create control point & make convert table
+        OverlapReducer<_PositionSkin> reducer(pNode->Vertices.Length, [&pNode, &pSkinnedNode](size_t idx)->_PositionSkin{
+            const auto& oldVal = pNode->Vertices.Values[idx];
+
+            Float3 newVal;
+            CopyArrayData(newVal.raw, oldVal.Values);
+
+            const FBXDynamicArray<FBXSkinElement>* skinInfos = nullptr;
+            if(pSkinnedNode)
+                skinInfos = &pSkinnedNode->SkinInfos.Values[idx];
+
+            return _PositionSkin(newVal, skinInfos);
+        });
+
+        reducer.build([](const _PositionSkin& v)->size_t{ return v.makeHash(); });
+
+        const auto& convTable = reducer.getConvertedTable();
+
+        kMesh->SetControlPointCount((int)convTable.size());
 
         auto* kPoints = kMesh->GetControlPoints();
-        for(auto* pVert = pNode->Vertices.Values; FBX_PTRDIFFU(pVert - pNode->Vertices.Values) < pNode->Vertices.Length; ++pVert, ++kPoints){
-            CopyArrayData<pVert->Length>(kPoints->mData, pVert->Values);
-            (*kPoints)[3] = 1.;
-        }
+        for(auto itPos = convTable.cbegin(), etPos = convTable.cend(); itPos != etPos; ++itPos, ++kPoints)
+            CopyArrayData(kPoints->mData, itPos->position.raw);
+
+        ctrlPointMergeMap = eastl::move(reducer.getOldToConvertIndexer());
     }
 
-    {
+    { // create polygon
         for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
             kMesh->BeginPolygon();
 
-            for(const auto& iPolyIndex : pPoly->Values)
-                kMesh->AddPolygon(iPolyIndex);
+            for(const auto& iPolyIndex : pPoly->Values){
+                const auto convIndex = ctrlPointMergeMap[iPolyIndex];
+
+                kMesh->AddPolygon(convIndex);
+            }
 
             kMesh->EndPolygon();
         }
     }
 
-    int iLayer = 0;
-    for(auto* pLayer = pNode->LayeredVertices.Values; FBX_PTRDIFFU(pLayer - pNode->LayeredVertices.Values) < pNode->LayeredVertices.Length; ++pLayer, ++iLayer){
-        auto* kLayer = kMesh->GetLayer(iLayer);
+    // reserve layer
+    for(size_t idxLayer = 0; idxLayer < pNode->LayeredVertices.Length; ++idxLayer){
+        auto* kLayer = kMesh->GetLayer(idxLayer);
         if(!kLayer){
-            const auto iNewLayer = kMesh->CreateLayer();
-            if(iNewLayer < 0){
+            const auto idxNewLayer = kMesh->CreateLayer();
+            if(idxNewLayer < 0){
                 eastl::string msg = "failed to create layer";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
-                continue;
+                return false;
             }
-            else if(iLayer != iNewLayer){
+            else if(idxLayer != idxNewLayer){
                 eastl::string msg = "the created layer has unexpected index number";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
-                continue;
+                return false;
             }
-            
-            kLayer = kMesh->GetLayer(iNewLayer);
+
+            kLayer = kMesh->GetLayer(idxNewLayer);
+        }
+    }
+
+    for(size_t idxLayer = 0; idxLayer < pNode->LayeredVertices.Length; ++idxLayer){
+        const auto& iLayer = pNode->LayeredVertices.Values[idxLayer];
+        auto* kLayer = kMesh->GetLayer(idxLayer);
+
+        if(iLayer.Material.Length){
+
         }
 
-        //const auto layerName = "Layer" + eastl::to_string(FBX_PTRDIFFU(pLayer - pNode->LayeredVertices.Values));
-
-        if(pLayer->Material.Length){
-            //
-        }
-
-        if(pLayer->Color.Length){
+        if(iLayer.Color.Length){
             auto* kColor = FbxLayerElementVertexColor::Create(kMesh, "");
             if(kColor){
-                kColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
-                kColor->SetReferenceMode(FbxGeometryElement::eDirect);
-
-                auto& kArray = kColor->GetDirectArray();
-                for(auto* pVert = pLayer->Color.Values; FBX_PTRDIFFU(pVert - pLayer->Color.Values) < pLayer->Color.Length; ++pVert){
-                    FbxVector4 kValue;
-
-                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
-
-                    kArray.Add(kValue);
-                }
-
-                kLayer->SetVertexColors(kColor);
+                kColor->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+                kColor->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element vertex color in the layer " + eastl::to_string(iLayer);
+                eastl::string msg = "failed to create element vertex color in the layer " + eastl::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                return false;
             }
+
+            OverlapReducer<Float4> reducer(iLayer.Color.Length, [&iLayer](size_t idx)->Float4{
+                const auto& oldVal = iLayer.Color.Values[idx];
+
+                Float4 newVal;
+                CopyArrayData(newVal.raw, oldVal.Values);
+
+                return newVal;
+            });
+
+            reducer.build([](const Float4& v)->size_t{ return MakeHash(v.raw); });
+
+            auto& kDirect = kColor->GetDirectArray();
+            for(const auto& iVal : reducer.getConvertedTable()){
+                FbxColor kVal(iVal.x, iVal.y, iVal.z, iVal.w);
+                kDirect.Add(kVal);
+            }
+
+            auto& kIndices = kColor->GetIndexArray();
+            for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
+                for(const auto& idxPolyIndex : pPoly->Values)
+                    kIndices.Add((int)reducer.getOldToConvertIndexer()[idxPolyIndex]);
+            }
+
+            kLayer->SetVertexColors(kColor);
         }
 
-        if(pLayer->Normal.Length){
+        if(iLayer.Normal.Length){
             auto* kNormal = FbxLayerElementNormal::Create(kMesh, "");
             if(kNormal){
-                kNormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
-                kNormal->SetReferenceMode(FbxGeometryElement::eDirect);
-
-                auto& kArray = kNormal->GetDirectArray();
-                for(auto* pVert = pLayer->Normal.Values; FBX_PTRDIFFU(pVert - pLayer->Normal.Values) < pLayer->Normal.Length; ++pVert){
-                    FbxVector4 kValue;
-
-                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
-                    kValue[3] = 1.;
-                    kValue.Normalize();
-
-                    kArray.Add(kValue);
-                }
-
-                kLayer->SetNormals(kNormal);
+                kNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+                kNormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element normal in the layer " + eastl::to_string(iLayer);
+                eastl::string msg = "failed to create element normal in the layer " + eastl::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                return false;
             }
+
+            OverlapReducer<FbxVector4> reducer(iLayer.Normal.Length, [&iLayer](size_t idx)->FbxVector4{
+                const auto& oldVal = iLayer.Normal.Values[idx];
+
+                FbxVector4 newVal;
+                CopyArrayData(newVal.mData, oldVal.Values);
+                newVal[3] = 1.;
+                newVal.Normalize();
+
+                return newVal;
+            });
+
+            reducer.build([](const FbxVector4& v)->size_t{ return MakeHash(v.mData); });
+
+            auto& kDirect = kNormal->GetDirectArray();
+            for(const auto& iVal : reducer.getConvertedTable())
+                kDirect.Add(iVal);
+
+            auto& kIndices = kNormal->GetIndexArray();
+            for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
+                for(const auto& idxPolyIndex : pPoly->Values)
+                    kIndices.Add((int)reducer.getOldToConvertIndexer()[idxPolyIndex]);
+            }
+
+            kLayer->SetNormals(kNormal);
         }
-        if(pLayer->Binormal.Length){
+
+        if(iLayer.Binormal.Length){
             auto* kBinormal = FbxLayerElementBinormal::Create(kMesh, "");
             if(kBinormal){
-                kBinormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
-                kBinormal->SetReferenceMode(FbxGeometryElement::eDirect);
-
-                auto& kArray = kBinormal->GetDirectArray();
-                for(auto* pVert = pLayer->Binormal.Values; FBX_PTRDIFFU(pVert - pLayer->Binormal.Values) < pLayer->Binormal.Length; ++pVert){
-                    FbxVector4 kValue;
-
-                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
-                    kValue[3] = 1.;
-                    kValue.Normalize();
-
-                    kArray.Add(kValue);
-                }
-
-                kLayer->SetBinormals(kBinormal);
+                kBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+                kBinormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element binormal in the layer " + eastl::to_string(iLayer);
+                eastl::string msg = "failed to create element binormal in the layer " + eastl::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                return false;
             }
+
+            OverlapReducer<FbxVector4> reducer(iLayer.Binormal.Length, [&iLayer](size_t idx)->FbxVector4{
+                const auto& oldVal = iLayer.Binormal.Values[idx];
+
+                FbxVector4 newVal;
+                CopyArrayData(newVal.mData, oldVal.Values);
+                newVal[3] = 1.;
+                newVal.Normalize();
+
+                return newVal;
+            });
+
+            reducer.build([](const FbxVector4& v)->size_t{ return MakeHash(v.mData); });
+
+            auto& kDirect = kBinormal->GetDirectArray();
+            for(const auto& iVal : reducer.getConvertedTable())
+                kDirect.Add(iVal);
+
+            auto& kIndices = kBinormal->GetIndexArray();
+            for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
+                for(const auto& idxPolyIndex : pPoly->Values)
+                    kIndices.Add((int)reducer.getOldToConvertIndexer()[idxPolyIndex]);
+            }
+
+            kLayer->SetBinormals(kBinormal);
         }
-        if(pLayer->Tangent.Length){
+
+        if(iLayer.Tangent.Length){
             auto* kTangent = FbxLayerElementTangent::Create(kMesh, "");
             if(kTangent){
-                kTangent->SetMappingMode(FbxGeometryElement::eByControlPoint);
-                kTangent->SetReferenceMode(FbxGeometryElement::eDirect);
-
-                auto& kArray = kTangent->GetDirectArray();
-                for(auto* pVert = pLayer->Tangent.Values; FBX_PTRDIFFU(pVert - pLayer->Tangent.Values) < pLayer->Tangent.Length; ++pVert){
-                    FbxVector4 kValue;
-
-                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
-                    kValue[3] = 1.;
-                    kValue.Normalize();
-
-                    kArray.Add(kValue);
-                }
-
-                kLayer->SetTangents(kTangent);
+                kTangent->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+                kTangent->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element tangent in the layer " + eastl::to_string(iLayer);
+                eastl::string msg = "failed to create element tangent in the layer " + eastl::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                return false;
             }
+
+            OverlapReducer<FbxVector4> reducer(iLayer.Tangent.Length, [&iLayer](size_t idx)->FbxVector4{
+                const auto& oldVal = iLayer.Tangent.Values[idx];
+
+                FbxVector4 newVal;
+                CopyArrayData(newVal.mData, oldVal.Values);
+                newVal[3] = 1.;
+                newVal.Normalize();
+
+                return newVal;
+            });
+
+            reducer.build([](const FbxVector4& v)->size_t{ return MakeHash(v.mData); });
+
+            auto& kDirect = kTangent->GetDirectArray();
+            for(const auto& iVal : reducer.getConvertedTable())
+                kDirect.Add(iVal);
+
+            auto& kIndices = kTangent->GetIndexArray();
+            for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
+                for(const auto& idxPolyIndex : pPoly->Values)
+                    kIndices.Add((int)reducer.getOldToConvertIndexer()[idxPolyIndex]);
+            }
+
+            kLayer->SetTangents(kTangent);
         }
 
-        if(pLayer->Texcoord.Length){
+        if(iLayer.Texcoord.Length){
             auto* kUV = FbxLayerElementUV::Create(kMesh, "");
             if(kUV){
-                kUV->SetMappingMode(FbxGeometryElement::eByControlPoint);
-                kUV->SetReferenceMode(FbxGeometryElement::eDirect);
-
-                auto& kArray = kUV->GetDirectArray();
-                for(auto* pVert = pLayer->Texcoord.Values; FBX_PTRDIFFU(pVert - pLayer->Texcoord.Values) < pLayer->Texcoord.Length; ++pVert){
-                    FbxVector2 kValue;
-
-                    CopyArrayData<pVert->Length>(kValue.Buffer(), pVert->Values);
-                    kValue[1] = 1. - kValue[1];
-
-                    kArray.Add(kValue);
-                }
-
-                kLayer->SetUVs(kUV);
+                kUV->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+                kUV->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element UV in the layer " + eastl::to_string(iLayer);
+                eastl::string msg = "failed to create element UV in the layer " + eastl::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                return false;
             }
+
+            OverlapReducer<Float2> reducer(iLayer.Texcoord.Length, [&iLayer](size_t idx)->Float2{
+                const auto& oldVal = iLayer.Texcoord.Values[idx];
+
+                Float2 newVal;
+                CopyArrayData(newVal.raw, oldVal.Values);
+
+                return newVal;
+            });
+
+            reducer.build([](const Float2& v)->size_t{ return MakeHash(v.raw); });
+
+            auto& kDirect = kUV->GetDirectArray();
+            for(const auto& iVal : reducer.getConvertedTable()){
+                FbxVector2 kVal(iVal.x, iVal.y);
+                kDirect.Add(kVal);
+            }
+
+            auto& kIndices = kUV->GetIndexArray();
+            for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
+                for(const auto& idxPolyIndex : pPoly->Values)
+                    kIndices.Add((int)reducer.getOldToConvertIndexer()[idxPolyIndex]);
+            }
+
+            kLayer->SetUVs(kUV);
         }
     }
 

@@ -21,38 +21,50 @@ public:
     static inline size_t makeHash(const _VertexInfo& data){
         size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
 
+#define __CAL_RESULT result = (result * 16777619) ^ c;
+
         {
             c = MakeHash(data.position.mData);
-            result = (result * 16777619) ^ c;
+            __CAL_RESULT;
+        }
+
+        for(const auto& i : data.skinData){
+            c = MakeHash<1>(&i.weight);
+            __CAL_RESULT;
+
+            c = reinterpret_cast<size_t>(i.cluster);
+            __CAL_RESULT;
         }
 
         for(const auto& i : data.layeredColor){
             c = MakeHash(data.position.mData);
-            result = (result * 16777619) ^ c;
+            __CAL_RESULT;
         }
 
         for(const auto& i : data.layeredNormal){
             c = MakeHash(i.mData);
-            result = (result * 16777619) ^ c;
+            __CAL_RESULT;
         }
 
         for(const auto& i : data.layeredBinormal){
             c = MakeHash(i.mData);
-            result = (result * 16777619) ^ c;
+            __CAL_RESULT;
         }
 
         for(const auto& i : data.layeredTangent){
             c = MakeHash(i.mData);
-            result = (result * 16777619) ^ c;
+            __CAL_RESULT;
         }
 
         for(const auto& i : data.layeredUV){
             c = MakeHash(i.first.c_str(), i.first.length());
-            result = (result * 16777619) ^ c;
+            __CAL_RESULT;
 
             c = MakeHash(i.second.mData);
-            result = (result * 16777619) ^ c;
+            __CAL_RESULT;
         }
+
+#undef __CAL_RESULT
 
         return result;
     }
@@ -62,6 +74,17 @@ public:
     inline bool operator==(const _VertexInfo& rhs)const{
         if(position != rhs.position)
             return false;
+
+        if(skinData.size() != rhs.skinData.size())
+            return false;
+        for(size_t idx = 0, edx = skinData.size(); idx < edx; ++idx){
+            const auto& lhsSkin = skinData[idx];
+            const auto& rhsSkin = rhs.skinData[idx];
+            if(lhsSkin.weight != rhsSkin.weight)
+                return false;
+            if(lhsSkin.cluster != rhsSkin.cluster)
+                return false;
+        }
 
         if(layeredColor.size() != rhs.layeredColor.size())
             return false;
@@ -107,6 +130,8 @@ public:
 public:
     fbxsdk::FbxDouble3 position;
 
+    eastl::vector<SkinInfo> skinData;
+
     Vector4Container layeredColor;
 
     Unit3Container layeredNormal;
@@ -136,11 +161,6 @@ public:
 
 class _VertexInfoKey{
 public:
-    _VertexInfoKey(const _VertexInfo& _data)
-        :
-        hash(_VertexInfo::makeHash(_data)),
-        data(_data)
-    {}
     _VertexInfoKey(const _VertexInfo& _data, size_t _hash)
         :
         hash(_hash),
@@ -209,6 +229,8 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
                 _VertexInfo iVertInfo;
                 {
                     iVertInfo.position = pNodeData->bufPositions[idxVert];
+
+                    iVertInfo.skinData = pNodeData->bufSkinData[idxVert];
 
                     size_t colorCount = 0;
                     size_t normalCount = 0;
@@ -286,26 +308,17 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
     }
 }
 
-static inline void ins_genOptimizeMesh(ControlPointRemap& controlPointRemap, NodeData* pNodeData){
-    {
-        eastl::unordered_set<int> vertNew;
-
-        for(auto& iCtrl : controlPointRemap){
-            vertNew.clear();
-            for(const auto& iVertOld : iCtrl)
-                vertNew.emplace(ins_flatVertexBinder[iVertOld]);
-
-            eastl::swap(iCtrl, vertNew);
-        }
-    }
-
+static inline void ins_genOptimizeMesh(NodeData* pNodeData){
     pNodeData->bufIndices.clear();
     for(const auto& iPolyInfo : ins_aosPolygons)
         pNodeData->bufIndices.emplace_back(iPolyInfo.indices);
 
     pNodeData->bufPositions.clear();
-    for(const auto& iVertInfo : ins_aosVertices)
+    pNodeData->bufSkinData.clear();
+    for(const auto& iVertInfo : ins_aosVertices){
         pNodeData->bufPositions.emplace_back(iVertInfo.position);
+        pNodeData->bufSkinData.emplace_back(eastl::move(iVertInfo.skinData));
+    }
 
     for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
         auto& iLayer = pNodeData->bufLayers[idxLayer];
@@ -349,7 +362,7 @@ static inline void ins_genOptimizeMesh(ControlPointRemap& controlPointRemap, Nod
 }
 
 
-void SHROptimizeMesh(ControlPointRemap& controlPointRemap, NodeData* pNodeData){
+void SHROptimizeMesh(NodeData* pNodeData){
     ins_fillAOSContainers(pNodeData);
-    ins_genOptimizeMesh(controlPointRemap, pNodeData);
+    ins_genOptimizeMesh(pNodeData);
 }

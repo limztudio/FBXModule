@@ -31,6 +31,8 @@ struct _NodeData_wrapper{
 static FbxNodeToExportNode ins_fbxNodeToExportNode;
 static ImportNodeToFbxNode ins_importedNodeToFbxNode;
 
+static ControlPointMergeMap ins_controlPointMergeMap;
+
 
 static inline bool ins_addBoneNode(
     FbxManager* kSDKManager,
@@ -67,10 +69,10 @@ static inline bool ins_addMeshNode(
         if(!SHRLoadMeshFromNode(controlPointRemap, kNode, pNodeData))
             throw _ERROR_INSIDE_ADD_MESH;
 
-        SHROptimizeMesh(controlPointRemap, pNodeData);
-
         if(!SHRLoadSkinFromNode(controlPointRemap, kNode, pNodeData))
             throw _ERROR_INSIDE_ADD_MESH;
+
+        SHROptimizeMesh(pNodeData);
     }
 
     {
@@ -418,13 +420,15 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRo
                 return false;
         }
 
+        ins_controlPointMergeMap.clear();
+
         if(FBXTypeHasMember(curID, FBXType::FBXType_Mesh)){
-            if(!SHRInitMeshNode(kSDKManager, static_cast<const FBXMesh*>(i.first), i.second))
+            if(!SHRInitMeshNode(kSDKManager, ins_controlPointMergeMap, static_cast<const FBXMesh*>(i.first), i.second))
                 return false;
         }
 
         if(FBXTypeHasMember(curID, FBXType::FBXType_SkinnedMesh)){
-            if(!SHRInitSkinData(kSDKManager, ins_importedNodeToFbxNode, static_cast<const FBXSkinnedMesh*>(i.first), i.second))
+            if(!SHRInitSkinData(kSDKManager, ins_importedNodeToFbxNode, ins_controlPointMergeMap, static_cast<const FBXSkinnedMesh*>(i.first), i.second))
                 return false;
         }
     }

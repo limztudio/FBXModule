@@ -11,6 +11,8 @@
 #include <intrin.h>
 
 #include <eastl/string.h>
+#include <eastl/vector.h>
+#include <eastl/unordered_map.h>
 
 #include <fbxsdk.h>
 #include <FBXNode.hpp>
@@ -28,14 +30,95 @@ static const XMMDouble XMMD_Epsilon = { { { DBL_EPSILON, DBL_EPSILON } } };
 static const XMMDouble XMMD_EpsilonSq = { { { DBL_EPSILON * DBL_EPSILON, DBL_EPSILON * DBL_EPSILON } } };
 
 
-struct Int3{
+template<typename T>
+class Container2{
+public:
+    inline bool operator==(const Container2<T>& rhs)const{
+        if(x != rhs.x)
+            return false;
+        if(y != rhs.y)
+            return false;
+        return true;
+    }
+    inline bool operator!=(const Container2<T>& rhs)const{
+        if((x == rhs.x) && (y == rhs.y))
+            return false;
+        return true;
+    }
+
+
+public:
     union{
         struct{
-            int x, y, z;
+            T x, y;
         };
-        int raw[3];
+        T raw[2];
     };
 };
+template<typename T>
+class Container3{
+public:
+    inline bool operator==(const Container3<T>& rhs)const{
+        if(x != rhs.x)
+            return false;
+        if(y != rhs.y)
+            return false;
+        if(z != rhs.z)
+            return false;
+        return true;
+    }
+    inline bool operator!=(const Container3<T>& rhs)const{
+        if((x == rhs.x) && (y == rhs.y) && (z == rhs.z))
+            return false;
+        return true;
+    }
+
+
+public:
+    union{
+        struct{
+            T x, y, z;
+        };
+        T raw[3];
+    };
+};
+template<typename T>
+class Container4{
+public:
+    inline bool operator==(const Container4<T>& rhs)const{
+        if(x != rhs.x)
+            return false;
+        if(y != rhs.y)
+            return false;
+        if(z != rhs.z)
+            return false;
+        if(w != rhs.w)
+            return false;
+        return true;
+    }
+    inline bool operator!=(const Container4<T>& rhs)const{
+        if((x == rhs.x) && (y == rhs.y) && (z == rhs.z) && (w == rhs.w))
+            return false;
+        return true;
+    }
+
+
+public:
+    union{
+        struct{
+            T x, y, z, w;
+        };
+        T raw[4];
+    };
+};
+
+using Int2 = Container2<int>;
+using Int3 = Container3<int>;
+using Int4 = Container4<int>;
+
+using Float2 = Container2<float>;
+using Float3 = Container3<float>;
+using Float4 = Container4<float>;
 
 
 class CustomStream : public FbxStream{
@@ -81,6 +164,111 @@ private:
     int m_readerID;
     int m_writerID;
 };
+
+
+namespace __hidden_FBXModule{
+    template<typename T>
+    class _OverlapReducer_Compare_Key{
+    public:
+        _OverlapReducer_Compare_Key(const _OverlapReducer_Compare_Key<T>& rhs)
+            :
+            hash(rhs.hash),
+            data(rhs.data)
+        {}
+        _OverlapReducer_Compare_Key(const T& _data, size_t _hash)
+            :
+            hash(_hash),
+            data(_data)
+        {}
+
+
+    public:
+        inline bool operator==(const T& rhs)const{ return (data == rhs.data); }
+
+    public:
+        inline operator size_t()const{ return hash; }
+
+
+    private:
+        const size_t hash;
+        const T& data;
+    };
+};
+template<typename T>
+class OverlapReducer{
+public:
+    OverlapReducer(){}
+    template<typename FILL_FUNC>
+    OverlapReducer(size_t len, FILL_FUNC func){
+        m_oldData.resize(len);
+        for(size_t i = 0; i < len; ++i)
+            m_oldData[i] = func(i);
+    }
+    OverlapReducer(const eastl::vector<T>& data) : m_oldData(data){}
+    OverlapReducer(eastl::vector<T>&& data) : m_oldData(eastl::move(data)){}
+
+
+public:
+    template<typename FILL_FUNC>
+    inline void init(size_t len, FILL_FUNC func){
+        m_oldData.resize(len);
+        for(size_t i = 0; i < len; ++i)
+            m_oldData[i] = func(i);
+    }
+    inline void init(const eastl::vector<T>& data){ m_oldData = data; }
+    inline void init(eastl::vector<T>&& data){ m_oldData = eastl::(data); }
+
+
+public:
+    template<typename HASH_FUNC>
+    inline void build(HASH_FUNC hashFunc){
+        const auto oldSize = m_oldData.size();
+
+        m_convData.clear();
+        m_convData.reserve(oldSize);
+
+        m_oldToConvIndexer.clear();
+        m_oldToConvIndexer.reserve(oldSize);
+
+        m_comparer.clear();
+        m_comparer.rehash(oldSize << 1);
+
+        for(size_t idxOld = 0; idxOld < oldSize; ++idxOld){
+            const auto& iOld = m_oldData[idxOld];
+
+            T iNew(iOld);
+            const size_t iNewHash = hashFunc(iNew);
+
+            auto f = m_comparer.find(__hidden_FBXModule::_OverlapReducer_Compare_Key<T>(iNew, iNewHash));
+            if(f == m_comparer.cend()){
+                const size_t idxNew = m_convData.size();
+
+                m_convData.emplace_back(eastl::move(iNew));
+                m_oldToConvIndexer.emplace_back(idxNew);
+
+                m_comparer.emplace(__hidden_FBXModule::_OverlapReducer_Compare_Key<T>(m_convData[idxNew], iNewHash));
+            }
+            else
+                m_oldToConvIndexer.emplace_back(f->second);
+        }
+    }
+
+public:
+    inline const eastl::vector<T>& getConvertedTable()const{ return m_convData; }
+    inline eastl::vector<T>& getConvertedTable(){ return m_convData; }
+
+    inline const eastl::vector<size_t>& getOldToConvertIndexer()const{ return m_oldToConvIndexer; }
+    inline eastl::vector<size_t>& getOldToConvertIndexer(){ return m_oldToConvIndexer; }
+
+
+private:
+    eastl::vector<T> m_oldData;
+    eastl::vector<T> m_convData;
+
+    eastl::vector<size_t> m_oldToConvIndexer;
+    eastl::unordered_map<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>, size_t> m_comparer;
+};
+
 
 extern void ConvertObjects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
