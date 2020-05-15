@@ -246,7 +246,7 @@ public:
                 m_convData.emplace_back(eastl::move(iNew));
                 m_oldToConvIndexer.emplace_back(idxNew);
 
-                m_comparer.emplace(__hidden_FBXModule::_OverlapReducer_Compare_Key<T>(m_convData[idxNew], iNewHash));
+                m_comparer.emplace(__hidden_FBXModule::_OverlapReducer_Compare_Key<T>(m_convData[idxNew], iNewHash), idxNew);
             }
             else
                 m_oldToConvIndexer.emplace_back(f->second);
