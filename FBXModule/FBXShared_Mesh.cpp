@@ -13,6 +13,10 @@
 
 class _PositionSkin{
 public:
+    _PositionSkin()
+        :
+        skinInfos(nullptr)
+    {}
     _PositionSkin(const Float3& _position, const FBXDynamicArray<FBXSkinElement>* _skinInfos)
         :
         position(_position),
@@ -26,30 +30,15 @@ public:
 
 
 public:
-    inline bool operator==(const _PositionSkin& rhs)const{
-        if(position != rhs.position)
-            return false;
-
-
-        if(skinInfos && (!rhs.skinInfos))
-            return false;
-        if((!skinInfos) && rhs.skinInfos)
-            return false;
-        if(skinInfos && rhs.skinInfos){
-            if(skinInfos->Length != rhs.skinInfos->Length)
-                return false;
-            for(size_t idx = 0; idx < skinInfos->Length; ++idx){
-                const auto& lhsInfo = skinInfos->Values[idx];
-                const auto& rhsInfo = rhs.skinInfos->Values[idx];
-
-                if(lhsInfo.BindNode != rhsInfo.BindNode)
-                    return false;
-                if(lhsInfo.Weight != rhsInfo.Weight)
-                    return false;
-            }
-        }
-
-        return true;
+    _PositionSkin& operator=(const _PositionSkin& rhs){
+        position = rhs.position;
+        skinInfos = rhs.skinInfos;
+        return (*this);
+    }
+    _PositionSkin& operator=(_PositionSkin&& rhs){
+        position = rhs.position;
+        skinInfos = rhs.skinInfos;
+        return (*this);
     }
 
 
@@ -67,7 +56,7 @@ public:
                 c = reinterpret_cast<size_t>(pSkinInfo->BindNode);
                 __CAL_RESULT;
 
-                c = MakeHash<1>(&pSkinInfo->Weight);
+                c = MakeHash<1>(reinterpret_cast<const unsigned long*>(&pSkinInfo->Weight));
                 __CAL_RESULT;
             }
         }
@@ -82,6 +71,31 @@ public:
     Float3 position;
     const FBXDynamicArray<FBXSkinElement>* skinInfos;
 };
+inline bool operator==(const _PositionSkin& lhs, const _PositionSkin& rhs){
+    if(lhs.position != rhs.position)
+        return false;
+
+
+    if(lhs.skinInfos && (!rhs.skinInfos))
+        return false;
+    if((!lhs.skinInfos) && rhs.skinInfos)
+        return false;
+    if(lhs.skinInfos && rhs.skinInfos){
+        if(lhs.skinInfos->Length != rhs.skinInfos->Length)
+            return false;
+        for(size_t idx = 0; idx < lhs.skinInfos->Length; ++idx){
+            const auto& lhsInfo = lhs.skinInfos->Values[idx];
+            const auto& rhsInfo = rhs.skinInfos->Values[idx];
+
+            if(lhsInfo.BindNode != rhsInfo.BindNode)
+                return false;
+            if(lhsInfo.Weight != rhsInfo.Weight)
+                return false;
+        }
+    }
+
+    return true;
+}
 
 
 bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
@@ -622,8 +636,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
         kMesh->SetControlPointCount((int)convTable.size());
 
         auto* kPoints = kMesh->GetControlPoints();
-        for(auto itPos = convTable.cbegin(), etPos = convTable.cend(); itPos != etPos; ++itPos, ++kPoints)
+        for(auto itPos = convTable.cbegin(), etPos = convTable.cend(); itPos != etPos; ++itPos, ++kPoints){
             CopyArrayData(kPoints->mData, itPos->position.raw);
+            kPoints->mData[3] = 1.;
+        }
 
         ctrlPointMergeMap = eastl::move(reducer.getOldToConvertIndexer());
     }
@@ -700,7 +716,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 return newVal;
             });
 
-            reducer.build([](const Float4& v)->size_t{ return MakeHash(v.raw); });
+            reducer.build([](const Float4& v)->size_t{ return MakeHash<_countof(v.raw)>(reinterpret_cast<const unsigned long*>(v.raw)); });
 
             auto& kDirect = kColor->GetDirectArray();
             for(const auto& iVal : reducer.getConvertedTable()){
@@ -732,22 +748,23 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 return false;
             }
 
-            OverlapReducer<FbxVector4> reducer(iLayer.Normal.Length, [&iLayer](size_t idx)->FbxVector4{
+            OverlapReducer<Float3> reducer(iLayer.Normal.Length, [&iLayer](size_t idx)->Float3{
                 const auto& oldVal = iLayer.Normal.Values[idx];
 
-                FbxVector4 newVal;
-                CopyArrayData(newVal.mData, oldVal.Values);
-                newVal[3] = 1.;
-                newVal.Normalize();
+                Float3 newVal;
+                CopyArrayData(newVal.raw, oldVal.Values);
+                newVal = Normalize3(newVal);
 
                 return newVal;
             });
 
-            reducer.build([](const FbxVector4& v)->size_t{ return MakeHash(v.mData); });
+            reducer.build([](const Float3& v)->size_t{ return MakeHash<_countof(v.raw)>(reinterpret_cast<const unsigned long*>(v.raw)); });
 
             auto& kDirect = kNormal->GetDirectArray();
-            for(const auto& iVal : reducer.getConvertedTable())
-                kDirect.Add(iVal);
+            for(const auto& iVal : reducer.getConvertedTable()){
+                FbxVector4 kVal(iVal.x, iVal.y, iVal.z);
+                kDirect.Add(kVal);
+            }
 
             auto& kIndices = kNormal->GetIndexArray();
             for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
@@ -773,22 +790,23 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 return false;
             }
 
-            OverlapReducer<FbxVector4> reducer(iLayer.Binormal.Length, [&iLayer](size_t idx)->FbxVector4{
+            OverlapReducer<Float3> reducer(iLayer.Binormal.Length, [&iLayer](size_t idx)->Float3{
                 const auto& oldVal = iLayer.Binormal.Values[idx];
 
-                FbxVector4 newVal;
-                CopyArrayData(newVal.mData, oldVal.Values);
-                newVal[3] = 1.;
-                newVal.Normalize();
+                Float3 newVal;
+                CopyArrayData(newVal.raw, oldVal.Values);
+                newVal = Normalize3(newVal);
 
                 return newVal;
             });
 
-            reducer.build([](const FbxVector4& v)->size_t{ return MakeHash(v.mData); });
+            reducer.build([](const Float3& v)->size_t{ return MakeHash<_countof(v.raw)>(reinterpret_cast<const unsigned long*>(v.raw)); });
 
             auto& kDirect = kBinormal->GetDirectArray();
-            for(const auto& iVal : reducer.getConvertedTable())
-                kDirect.Add(iVal);
+            for(const auto& iVal : reducer.getConvertedTable()){
+                FbxVector4 kVal(iVal.x, iVal.y, iVal.z);
+                kDirect.Add(kVal);
+            }
 
             auto& kIndices = kBinormal->GetIndexArray();
             for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
@@ -814,22 +832,23 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 return false;
             }
 
-            OverlapReducer<FbxVector4> reducer(iLayer.Tangent.Length, [&iLayer](size_t idx)->FbxVector4{
+            OverlapReducer<Float3> reducer(iLayer.Tangent.Length, [&iLayer](size_t idx)->Float3{
                 const auto& oldVal = iLayer.Tangent.Values[idx];
 
-                FbxVector4 newVal;
-                CopyArrayData(newVal.mData, oldVal.Values);
-                newVal[3] = 1.;
-                newVal.Normalize();
+                Float3 newVal;
+                CopyArrayData(newVal.raw, oldVal.Values);
+                newVal = Normalize3(newVal);
 
                 return newVal;
             });
 
-            reducer.build([](const FbxVector4& v)->size_t{ return MakeHash(v.mData); });
+            reducer.build([](const Float3& v)->size_t{ return MakeHash<_countof(v.raw)>(reinterpret_cast<const unsigned long*>(v.raw)); });
 
             auto& kDirect = kTangent->GetDirectArray();
-            for(const auto& iVal : reducer.getConvertedTable())
-                kDirect.Add(iVal);
+            for(const auto& iVal : reducer.getConvertedTable()){
+                FbxVector4 kVal(iVal.x, iVal.y, iVal.z);
+                kDirect.Add(kVal);
+            }
 
             auto& kIndices = kTangent->GetIndexArray();
             for(auto* pPoly = pNode->Indices.Values; FBX_PTRDIFFU(pPoly - pNode->Indices.Values) < pNode->Indices.Length; ++pPoly){
@@ -860,11 +879,12 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
                 Float2 newVal;
                 CopyArrayData(newVal.raw, oldVal.Values);
+                newVal.y = 1.f - newVal.y;
 
                 return newVal;
             });
 
-            reducer.build([](const Float2& v)->size_t{ return MakeHash(v.raw); });
+            reducer.build([](const Float2& v)->size_t{ return MakeHash<_countof(v.raw)>(reinterpret_cast<const unsigned long*>(v.raw)); });
 
             auto& kDirect = kUV->GetDirectArray();
             for(const auto& iVal : reducer.getConvertedTable()){

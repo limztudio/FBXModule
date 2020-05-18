@@ -71,63 +71,6 @@ public:
 
 
 public:
-    inline bool operator==(const _VertexInfo& rhs)const{
-        if(position != rhs.position)
-            return false;
-
-        if(skinData.size() != rhs.skinData.size())
-            return false;
-        for(size_t idx = 0, edx = skinData.size(); idx < edx; ++idx){
-            const auto& lhsSkin = skinData[idx];
-            const auto& rhsSkin = rhs.skinData[idx];
-            if(lhsSkin.weight != rhsSkin.weight)
-                return false;
-            if(lhsSkin.cluster != rhsSkin.cluster)
-                return false;
-        }
-
-        if(layeredColor.size() != rhs.layeredColor.size())
-            return false;
-        for(size_t idx = 0, edx = layeredColor.size(); idx < edx; ++idx){
-            if(layeredColor[idx] != rhs.layeredColor[idx])
-                return false;
-        }
-
-        if(layeredNormal.size() != rhs.layeredNormal.size())
-            return false;
-        for(size_t idx = 0, edx = layeredNormal.size(); idx < edx; ++idx){
-            if(layeredNormal[idx] != rhs.layeredNormal[idx])
-                return false;
-        }
-
-        if(layeredBinormal.size() != rhs.layeredBinormal.size())
-            return false;
-        for(size_t idx = 0, edx = layeredBinormal.size(); idx < edx; ++idx){
-            if(layeredBinormal[idx] != rhs.layeredBinormal[idx])
-                return false;
-        }
-
-        if(layeredTangent.size() != rhs.layeredTangent.size())
-            return false;
-        for(size_t idx = 0, edx = layeredTangent.size(); idx < edx; ++idx){
-            if(layeredTangent[idx] != rhs.layeredTangent[idx])
-                return false;
-        }
-
-        if(layeredUV.size() != rhs.layeredUV.size())
-            return false;
-        for(size_t idx = 0, edx = layeredUV.size(); idx < edx; ++idx){
-            if(layeredUV[idx].second != rhs.layeredUV[idx].second)
-                return false;
-            if(layeredUV[idx].first != rhs.layeredUV[idx].first)
-                return false;
-        }
-
-        return true;
-    }
-
-
-public:
     fbxsdk::FbxDouble3 position;
 
     eastl::vector<SkinInfo> skinData;
@@ -140,6 +83,61 @@ public:
 
     eastl::vector<eastl::pair<eastl::string, fbxsdk::FbxDouble2>> layeredUV;
 };
+inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
+    if(lhs.position != rhs.position)
+        return false;
+
+    if(lhs.skinData.size() != rhs.skinData.size())
+        return false;
+    for(size_t idx = 0, edx = lhs.skinData.size(); idx < edx; ++idx){
+        const auto& lhsSkin = lhs.skinData[idx];
+        const auto& rhsSkin = rhs.skinData[idx];
+        if(lhsSkin.weight != rhsSkin.weight)
+            return false;
+        if(lhsSkin.cluster != rhsSkin.cluster)
+            return false;
+    }
+
+    if(lhs.layeredColor.size() != rhs.layeredColor.size())
+        return false;
+    for(size_t idx = 0, edx = lhs.layeredColor.size(); idx < edx; ++idx){
+        if(lhs.layeredColor[idx] != rhs.layeredColor[idx])
+            return false;
+    }
+
+    if(lhs.layeredNormal.size() != rhs.layeredNormal.size())
+        return false;
+    for(size_t idx = 0, edx = lhs.layeredNormal.size(); idx < edx; ++idx){
+        if(lhs.layeredNormal[idx] != rhs.layeredNormal[idx])
+            return false;
+    }
+
+    if(lhs.layeredBinormal.size() != rhs.layeredBinormal.size())
+        return false;
+    for(size_t idx = 0, edx = lhs.layeredBinormal.size(); idx < edx; ++idx){
+        if(lhs.layeredBinormal[idx] != rhs.layeredBinormal[idx])
+            return false;
+    }
+
+    if(lhs.layeredTangent.size() != rhs.layeredTangent.size())
+        return false;
+    for(size_t idx = 0, edx = lhs.layeredTangent.size(); idx < edx; ++idx){
+        if(lhs.layeredTangent[idx] != rhs.layeredTangent[idx])
+            return false;
+    }
+
+    if(lhs.layeredUV.size() != rhs.layeredUV.size())
+        return false;
+    for(size_t idx = 0, edx = lhs.layeredUV.size(); idx < edx; ++idx){
+        if(lhs.layeredUV[idx].second != rhs.layeredUV[idx].second)
+            return false;
+        if(lhs.layeredUV[idx].first != rhs.layeredUV[idx].first)
+            return false;
+    }
+
+    return true;
+}
+
 class _PolygonInfo{
 public:
     inline bool useSameMaterial(const _PolygonInfo& rhs)const{
@@ -171,13 +169,14 @@ public:
 public:
     inline operator size_t()const{ return hash; }
 
-    inline bool operator==(const _VertexInfoKey& rhs)const{ return (data == rhs.data); }
 
-
-private:
+public:
     const size_t hash;
     const _VertexInfo& data;
 };
+inline bool operator==(const _VertexInfoKey& lhs, const _VertexInfoKey& rhs){
+    return (lhs.data == rhs.data);
+}
 
 
 static eastl::vector<_VertexInfo> ins_aosVertices;
@@ -230,7 +229,8 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
                 {
                     iVertInfo.position = pNodeData->bufPositions[idxVert];
 
-                    iVertInfo.skinData = pNodeData->bufSkinData[idxVert];
+                    if(!pNodeData->bufSkinData.empty())
+                        iVertInfo.skinData = pNodeData->bufSkinData[idxVert];
 
                     size_t colorCount = 0;
                     size_t normalCount = 0;
@@ -309,15 +309,22 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
 }
 
 static inline void ins_genOptimizeMesh(NodeData* pNodeData){
-    pNodeData->bufIndices.clear();
-    for(const auto& iPolyInfo : ins_aosPolygons)
-        pNodeData->bufIndices.emplace_back(iPolyInfo.indices);
+    const bool isSkinned = (!pNodeData->bufSkinData.empty());
 
-    pNodeData->bufPositions.clear();
-    pNodeData->bufSkinData.clear();
-    for(const auto& iVertInfo : ins_aosVertices){
-        pNodeData->bufPositions.emplace_back(iVertInfo.position);
-        pNodeData->bufSkinData.emplace_back(eastl::move(iVertInfo.skinData));
+    {
+        pNodeData->bufIndices.clear();
+        for(const auto& iPolyInfo : ins_aosPolygons)
+            pNodeData->bufIndices.emplace_back(iPolyInfo.indices);
+    }
+    {
+        pNodeData->bufPositions.clear();
+        for(const auto& iVertInfo : ins_aosVertices)
+            pNodeData->bufPositions.emplace_back(iVertInfo.position);
+    }
+    if(isSkinned){
+        pNodeData->bufSkinData.clear();
+        for(const auto& iVertInfo : ins_aosVertices)
+            pNodeData->bufSkinData.emplace_back(eastl::move(iVertInfo.skinData));
     }
 
     for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){

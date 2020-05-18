@@ -18,12 +18,21 @@
 #include <FBXNode.hpp>
 
 
+struct alignas(16) XMMFloat{
+    union{
+        float f[4];
+        __m128 v;
+    };
+};
 struct alignas(16) XMMDouble{
     union{
         double d[2];
         __m128d v;
     };
 };
+
+static XMMFloat XMMF_Infinity = { { { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 } } };
+static XMMFloat XMMF_QNaN = { { { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 } } };
 
 static const XMMDouble XMMD_One = { { { 1., 1. } } };
 static const XMMDouble XMMD_Epsilon = { { { DBL_EPSILON, DBL_EPSILON } } };
@@ -33,21 +42,6 @@ static const XMMDouble XMMD_EpsilonSq = { { { DBL_EPSILON * DBL_EPSILON, DBL_EPS
 template<typename T>
 class Container2{
 public:
-    inline bool operator==(const Container2<T>& rhs)const{
-        if(x != rhs.x)
-            return false;
-        if(y != rhs.y)
-            return false;
-        return true;
-    }
-    inline bool operator!=(const Container2<T>& rhs)const{
-        if((x == rhs.x) && (y == rhs.y))
-            return false;
-        return true;
-    }
-
-
-public:
     union{
         struct{
             T x, y;
@@ -56,24 +50,21 @@ public:
     };
 };
 template<typename T>
+inline bool operator==(const Container2<T>& lhs, const Container2<T>& rhs){
+    if(lhs.x != rhs.x)
+        return false;
+    if(lhs.y != rhs.y)
+        return false;
+    return true;
+}
+template<typename T>
+inline bool operator!=(const Container2<T>& lhs, const Container2<T>& rhs){
+    if((lhs.x == rhs.x) && (lhs.y == rhs.y))
+        return false;
+    return true;
+}
+template<typename T>
 class Container3{
-public:
-    inline bool operator==(const Container3<T>& rhs)const{
-        if(x != rhs.x)
-            return false;
-        if(y != rhs.y)
-            return false;
-        if(z != rhs.z)
-            return false;
-        return true;
-    }
-    inline bool operator!=(const Container3<T>& rhs)const{
-        if((x == rhs.x) && (y == rhs.y) && (z == rhs.z))
-            return false;
-        return true;
-    }
-
-
 public:
     union{
         struct{
@@ -83,26 +74,23 @@ public:
     };
 };
 template<typename T>
+inline bool operator==(const Container3<T>& lhs, const Container3<T>& rhs){
+    if(lhs.x != rhs.x)
+        return false;
+    if(lhs.y != rhs.y)
+        return false;
+    if(lhs.z != rhs.z)
+        return false;
+    return true;
+}
+template<typename T>
+inline bool operator!=(const Container3<T>& lhs, const Container3<T>& rhs){
+    if((lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z))
+        return false;
+    return true;
+}
+template<typename T>
 class Container4{
-public:
-    inline bool operator==(const Container4<T>& rhs)const{
-        if(x != rhs.x)
-            return false;
-        if(y != rhs.y)
-            return false;
-        if(z != rhs.z)
-            return false;
-        if(w != rhs.w)
-            return false;
-        return true;
-    }
-    inline bool operator!=(const Container4<T>& rhs)const{
-        if((x == rhs.x) && (y == rhs.y) && (z == rhs.z) && (w == rhs.w))
-            return false;
-        return true;
-    }
-
-
 public:
     union{
         struct{
@@ -111,6 +99,24 @@ public:
         T raw[4];
     };
 };
+template<typename T>
+inline bool operator==(const Container4<T>& lhs, const Container4<T>& rhs){
+    if(lhs.x != rhs.x)
+        return false;
+    if(lhs.y != rhs.y)
+        return false;
+    if(lhs.z != rhs.z)
+        return false;
+    if(lhs.w != rhs.w)
+        return false;
+    return true;
+}
+template<typename T>
+inline bool operator!=(const Container4<T>& lhs, const Container4<T>& rhs){
+    if((lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z) && (lhs.w == rhs.w))
+        return false;
+    return true;
+}
 
 using Int2 = Container2<int>;
 using Int3 = Container3<int>;
@@ -183,17 +189,18 @@ namespace __hidden_FBXModule{
 
 
     public:
-        inline bool operator==(const T& rhs)const{ return (data == rhs.data); }
-
-    public:
         inline operator size_t()const{ return hash; }
 
 
-    private:
+    public:
         const size_t hash;
         const T& data;
     };
 };
+template<typename T>
+inline bool operator==(const __hidden_FBXModule::_OverlapReducer_Compare_Key<T>& lhs, const __hidden_FBXModule::_OverlapReducer_Compare_Key<T>& rhs){
+    return (lhs.data == rhs.data);
+}
 template<typename T>
 class OverlapReducer{
 public:
@@ -231,7 +238,7 @@ public:
         m_oldToConvIndexer.reserve(oldSize);
 
         m_comparer.clear();
-        m_comparer.rehash(oldSize << 1);
+        m_comparer.rehash(oldSize << 2);
 
         for(size_t idxOld = 0; idxOld < oldSize; ++idxOld){
             const auto& iOld = m_oldData[idxOld];
@@ -509,4 +516,33 @@ static inline fbxsdk::FbxDouble3 Normalize3(const fbxsdk::FbxDouble3& kVector3){
     }
 
     return fbxsdk::FbxDouble3(0., 0., 0.);
+}
+
+static inline Float3 Normalize3(const Float3& flt3){
+    __m128 xmm_xyz;
+    {
+        auto xmm_xy = _mm_castpd_ps(_mm_load_sd(reinterpret_cast<const double*>(flt3.raw)));
+        auto xmm_z = _mm_load_ss(&flt3.z);
+        xmm_xyz = _mm_insert_ps(xmm_xy, xmm_z, 0x20);
+    }
+
+    auto xmm_lenSq = _mm_dp_ps(xmm_xyz, xmm_xyz, 0x7f);
+
+    auto xmm_res = _mm_sqrt_ps(xmm_lenSq);
+    auto xmm_zeroMask = _mm_setzero_ps();
+    xmm_zeroMask = _mm_cmpneq_ps(xmm_zeroMask, xmm_res);
+
+    xmm_lenSq = _mm_cmpneq_ps(xmm_lenSq, XMMF_Infinity.v);
+    xmm_res = _mm_div_ps(xmm_xyz, xmm_res);
+    xmm_res = _mm_and_ps(xmm_res, xmm_zeroMask);
+
+    auto xmm_tmp0 = _mm_andnot_ps(xmm_lenSq, XMMF_QNaN.v);
+    auto xmm_tmp1 = _mm_and_ps(xmm_res, xmm_lenSq);
+    xmm_res = _mm_or_ps(xmm_tmp0, xmm_tmp1);
+
+    alignas(16) Float3 ret;
+    _mm_store_sd(reinterpret_cast<double*>(ret.raw), _mm_castps_pd(xmm_res));
+    *reinterpret_cast<int*>(&ret.z) = _mm_extract_ps(xmm_res, 2);
+
+    return ret;
 }
