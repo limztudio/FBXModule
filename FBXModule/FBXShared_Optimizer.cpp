@@ -7,6 +7,8 @@
 
 #include "stdafx.h"
 
+#include <eastl/unordered_set.h>
+
 #include <FBXAssign.hpp>
 
 #include "FBXUtilites.h"
@@ -14,6 +16,9 @@
 
 
 using namespace fbxsdk;
+
+
+static eastl::unordered_set<const FbxCluster*> ins_nodeUsageChecker;
 
 
 class _VertexInfo{
@@ -413,8 +418,27 @@ static inline void ins_genOptimizeMesh(NodeData* pNodeData){
     }
 }
 
+static inline void ins_removeUnusedDeforms(NodeData* pNodeData){
+    if(pNodeData->bufSkinData.empty())
+        return;
+
+    ins_nodeUsageChecker.clear();
+    for(const auto& iVert : pNodeData->bufSkinData){
+        for(const auto& iWeight : iVert)
+            ins_nodeUsageChecker.emplace(iWeight.cluster);
+    }
+
+    for(auto i = pNodeData->mapBoneDeformMatrices.begin(); i != pNodeData->mapBoneDeformMatrices.end();){
+        if(ins_nodeUsageChecker.find(i->first) == ins_nodeUsageChecker.end())
+            i = pNodeData->mapBoneDeformMatrices.erase(i);
+        else
+            ++i;
+    }
+}
+
 
 void SHROptimizeMesh(NodeData* pNodeData){
     ins_fillAOSContainers(pNodeData);
     ins_genOptimizeMesh(pNodeData);
+    ins_removeUnusedDeforms(pNodeData);
 }
