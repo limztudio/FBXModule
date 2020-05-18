@@ -34,6 +34,9 @@ static ImportNodeToFbxNode ins_importedNodeToFbxNode;
 static ControlPointMergeMap ins_controlPointMergeMap;
 
 
+PoseNodeList shr_poseNodeList;
+
+
 static inline bool ins_addBoneNode(
     FbxManager* kSDKManager,
     FbxNode* kNode,
@@ -383,8 +386,8 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
     return true;
 }
 
-bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRootNode){
-    static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, FbxScene*, const FBXNode*)";
+bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRootNode, PoseNodeList& poseNodeList){
+    static const char __name_of_this_func[] = "SHRStoreNodes(FbxManager*, FbxScene*, const FBXNode*, PoseNodeList&)";
 
 
     ins_importedNodeToFbxNode.clear();
@@ -412,6 +415,8 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRo
         }
     }
 
+    poseNodeList.clear();
+
     for(auto& i : ins_importedNodeToFbxNode){
         const auto curID = i.first->getID();
 
@@ -428,7 +433,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, const FBXNode* pRo
         }
 
         if(FBXTypeHasMember(curID, FBXType::FBXType_SkinnedMesh)){
-            if(!SHRInitSkinData(kSDKManager, ins_importedNodeToFbxNode, ins_controlPointMergeMap, static_cast<const FBXSkinnedMesh*>(i.first), i.second))
+            if(!SHRInitSkinData(kSDKManager, poseNodeList, ins_importedNodeToFbxNode, ins_controlPointMergeMap, static_cast<const FBXSkinnedMesh*>(i.first), i.second))
                 return false;
         }
     }
@@ -577,4 +582,37 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, FbxNode* kParentNode, const FBXNo
     }
 
     return nullptr;
+}
+
+bool SHRCreateBindPose(FbxManager* kSDKManager, FbxScene* kScene, const PoseNodeList& poseNodeList){
+    static const char __name_of_this_func[] = "SHRCreateBindPose(FbxManager*, FbxScene*, const PoseNodeList&)";
+
+
+    if(!poseNodeList.empty()){
+        auto* kPose = FbxPose::Create(kSDKManager, "");
+        if(!kPose){
+            SHRPushErrorMessage("an error occurred while creating FbxPose", __name_of_this_func);
+            return false;
+        }
+
+        kPose->SetIsBindPose(true);
+
+        for(auto* kNode : poseNodeList){
+            const eastl::string strName = kNode->GetName();
+
+            auto kMat = GetGlobalTransform(kNode);
+            if(kPose->Add(kNode, kMat) < 0){
+                eastl::string msg = "an error occurred while adding pose matrix";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                return false;
+            }
+        }
+
+        kScene->AddPose(kPose);
+    }
+
+    return true;
 }

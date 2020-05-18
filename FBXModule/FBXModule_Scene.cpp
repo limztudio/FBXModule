@@ -75,8 +75,13 @@ __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
         return false;
     }
 
-    if(!SHRStoreNodes(shr_SDKManager, shr_scene, ext_root->Nodes)){
+    if(!SHRStoreNodes(shr_SDKManager, shr_scene, ext_root->Nodes, shr_poseNodeList)){
         SHRPushErrorMessage("an error occurred while storing object nodes", __name_of_this_func);
+        return false;
+    }
+
+    if(!SHRCreateBindPose(shr_SDKManager, shr_scene, shr_poseNodeList)){
+        SHRPushErrorMessage("an error occurred while storing bind poses", __name_of_this_func);
         return false;
     }
 

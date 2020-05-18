@@ -92,6 +92,8 @@ struct NodeData{
 using FbxNodeToExportNode = eastl::unordered_map<FbxNode*, FBXNode*>;
 using ImportNodeToFbxNode = eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*>;
 
+using PoseNodeList = eastl::unordered_set<FbxNode*>;
+
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
 struct AnimationElement{
@@ -140,6 +142,8 @@ extern fbxsdk::FbxScene* shr_scene;
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
+extern PoseNodeList shr_poseNodeList;
+
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
@@ -185,14 +189,16 @@ extern fbxsdk::FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count)
 
 extern bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
-extern bool SHRInitSkinData(fbxsdk::FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const ControlPointMergeMap& ctrlPointMergeMap, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
+extern bool SHRInitSkinData(fbxsdk::FbxManager* kSDKManager, PoseNodeList& poseNodeList, const ImportNodeToFbxNode& nodeBinder, const ControlPointMergeMap& ctrlPointMergeMap, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
 extern bool SHRGenerateNodeTree(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
-extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXNode* pRootNode);
+extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXNode* pRootNode, PoseNodeList& poseNodeList);
 extern fbxsdk::FbxNode* SHRStoreNode(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxNode* kParentNode, const FBXNode* pNode);
+
+extern bool SHRCreateBindPose(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const PoseNodeList& poseNodeList);
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 

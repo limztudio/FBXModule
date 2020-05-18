@@ -236,8 +236,8 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
 }
 
 
-bool SHRInitSkinData(FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBinder, const ControlPointMergeMap& ctrlPointMergeMap, const FBXSkinnedMesh* pNode, FbxNode* kNode){
-    static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, const FBXNodeToFbxNode&, const ControlPointMergeMap&, const FBXSkinnedMesh*, FbxNode*)";
+bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const ImportNodeToFbxNode& nodeBinder, const ControlPointMergeMap& ctrlPointMergeMap, const FBXSkinnedMesh* pNode, FbxNode* kNode){
+    static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, PoseNodeList&, const FBXNodeToFbxNode&, const ControlPointMergeMap&, const FBXSkinnedMesh*, FbxNode*)";
 
 
     const eastl::string strName = pNode->Name;
@@ -311,6 +311,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBin
         }
 
         clusterFinder.emplace(pDeform->TargetNode, kCluster);
+        poseNodeList.emplace(kTargetNode);
     }
 
     for(size_t idxVert = 0, edxVert = pNode->SkinInfos.Length; idxVert < edxVert; ++idxVert){
@@ -344,6 +345,8 @@ bool SHRInitSkinData(FbxManager* kSDKManager, const ImportNodeToFbxNode& nodeBin
         SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
         return false;
     }
+
+    poseNodeList.emplace(kNode);
 
     return true;
 }
