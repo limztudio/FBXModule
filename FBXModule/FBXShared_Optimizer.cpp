@@ -84,8 +84,17 @@ public:
     eastl::vector<eastl::pair<eastl::string, fbxsdk::FbxDouble2>> layeredUV;
 };
 inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
-    if(lhs.position != rhs.position)
-        return false;
+    {
+        const auto& lhsVal = lhs.position;
+        const auto& rhsVal = rhs.position;
+
+        if(lhsVal.mData[0] != rhsVal.mData[0])
+            return false;
+        if(lhsVal.mData[1] != rhsVal.mData[1])
+            return false;
+        if(lhsVal.mData[2] != rhsVal.mData[2])
+            return false;
+    }
 
     if(lhs.skinData.size() != rhs.skinData.size())
         return false;
@@ -101,37 +110,73 @@ inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
     if(lhs.layeredColor.size() != rhs.layeredColor.size())
         return false;
     for(size_t idx = 0, edx = lhs.layeredColor.size(); idx < edx; ++idx){
-        if(lhs.layeredColor[idx] != rhs.layeredColor[idx])
+        const auto& lhsVal = lhs.layeredColor[idx];
+        const auto& rhsVal = rhs.layeredColor[idx];
+
+        if(lhsVal.mData[0] != rhsVal.mData[0])
+            return false;
+        if(lhsVal.mData[1] != rhsVal.mData[1])
+            return false;
+        if(lhsVal.mData[2] != rhsVal.mData[2])
+            return false;
+        if(lhsVal.mData[3] != rhsVal.mData[3])
             return false;
     }
 
     if(lhs.layeredNormal.size() != rhs.layeredNormal.size())
         return false;
     for(size_t idx = 0, edx = lhs.layeredNormal.size(); idx < edx; ++idx){
-        if(lhs.layeredNormal[idx] != rhs.layeredNormal[idx])
+        const auto& lhsVal = lhs.layeredNormal[idx];
+        const auto& rhsVal = rhs.layeredNormal[idx];
+
+        if(lhsVal.mData[0] != rhsVal.mData[0])
+            return false;
+        if(lhsVal.mData[1] != rhsVal.mData[1])
+            return false;
+        if(lhsVal.mData[2] != rhsVal.mData[2])
             return false;
     }
 
     if(lhs.layeredBinormal.size() != rhs.layeredBinormal.size())
         return false;
     for(size_t idx = 0, edx = lhs.layeredBinormal.size(); idx < edx; ++idx){
-        if(lhs.layeredBinormal[idx] != rhs.layeredBinormal[idx])
+        const auto& lhsVal = lhs.layeredBinormal[idx];
+        const auto& rhsVal = rhs.layeredBinormal[idx];
+
+        if(lhsVal.mData[0] != rhsVal.mData[0])
+            return false;
+        if(lhsVal.mData[1] != rhsVal.mData[1])
+            return false;
+        if(lhsVal.mData[2] != rhsVal.mData[2])
             return false;
     }
 
     if(lhs.layeredTangent.size() != rhs.layeredTangent.size())
         return false;
     for(size_t idx = 0, edx = lhs.layeredTangent.size(); idx < edx; ++idx){
-        if(lhs.layeredTangent[idx] != rhs.layeredTangent[idx])
+        const auto& lhsVal = lhs.layeredTangent[idx];
+        const auto& rhsVal = rhs.layeredTangent[idx];
+
+        if(lhsVal.mData[0] != rhsVal.mData[0])
+            return false;
+        if(lhsVal.mData[1] != rhsVal.mData[1])
+            return false;
+        if(lhsVal.mData[2] != rhsVal.mData[2])
             return false;
     }
 
     if(lhs.layeredUV.size() != rhs.layeredUV.size())
         return false;
     for(size_t idx = 0, edx = lhs.layeredUV.size(); idx < edx; ++idx){
-        if(lhs.layeredUV[idx].second != rhs.layeredUV[idx].second)
+        const auto& lhsVal = lhs.layeredUV[idx];
+        const auto& rhsVal = rhs.layeredUV[idx];
+
+        if(lhsVal.second.mData[0] != rhsVal.second.mData[0])
             return false;
-        if(lhs.layeredUV[idx].first != rhs.layeredUV[idx].first)
+        if(lhsVal.second.mData[1] != rhsVal.second.mData[1])
+            return false;
+
+        if(lhsVal.first != rhsVal.first)
             return false;
     }
 
