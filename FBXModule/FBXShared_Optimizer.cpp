@@ -88,7 +88,7 @@ public:
 
     eastl::vector<eastl::pair<eastl::string, fbxsdk::FbxDouble2>> layeredUV;
 };
-inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
+static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
     {
         const auto& lhsVal = lhs.position;
         const auto& rhsVal = rhs.position;
@@ -224,7 +224,7 @@ public:
     const size_t hash;
     const _VertexInfo& data;
 };
-inline bool operator==(const _VertexInfoKey& lhs, const _VertexInfoKey& rhs){
+static inline bool operator==(const _VertexInfoKey& lhs, const _VertexInfoKey& rhs){
     return (lhs.data == rhs.data);
 }
 

@@ -17,6 +17,20 @@ enum class FBXIOType : unsigned long{
     FBXIOType_BinaryExport = 1,
 };
 
+class FBXIOSetting{
+public:
+    FBXIOSetting()
+        :
+        MaxParticipateClusterPerVertex(4),
+        MaxBoneCountPerMesh(20)
+    {}
+
+
+public:
+    unsigned long MaxParticipateClusterPerVertex;
+    unsigned long MaxBoneCountPerMesh;
+};
+
 
 template<typename T>
 class FBXDynamicArray{

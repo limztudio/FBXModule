@@ -26,11 +26,14 @@ static unsigned char ins_fileMode = 0;
 static FBXIOType ins_ioFlag = FBXIOType::FBXIOType_None;
 
 
-__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, unsigned long ioFlag){
-    static const char __name_of_this_func[] = "FBXOpenFile(const char*, const char*, unsigned long)";
+__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, unsigned long ioFlag, const void* ioSetting){
+    static const char __name_of_this_func[] = "FBXOpenFile(const char*, const char*, unsigned long, const void*)";
 
 
     ins_ioFlag = (FBXIOType)ioFlag;
+
+    if(ioSetting)
+        shr_ioSetting = (*reinterpret_cast<const FBXIOSetting*>(ioSetting));
 
     if((*mode == 'r') || (*mode == 'R')){
         ins_fileMode = 1;

@@ -7,6 +7,8 @@
 
 #include "stdafx.h"
 
+#include <cassert>
+
 #include "FBXShared.h"
 
 
@@ -19,6 +21,7 @@ void SHRPushErrorMessage(const char* strMessage, const char* strCallPos){
     _new += strCallPos;
     _new += '\n';
 
+    assert(!_new.c_str());
     shr_errorStack.emplace(eastl::move(_new));
 }
 void SHRPushErrorMessage(const eastl::string& strMessage, const char* strCallPos){
@@ -27,6 +30,7 @@ void SHRPushErrorMessage(const eastl::string& strMessage, const char* strCallPos
     _new += strCallPos;
     _new += '\n';
 
+    assert(!_new.c_str());
     shr_errorStack.emplace(eastl::move(_new));
 }
 void SHRPushErrorMessage(eastl::string&& strMessage, const char* strCallPos){
@@ -35,5 +39,6 @@ void SHRPushErrorMessage(eastl::string&& strMessage, const char* strCallPos){
     _new += strCallPos;
     _new += '\n';
 
+    assert(!_new.c_str());
     shr_errorStack.emplace(eastl::move(_new));
 }

@@ -13,6 +13,15 @@
 #include "FBXNode.hpp"
 
 
+class FBXMeshAttribute{
+public:
+    unsigned long VertexStart;
+    unsigned long VertexCount;
+
+    unsigned long IndexStart;
+    unsigned long IndexCount;
+};
+
 class FBXMeshLayerElement{
 public:
     FBXDynamicArray<long> Material;
@@ -41,9 +50,12 @@ public:
 
 
 public:
+    FBXDynamicArray<FBXMeshAttribute> Attributes;
+
+public:
     FBXDynamicArray<FBXStaticArray<long, 3>> Indices;
     FBXDynamicArray<FBXStaticArray<float, 3>> Vertices;
 
 public:
-    FBXDynamicArray<FBXMeshLayerElement> LayeredVertices;
+    FBXDynamicArray<FBXMeshLayerElement> LayeredElements;
 };

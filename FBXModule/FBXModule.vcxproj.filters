@@ -19,6 +19,7 @@
     <ClCompile Include="FBXShared_Bone.cpp" />
     <ClCompile Include="FBXShared_Optimizer.cpp" />
     <ClCompile Include="FBXModule_Compatible.cpp" />
+    <ClCompile Include="FBXShared_BoneCombination.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

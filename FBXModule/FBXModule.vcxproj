@@ -28,6 +28,7 @@
     <ClCompile Include="FBXShared.cpp" />
     <ClCompile Include="FBXShared_Animation.cpp" />
     <ClCompile Include="FBXShared_Bone.cpp" />
+    <ClCompile Include="FBXShared_BoneCombination.cpp" />
     <ClCompile Include="FBXShared_FbxSdk.cpp" />
     <ClCompile Include="FBXShared_Error.cpp" />
     <ClCompile Include="FBXShared_Mesh.cpp" />

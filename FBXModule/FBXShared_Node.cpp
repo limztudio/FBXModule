@@ -76,6 +76,8 @@ static inline bool ins_addMeshNode(
             throw _ERROR_INSIDE_ADD_MESH;
 
         SHROptimizeMesh(pNodeData);
+
+        SHRGenerateMeshAttribute(pNodeData);
     }
 
     {
@@ -87,6 +89,18 @@ static inline bool ins_addMeshNode(
 
     {
         auto* pMesh = static_cast<FBXMesh*>(pNode);
+
+        pMesh->Attributes.Assign(pNodeData->bufMeshAttribute.size());
+        for(size_t idxAttr = 0; idxAttr < pMesh->Attributes.Length; ++idxAttr){
+            const auto& iOldAttr = pNodeData->bufMeshAttribute[idxAttr];
+            auto& iNewAttr = pMesh->Attributes.Values[idxAttr];
+
+            iNewAttr.VertexStart = iOldAttr.VertexFirst;
+            iNewAttr.IndexStart = iOldAttr.PolygonFirst;
+
+            iNewAttr.VertexCount = 1 + iOldAttr.VertexLast - iOldAttr.VertexFirst;
+            iNewAttr.IndexCount = 1 + iOldAttr.PolygonLast - iOldAttr.PolygonFirst;
+        }
 
         pMesh->Indices.Assign(pNodeData->bufIndices.size());
         for(size_t idxInd = 0; idxInd < pMesh->Indices.Length; ++idxInd){
@@ -102,17 +116,24 @@ static inline bool ins_addMeshNode(
             CopyArrayData(iVert.Values, pNodeData->bufPositions[idxVert].mData);
         }
 
-        pMesh->LayeredVertices.Assign(pNodeData->bufLayers.size());
-        for(size_t idxLayer = 0; idxLayer < pMesh->LayeredVertices.Length; ++idxLayer){
-            auto& iLayer = pMesh->LayeredVertices.Values[idxLayer];
+        pMesh->LayeredElements.Assign(pNodeData->bufLayers.size());
+        for(size_t idxLayer = 0; idxLayer < pMesh->LayeredElements.Length; ++idxLayer){
+            auto& iLayer = pMesh->LayeredElements.Values[idxLayer];
             const auto& nodeLayer = pNodeData->bufLayers[idxLayer];
 
             {
                 auto& iObject = iLayer.Material;
                 const auto& nodeObject = nodeLayer.materials;
 
-                iObject.Assign(nodeObject.size());
-                CopyArrayData(iObject.Values, nodeObject.data(), iObject.Length);
+                if(nodeObject.empty())
+                    iObject.Assign(0);
+                else{
+                    iObject.Assign(pNodeData->bufMeshAttribute.size());
+                    for(size_t idxMat = 0; idxMat < iObject.Length; ++idxMat){
+                        const auto idxOldMat = pMesh->Attributes.Values[idxMat].IndexStart;
+                        iObject.Values[idxMat] = nodeObject[idxOldMat];
+                    }
+                }
             }
 
             {
@@ -165,6 +186,22 @@ static inline bool ins_addMeshNode(
     if(!pNodeData->bufSkinData.empty()){
         auto* pMesh = static_cast<FBXSkinnedMesh*>(pNode);
 
+        pMesh->BoneCombinations.Assign(pNodeData->bufBoneCombination.size());
+        for(size_t idxAttr = 0; idxAttr < pMesh->BoneCombinations.Length; ++idxAttr){
+            auto& iAttr = pMesh->BoneCombinations.Values[idxAttr];
+            const auto& nodeAttr = pNodeData->bufBoneCombination[idxAttr];
+
+            iAttr.Assign(nodeAttr.size());
+            for(size_t idxBC = 0; idxBC < iAttr.Length; ++idxBC){
+                auto*& iCluster = iAttr.Values[idxBC];
+                auto* nodeCluster = nodeAttr[idxBC];
+
+                auto* kBindNode = nodeCluster->GetLink();
+
+                iCluster = reinterpret_cast<decltype(iCluster)>(kBindNode);
+            }
+        }
+
         pMesh->SkinInfos.Assign(pNodeData->bufSkinData.size());
         for(size_t idxSkin = 0; idxSkin < pMesh->SkinInfos.Length; ++idxSkin){
             auto& iSkin = pMesh->SkinInfos.Values[idxSkin];
@@ -183,7 +220,6 @@ static inline bool ins_addMeshNode(
         }
 
         pMesh->SkinDeforms.Assign(pNodeData->mapBoneDeformMatrices.size());
-
         auto* iDeform = pMesh->SkinDeforms.Values;
         for(const auto& nodeDeform : pNodeData->mapBoneDeformMatrices){
             auto* kBindNode = nodeDeform.first->GetLink();
@@ -306,6 +342,18 @@ static void ins_addNodeRecursive(
 static void ins_bindSkinningInfoRecursive(FBXNode* pNode){
     if(pNode->getID() == FBXType::FBXType_SkinnedMesh){
         auto* pMesh = static_cast<FBXSkinnedMesh*>(pNode);
+
+        for(auto* iAttr = pMesh->BoneCombinations.Values; size_t(iAttr - pMesh->BoneCombinations.Values) < pMesh->BoneCombinations.Length; ++iAttr){
+            for(auto** iCluster = iAttr->Values; size_t(iCluster - iAttr->Values) < iAttr->Length; ++iCluster){
+                auto* kBindNode = reinterpret_cast<FbxNode*>(*iCluster);
+
+                auto f = ins_fbxNodeToExportNode.find(kBindNode);
+                if(f == ins_fbxNodeToExportNode.cend())
+                    throw _ERROR_INDSID_BIND_SKIN;
+
+                (*iCluster) = f->second;
+            }
+        }
 
         for(auto* iVert = pMesh->SkinInfos.Values; size_t(iVert - pMesh->SkinInfos.Values) < pMesh->SkinInfos.Length; ++iVert){
             for(auto* iWeight = iVert->Values; size_t(iWeight - iVert->Values) < iVert->Length; ++iWeight){

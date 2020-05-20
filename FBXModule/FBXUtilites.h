@@ -39,8 +39,56 @@ static const XMMDouble XMMD_Epsilon = { { { DBL_EPSILON, DBL_EPSILON } } };
 static const XMMDouble XMMD_EpsilonSq = { { { DBL_EPSILON * DBL_EPSILON, DBL_EPSILON * DBL_EPSILON } } };
 
 
+template<size_t LEN, typename T>
+static inline size_t MakeHash(const T(&data)[LEN]){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto& i : data){
+        c = static_cast<size_t>(i);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+template<template<typename> typename C, typename T>
+static inline size_t MakeHash(const C<T>& data){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto& i : data){
+        c = static_cast<size_t>(i);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+template<size_t LEN, typename T>
+static inline size_t MakeHash(const T* data){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto* p = data; FBX_PTRDIFFU(p - data) < LEN; ++p){
+        c = static_cast<size_t>(*p);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+template<typename T>
+static inline size_t MakeHash(const T* data, size_t len){
+    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    for(const auto* p = data; FBX_PTRDIFFU(p - data) < len; ++p){
+        c = static_cast<size_t>(*p);
+        result = (result * 16777619) ^ c;
+    }
+    return result;
+}
+
+
 template<typename T>
 class Container2{
+public:
+    Container2(){}
+    Container2(const T& _x, const T& _y) : x(_x), y(_y){}
+    Container2(T&& _x, T&& _y) : x(eastl::move(_x)), y(eastl::move(_y)){}
+
+
+public:
+    inline operator size_t()const{ return MakeHash(raw); }
+
+
 public:
     union{
         struct{
@@ -50,7 +98,7 @@ public:
     };
 };
 template<typename T>
-inline bool operator==(const Container2<T>& lhs, const Container2<T>& rhs){
+static inline bool operator==(const Container2<T>& lhs, const Container2<T>& rhs){
     if(lhs.x != rhs.x)
         return false;
     if(lhs.y != rhs.y)
@@ -58,13 +106,23 @@ inline bool operator==(const Container2<T>& lhs, const Container2<T>& rhs){
     return true;
 }
 template<typename T>
-inline bool operator!=(const Container2<T>& lhs, const Container2<T>& rhs){
+static inline bool operator!=(const Container2<T>& lhs, const Container2<T>& rhs){
     if((lhs.x == rhs.x) && (lhs.y == rhs.y))
         return false;
     return true;
 }
 template<typename T>
 class Container3{
+public:
+    Container3(){}
+    Container3(const T& _x, const T& _y, const T& _z) : x(_x), y(_y), z(_z){}
+    Container3(T&& _x, T&& _y, T&& _z) : x(eastl::move(_x)), y(eastl::move(_y)), z(eastl::move(_z)){}
+
+
+public:
+    inline operator size_t()const{ return MakeHash(raw); }
+
+
 public:
     union{
         struct{
@@ -74,7 +132,7 @@ public:
     };
 };
 template<typename T>
-inline bool operator==(const Container3<T>& lhs, const Container3<T>& rhs){
+static inline bool operator==(const Container3<T>& lhs, const Container3<T>& rhs){
     if(lhs.x != rhs.x)
         return false;
     if(lhs.y != rhs.y)
@@ -84,13 +142,23 @@ inline bool operator==(const Container3<T>& lhs, const Container3<T>& rhs){
     return true;
 }
 template<typename T>
-inline bool operator!=(const Container3<T>& lhs, const Container3<T>& rhs){
+static inline bool operator!=(const Container3<T>& lhs, const Container3<T>& rhs){
     if((lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z))
         return false;
     return true;
 }
 template<typename T>
 class Container4{
+public:
+    Container4(){}
+    Container4(const T& _x, const T& _y, const T& _z, const T& _w) : x(_x), y(_y), z(_z), w(_w){}
+    Container4(T&& _x, T&& _y, T&& _z, T&& _w) : x(eastl::move(_x)), y(eastl::move(_y)), z(eastl::move(_z)), w(eastl::move(_w)){}
+
+
+public:
+    inline operator size_t()const{ return MakeHash(raw); }
+
+
 public:
     union{
         struct{
@@ -100,7 +168,7 @@ public:
     };
 };
 template<typename T>
-inline bool operator==(const Container4<T>& lhs, const Container4<T>& rhs){
+static inline bool operator==(const Container4<T>& lhs, const Container4<T>& rhs){
     if(lhs.x != rhs.x)
         return false;
     if(lhs.y != rhs.y)
@@ -112,7 +180,7 @@ inline bool operator==(const Container4<T>& lhs, const Container4<T>& rhs){
     return true;
 }
 template<typename T>
-inline bool operator!=(const Container4<T>& lhs, const Container4<T>& rhs){
+static inline bool operator!=(const Container4<T>& lhs, const Container4<T>& rhs){
     if((lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z) && (lhs.w == rhs.w))
         return false;
     return true;
@@ -198,7 +266,7 @@ namespace __hidden_FBXModule{
     };
 };
 template<typename T>
-inline bool operator==(const __hidden_FBXModule::_OverlapReducer_Compare_Key<T>& lhs, const __hidden_FBXModule::_OverlapReducer_Compare_Key<T>& rhs){
+static inline bool operator==(const __hidden_FBXModule::_OverlapReducer_Compare_Key<T>& lhs, const __hidden_FBXModule::_OverlapReducer_Compare_Key<T>& rhs){
     return (lhs.data == rhs.data);
 }
 template<typename T>
@@ -278,43 +346,6 @@ private:
 
 
 extern void ConvertObjects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
-
-template<size_t LEN, typename T>
-static inline size_t MakeHash(const T(&data)[LEN]){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
-    for(const auto& i : data){
-        c = static_cast<size_t>(i);
-        result = (result * 16777619) ^ c;
-    }
-    return result;
-}
-template<template<typename> typename C, typename T>
-static inline size_t MakeHash(const C<T>& data){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
-    for(const auto& i : data){
-        c = static_cast<size_t>(i);
-        result = (result * 16777619) ^ c;
-    }
-    return result;
-}
-template<size_t LEN, typename T>
-static inline size_t MakeHash(const T* data){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
-    for(const auto* p = data; FBX_PTRDIFFU(p - data) < LEN; ++p){
-        c = static_cast<size_t>(*p);
-        result = (result * 16777619) ^ c;
-    }
-    return result;
-}
-template<typename T>
-static inline size_t MakeHash(const T* data, size_t len){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
-    for(const auto* p = data; FBX_PTRDIFFU(p - data) < len; ++p){
-        c = static_cast<size_t>(*p);
-        result = (result * 16777619) ^ c;
-    }
-    return result;
-}
 
 template<typename C>
 static inline C* CopyString(const eastl::basic_string<C>& str){

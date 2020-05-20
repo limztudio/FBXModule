@@ -64,15 +64,17 @@ namespace __hidden_FBXModule{
                 auto* dest_c = static_cast<FBXMesh*>(dest);
                 const auto* src_c = static_cast<const FBXMesh*>(src);
 
+                dest_c->Attributes = src_c->Attributes;
                 dest_c->Indices = src_c->Indices;
                 dest_c->Vertices = src_c->Vertices;
 
-                dest_c->LayeredVertices = src_c->LayeredVertices;
+                dest_c->LayeredElements = src_c->LayeredElements;
             }
             if(FBXTypeHasMember(srcID, FBXType::FBXType_SkinnedMesh)){
                 auto* dest_c = static_cast<FBXSkinnedMesh*>(dest);
                 const auto* src_c = static_cast<const FBXSkinnedMesh*>(src);
 
+                dest_c->BoneCombinations = src_c->BoneCombinations;
                 dest_c->SkinInfos = src_c->SkinInfos;
                 dest_c->SkinDeforms = src_c->SkinDeforms;
             }

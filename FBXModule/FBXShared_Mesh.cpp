@@ -71,7 +71,7 @@ public:
     Float3 position;
     const FBXDynamicArray<FBXSkinElement>* skinInfos;
 };
-inline bool operator==(const _PositionSkin& lhs, const _PositionSkin& rhs){
+static inline bool operator==(const _PositionSkin& lhs, const _PositionSkin& rhs){
     if(lhs.position != rhs.position)
         return false;
 
@@ -659,7 +659,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
     }
 
     // reserve layer
-    for(size_t idxLayer = 0; idxLayer < pNode->LayeredVertices.Length; ++idxLayer){
+    for(size_t idxLayer = 0; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
         auto* kLayer = kMesh->GetLayer(idxLayer);
         if(!kLayer){
             const auto idxNewLayer = kMesh->CreateLayer();
@@ -684,8 +684,8 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
         }
     }
 
-    for(size_t idxLayer = 0; idxLayer < pNode->LayeredVertices.Length; ++idxLayer){
-        const auto& iLayer = pNode->LayeredVertices.Values[idxLayer];
+    for(size_t idxLayer = 0; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
+        const auto& iLayer = pNode->LayeredElements.Values[idxLayer];
         auto* kLayer = kMesh->GetLayer(idxLayer);
 
         if(iLayer.Material.Length){

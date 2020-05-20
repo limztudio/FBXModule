@@ -13,6 +13,7 @@
 #include "FBXMesh.hpp"
 
 
+typedef FBXDynamicArray<FBXDynamicArray<FBXNode*>> FBXBoneCombination;
 class FBXSkinElement{
 public:
     FBXNode* BindNode;
@@ -38,6 +39,7 @@ public:
 
 
 public:
+    FBXBoneCombination BoneCombinations;
     FBXDynamicArray<FBXDynamicArray<FBXSkinElement>> SkinInfos;
     FBXDynamicArray<FBXSkinDeformElement> SkinDeforms;
 };

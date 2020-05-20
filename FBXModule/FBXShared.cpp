@@ -13,6 +13,8 @@
 #include "FBXShared.h"
 
 
+FBXIOSetting shr_ioSetting;
+
 FBXRoot* shr_root = nullptr;
 
 static eastl::unordered_map<const FBXNode*, FBXNode*> ins_nodeBinder;
@@ -78,19 +80,31 @@ void SHRCopyNode(FBXNode* dest, const FBXNode* src){
         if(FBXTypeHasMember(srcID, FBXType::FBXType_Mesh)){
             auto* dest_c = static_cast<FBXMesh*>(dest);
             const auto* src_c = static_cast<const FBXMesh*>(src);
-
+            
+            dest_c->Attributes = src_c->Attributes;
             dest_c->Indices = src_c->Indices;
             dest_c->Vertices = src_c->Vertices;
 
-            dest_c->LayeredVertices = src_c->LayeredVertices;
+            dest_c->LayeredElements = src_c->LayeredElements;
         }
         if(FBXTypeHasMember(srcID, FBXType::FBXType_SkinnedMesh)){
             auto* dest_c = static_cast<FBXSkinnedMesh*>(dest);
             const auto* src_c = static_cast<const FBXSkinnedMesh*>(src);
 
+            dest_c->BoneCombinations = src_c->BoneCombinations;
             dest_c->SkinInfos = src_c->SkinInfos;
             dest_c->SkinDeforms = src_c->SkinDeforms;
 
+            for(auto* p0 = dest_c->BoneCombinations.Values; FBX_PTRDIFFU(p0 - dest_c->BoneCombinations.Values) < dest_c->BoneCombinations.Length; ++p0){
+                for(auto* p1 = p0->Values; FBX_PTRDIFFU(p1 - p0->Values) < p0->Length; ++p1){
+                    auto f = ins_nodeBinder.find(*p1);
+
+                    if(f != ins_nodeBinder.cend())
+                        *p1 = f->second;
+                    else
+                        SHRPushErrorMessage("an error occurred while binding node pointer on BoneCombinations", __name_of_this_func);
+                }
+            }
             for(auto* p0 = dest_c->SkinInfos.Values; FBX_PTRDIFFU(p0 - dest_c->SkinInfos.Values) < dest_c->SkinInfos.Length; ++p0){
                 for(auto* p1 = p0->Values; FBX_PTRDIFFU(p1 - p0->Values) < p0->Length; ++p1){
                     auto f = ins_nodeBinder.find(p1->BindNode);
@@ -101,7 +115,6 @@ void SHRCopyNode(FBXNode* dest, const FBXNode* src){
                         SHRPushErrorMessage("an error occurred while binding node pointer on SkinInfos", __name_of_this_func);
                 }
             }
-
             for(auto* p = dest_c->SkinDeforms.Values; FBX_PTRDIFFU(p - dest_c->SkinDeforms.Values) < dest_c->SkinDeforms.Length; ++p){
                 auto f = ins_nodeBinder.find(p->TargetNode);
 

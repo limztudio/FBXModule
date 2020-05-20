@@ -73,12 +73,28 @@ using SkinInfoContainer = eastl::vector<eastl::vector<SkinInfo>>;
 
 using BoneOffsetMatrixMap = eastl::unordered_map<fbxsdk::FbxCluster*, fbxsdk::FbxAMatrix>;
 
+// FBXShared_BoneCombination /////////////////////////////////////////////////////////////////////////
+
+struct MeshAttributeElement{
+    unsigned long PolygonFirst;
+    unsigned long PolygonLast;
+
+    unsigned long VertexFirst;
+    unsigned long VertexLast;
+};
+
+using MeshAttribute = eastl::vector<MeshAttributeElement>;
+using BoneCombination = eastl::vector<fbxsdk::FbxCluster*>;
+
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
 struct NodeData{
     eastl::string strName;
 
     FbxAMatrix kTransformMatrix;
+
+    MeshAttribute bufMeshAttribute;
+    eastl::vector<BoneCombination> bufBoneCombination;
 
     Vector3Container bufPositions;
     Int3Container bufIndices;
@@ -119,6 +135,8 @@ struct AnimationData{
 // variables
 // Common ////////////////////////////////////////////////////////////////////////////////////////////
 
+extern FBXIOSetting shr_ioSetting;
+
 extern FBXRoot* shr_root;
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
@@ -139,6 +157,8 @@ extern fbxsdk::FbxScene* shr_scene;
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
+
+// FBXShared_BoneCombination /////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
@@ -190,6 +210,10 @@ extern fbxsdk::FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count)
 extern bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
 extern bool SHRInitSkinData(fbxsdk::FbxManager* kSDKManager, PoseNodeList& poseNodeList, const ImportNodeToFbxNode& nodeBinder, const ControlPointMergeMap& ctrlPointMergeMap, const FBXSkinnedMesh* pNode, fbxsdk::FbxNode* kNode);
+
+// FBXShared_BoneCombination /////////////////////////////////////////////////////////////////////////
+
+extern void SHRGenerateMeshAttribute(NodeData* pNodeData);
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 

@@ -51,7 +51,7 @@ static inline void closeLib(){
 
 
 static inline void loadFile(const char* name){
-    if(!FBXOpenFile(name, "rb", (unsigned long)FBXIOType::FBXIOType_None)){
+    if(!FBXOpenFile(name, "rb", (unsigned long)FBXIOType::FBXIOType_None, nullptr)){
         printf_s("%s", getLastError().c_str());
         return;
     }
@@ -75,7 +75,7 @@ static inline void loadFile(const char* name){
 }
 
 static inline void storeNode(const char* name){
-    if(!FBXOpenFile(name, "wb", (unsigned long)FBXIOType::FBXIOType_None)){
+    if(!FBXOpenFile(name, "wb", (unsigned long)FBXIOType::FBXIOType_None, nullptr)){
         printf_s("%s", getLastError().c_str());
         return;
     }

@@ -13,9 +13,6 @@
 #include "FBXShared.h"
 
 
-static const int ins_maxWeightParticipations = 4;
-
-
 FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count){
     FbxAMatrix matOut;
 
@@ -166,14 +163,14 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         auto& weightBoneMap = vertexBoneList[idxVert];
 
         // remove too many participated clusters
-        if((decltype(ins_maxWeightParticipations))weightBoneMap.size() > ins_maxWeightParticipations){
-            int counter = 0;
+        if(weightBoneMap.size() > shr_ioSetting.MaxParticipateClusterPerVertex){
+            size_t counter = 0;
             for(auto itrBone = weightBoneMap.rbegin(); itrBone != weightBoneMap.rend(); ++itrBone){
                 auto& vertexBoneWeightMap = boneMapList[itrBone->second];
 
                 auto itrVertBone = vertexBoneWeightMap.find(idxVert);
                 if(itrVertBone != vertexBoneWeightMap.end()){
-                    if(counter >= ins_maxWeightParticipations)
+                    if(counter >= shr_ioSetting.MaxParticipateClusterPerVertex)
                         vertexBoneWeightMap.erase(itrVertBone);
                 }
 
@@ -181,7 +178,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
             }
 
             auto itrBone = weightBoneMap.begin();
-            for(int i = 0, e = (decltype(e))weightBoneMap.size() - ins_maxWeightParticipations; i < e; ++i){
+            for(size_t i = 0, e = weightBoneMap.size() - shr_ioSetting.MaxParticipateClusterPerVertex; i < e; ++i){
                 auto itrDel = itrBone;
                 ++itrBone;
 
