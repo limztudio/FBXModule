@@ -347,19 +347,6 @@ private:
 
 extern void ConvertObjects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
-template<typename C>
-static inline C* CopyString(const eastl::basic_string<C>& str){
-    const auto last = str.length();
-    auto* ret = reinterpret_cast<C*>(malloc((last + 1u) * sizeof(C)));
-
-    if(ret){
-        CopyMemory(ret, str.data(), last * sizeof(C));
-        ret[last] = 0;
-    }
-
-    return ret;
-}
-
 template<size_t LEN_LHS, size_t LEN_RHS, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], RHS(&&rhs)[LEN_RHS]){
     for(size_t i = 0; i < LEN_LHS; ++i)

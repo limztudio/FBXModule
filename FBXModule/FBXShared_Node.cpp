@@ -28,12 +28,12 @@ struct _NodeData_wrapper{
 };
 
 
-static FbxNodeToExportNode ins_fbxNodeToExportNode;
 static ImportNodeToFbxNode ins_importedNodeToFbxNode;
 
 static ControlPointMergeMap ins_controlPointMergeMap;
 
 
+FbxNodeToExportNode shr_fbxNodeToExportNode;
 PoseNodeList shr_poseNodeList;
 
 
@@ -238,6 +238,7 @@ static inline bool ins_addMeshNode(
 
 static void ins_addNodeRecursive(
     FbxManager* kSDKManager,
+    FbxNodeToExportNode& fbxNodeToExportNode,
     FbxPose* kPose,
     FbxNode* kNode,
     FBXNode*& pNode
@@ -304,14 +305,17 @@ static void ins_addNodeRecursive(
 
     _ADD_NODE_AFTER_ALLOCATE:
         {
-            pNode->Name = CopyString(genNodeData.strName);
+            const auto lenName = genNodeData.strName.length();
+            pNode->Name = FBXAllocate<char>(lenName + 1);
+            CopyArrayData(pNode->Name, genNodeData.strName.c_str(), lenName);
+            pNode->Name[lenName] = 0;
 
             const auto& matrix = genNodeData.kTransformMatrix;
             CopyArrayData(pNode->TransformMatrix.Values, (const double*)matrix);
         }
 
         {
-            ins_fbxNodeToExportNode.emplace(kNode, pNode);
+            fbxNodeToExportNode.emplace(kNode, pNode);
         }
     }
 
@@ -321,6 +325,7 @@ static void ins_addNodeRecursive(
             {
                 ins_addNodeRecursive(
                     kSDKManager,
+                    fbxNodeToExportNode,
                     kPose,
                     kNode->GetChild(0),
                     pNode->Child
@@ -328,18 +333,20 @@ static void ins_addNodeRecursive(
             }
 
             auto** pCurChildNode = &pNode->Child->Sibling;
-            for(auto i = decltype(e){ 1 }; i < e; ++i, pCurChildNode = &(*pCurChildNode)->Sibling)
+            for(auto i = decltype(e){ 1 }; i < e; ++i, pCurChildNode = &(*pCurChildNode)->Sibling){
                 ins_addNodeRecursive(
                     kSDKManager,
+                    fbxNodeToExportNode,
                     kPose,
                     kNode->GetChild(i),
                     *pCurChildNode
                 );
+            }
         }
     }
 }
 
-static void ins_bindSkinningInfoRecursive(FBXNode* pNode){
+static void ins_bindSkinningInfoRecursive(const FbxNodeToExportNode& fbxNodeToExportNode, FBXNode* pNode){
     if(pNode->getID() == FBXType::FBXType_SkinnedMesh){
         auto* pMesh = static_cast<FBXSkinnedMesh*>(pNode);
 
@@ -347,8 +354,8 @@ static void ins_bindSkinningInfoRecursive(FBXNode* pNode){
             for(auto** iCluster = iAttr->Values; size_t(iCluster - iAttr->Values) < iAttr->Length; ++iCluster){
                 auto* kBindNode = reinterpret_cast<FbxNode*>(*iCluster);
 
-                auto f = ins_fbxNodeToExportNode.find(kBindNode);
-                if(f == ins_fbxNodeToExportNode.cend())
+                auto f = fbxNodeToExportNode.find(kBindNode);
+                if(f == fbxNodeToExportNode.cend())
                     throw _ERROR_INDSID_BIND_SKIN;
 
                 (*iCluster) = f->second;
@@ -359,8 +366,8 @@ static void ins_bindSkinningInfoRecursive(FBXNode* pNode){
             for(auto* iWeight = iVert->Values; size_t(iWeight - iVert->Values) < iVert->Length; ++iWeight){
                 auto* kBindNode = reinterpret_cast<FbxNode*>(iWeight->BindNode);
 
-                auto f = ins_fbxNodeToExportNode.find(kBindNode);
-                if(f == ins_fbxNodeToExportNode.cend())
+                auto f = fbxNodeToExportNode.find(kBindNode);
+                if(f == fbxNodeToExportNode.cend())
                     throw _ERROR_INDSID_BIND_SKIN;
 
                 iWeight->BindNode = f->second;
@@ -370,8 +377,8 @@ static void ins_bindSkinningInfoRecursive(FBXNode* pNode){
         for(auto* iDeform = pMesh->SkinDeforms.Values; size_t(iDeform - pMesh->SkinDeforms.Values) < pMesh->SkinDeforms.Length; ++iDeform){
             auto* kBindNode = reinterpret_cast<FbxNode*>(iDeform->TargetNode);
 
-            auto f = ins_fbxNodeToExportNode.find(kBindNode);
-            if(f == ins_fbxNodeToExportNode.cend())
+            auto f = fbxNodeToExportNode.find(kBindNode);
+            if(f == fbxNodeToExportNode.cend())
                 throw _ERROR_INDSID_BIND_SKIN;
 
             iDeform->TargetNode = f->second;
@@ -380,16 +387,16 @@ static void ins_bindSkinningInfoRecursive(FBXNode* pNode){
 
     {
         if(pNode->Sibling)
-            ins_bindSkinningInfoRecursive(pNode->Sibling);
+            ins_bindSkinningInfoRecursive(fbxNodeToExportNode, pNode->Sibling);
 
         if(pNode->Child)
-            ins_bindSkinningInfoRecursive(pNode->Child);
+            ins_bindSkinningInfoRecursive(fbxNodeToExportNode, pNode->Child);
     }
 }
 
 
-bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
-    static const char __name_of_this_func[] = "SHRGenerateNodeTree(FbxManager*, FbxScene*)";
+bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, FbxNodeToExportNode& fbxNodeToExportNode){
+    static const char __name_of_this_func[] = "SHRGenerateNodeTree(FbxManager*, FbxScene*, FbxNodeToExportNode&)";
 
 
     if(shr_root->Nodes){
@@ -407,16 +414,15 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene){
             kPose = kScene->GetPose(poseIndex);
 
         try{
-            ins_fbxNodeToExportNode.clear();
-
             ins_addNodeRecursive(
                 kSDKManager,
+                fbxNodeToExportNode,
                 kPose,
                 kRootNode,
                 shr_root->Nodes
             );
 
-            ins_bindSkinningInfoRecursive(shr_root->Nodes);
+            ins_bindSkinningInfoRecursive(fbxNodeToExportNode, shr_root->Nodes);
         }
         catch(int ret){
             switch(ret){

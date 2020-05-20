@@ -112,20 +112,44 @@ using PoseNodeList = eastl::unordered_set<FbxNode*>;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
-struct AnimationElement{
-    fbxsdk::FbxDouble time;
+template<typename T>
+class AnimationFrameElement{
+public:
+    AnimationFrameElement(){}
+    AnimationFrameElement(const fbxsdk::FbxAnimCurveKey& _curveKey, const T& _value)
+        :
+        curveKey(_curveKey),
+        value(_value)
+    {}
+    AnimationFrameElement(fbxsdk::FbxAnimCurveKey&& _curveKey, T&& _value)
+        :
+        curveKey(eastl::move(_curveKey)),
+        value(eastl::move(_value))
+    {}
 
 
+public:
+    fbxsdk::FbxAnimCurveKey curveKey;
+    T value;
 };
+template<typename T>
+using AnimationFrameQueue = eastl::vector<AnimationFrameElement<T>>;
 
-using AnimationQueue = eastl::vector<AnimationElement>;
-using AnimationList = eastl::unordered_map<fbxsdk::FbxNode*, AnimationQueue>;
-
+struct AnimationLayer{
+    AnimationFrameQueue<fbxsdk::FbxDouble3> scaleKeys;
+    AnimationFrameQueue<fbxsdk::FbxDouble4> rotationKeys;
+    AnimationFrameQueue<fbxsdk::FbxDouble3> translationKeys;
+};
+struct AnimationLayerContainer{
+    fbxsdk::FbxNode* bindNode;
+    eastl::vector<AnimationLayer> layers;
+};
 struct AnimationData{
     eastl::string strName;
-
-    AnimationList animationList;
+    eastl::vector<AnimationLayerContainer> nodes;
 };
+
+using AnimationNodes = eastl::vector<fbxsdk::FbxNode*>;
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
@@ -162,6 +186,7 @@ extern fbxsdk::FbxScene* shr_scene;
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
+extern FbxNodeToExportNode shr_fbxNodeToExportNode;
 extern PoseNodeList shr_poseNodeList;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
@@ -217,7 +242,7 @@ extern void SHRGenerateMeshAttribute(NodeData* pNodeData);
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRGenerateNodeTree(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+extern bool SHRGenerateNodeTree(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, FbxNodeToExportNode& fbxNodeToExportNode);
 
 extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXNode* pRootNode, PoseNodeList& poseNodeList);
 extern fbxsdk::FbxNode* SHRStoreNode(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxNode* kParentNode, const FBXNode* pNode);
@@ -226,7 +251,8 @@ extern bool SHRCreateBindPose(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene*
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const AnimationNodes& kNodeTable);
+extern bool SHRLoadAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode);
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 

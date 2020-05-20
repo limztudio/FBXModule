@@ -88,7 +88,13 @@ namespace __hidden_FBXModule{
         if(src){
             dest = FBXNew<FBXAnimation>();
 
+            if(src->Name){
+                const auto i = FBXUtilites::Memlen(src->Name);
+                dest->Name = FBXAllocate<char>(i + 1);
+                dest->Name[i] = 0;
+            }
 
+            dest->AnimationNodes = src->AnimationNodes;
 
             allocateAnimation(dest->Next, src->Next);
         }

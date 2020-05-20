@@ -138,6 +138,19 @@ void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src){
 
 
     if(dest && src){
+        strcpy(dest->Name, src->Name);
+
+        dest->AnimationNodes = src->AnimationNodes;
+
+        for(auto* p = dest->AnimationNodes.Values; FBX_PTRDIFFU(p - dest->AnimationNodes.Values) < dest->AnimationNodes.Length; ++p){
+            auto f = ins_nodeBinder.find(p->BindNode);
+
+            if(f != ins_nodeBinder.cend())
+                p->BindNode = f->second;
+            else
+                SHRPushErrorMessage("an error occurred while binding node pointer on Animation", __name_of_this_func);
+        }
+
         SHRCopyAnimation(dest->Next, src->Next);
     }
     else if(dest && (!src))

@@ -50,12 +50,14 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
     ConvertObjects(shr_SDKManager, shr_scene);
 
     {
-        if(!SHRGenerateNodeTree(shr_SDKManager, shr_scene)){
+        shr_fbxNodeToExportNode.clear();
+
+        if(!SHRGenerateNodeTree(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode)){
             SHRPushErrorMessage("an error occurred while generating object nodes", __name_of_this_func);
             return false;
         }
 
-        if(!SHRLoadAnimation(shr_SDKManager, shr_scene)){
+        if(!SHRLoadAnimations(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode)){
             SHRPushErrorMessage("an error occurred while loading animation data", __name_of_this_func);
             return false;
         }

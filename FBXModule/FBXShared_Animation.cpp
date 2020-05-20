@@ -9,6 +9,7 @@
 
 #include <eastl/set.h>
 #include <eastl/unordered_map.h>
+#include <eastl/slist.h>
 
 #include <FBXAssign.hpp>
 
@@ -19,14 +20,19 @@
 using namespace fbxsdk;
 
 
-struct _AnimationData_wrapper{
-    FBXAnimation* ExportAnimations;
-    AnimationData AnimationData;
+struct _Marker{
+    FbxAnimCurveKey curveKey;
 };
+static inline bool operator==(const _Marker& lhs, const _Marker& rhs){
+    return (lhs.curveKey.GetTime() == rhs.curveKey.GetTime());
+}
+static inline bool operator<(const _Marker& lhs, const _Marker& rhs){
+    return (lhs.curveKey.GetTime() < rhs.curveKey.GetTime());
+}
+using _Timestamp = eastl::set<_Marker>;
 
-using _Timestamp = eastl::set<FbxTime>;
 
-static eastl::unordered_map<FbxAnimStack*, _AnimationData_wrapper> ins_AnimationFinder;
+static eastl::vector<AnimationData> ins_animations;
 
 
 static inline void ins_updateTimestamp(FbxAnimCurve* kAnimCurve, _Timestamp& timestamp){
@@ -34,17 +40,26 @@ static inline void ins_updateTimestamp(FbxAnimCurve* kAnimCurve, _Timestamp& tim
         return;
 
     for(auto e = kAnimCurve->KeyGetCount(), i = 0; i < e; ++i){
-        auto kTime = kAnimCurve->KeyGetTime(i);
-
-        timestamp.emplace(kTime);
+        _Marker newMaker;
+        newMaker.curveKey = kAnimCurve->KeyGet(i);
+        timestamp.emplace(eastl::move(newMaker));
     }
 }
 
 
-static void ins_addAnimationRecursive(
+static void ins_collectNodes(AnimationNodes& nodeTable, FbxNode* kNode){
+    if(kNode){
+        nodeTable.emplace_back(kNode);
+
+        for(auto e = kNode->GetChildCount(), i = 0; i < e; ++i)
+            ins_collectNodes(nodeTable, kNode->GetChild(i));
+    }
+}
+
+static inline void ins_addAnimation(
     FbxAnimLayer* kAnimLayer,
     FbxNode* kNode,
-    AnimationList& animationList
+    AnimationLayer& animationLayer
 )
 {
     { // translation
@@ -60,7 +75,17 @@ static void ins_addAnimationRecursive(
             ins_updateTimestamp(kCurveZ, timestamp);
         }
 
-        
+        {
+            auto& curKeys = animationLayer.translationKeys;
+
+            curKeys.clear();
+            curKeys.reserve(timestamp.size());
+            for(const auto& kMarker : timestamp){
+                auto& kCurveKey = kMarker.curveKey;
+                FbxDouble3 kVal = GetLocalTransform(kNode, kCurveKey.GetTime()).GetT();
+                curKeys.emplace_back(eastl::move(kCurveKey), eastl::move(kVal));
+            }
+        }
     }
 
     { // rotation
@@ -74,6 +99,18 @@ static void ins_addAnimationRecursive(
 
             auto* kCurveZ = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
             ins_updateTimestamp(kCurveZ, timestamp);
+        }
+
+        {
+            auto& curKeys = animationLayer.rotationKeys;
+
+            curKeys.clear();
+            curKeys.reserve(timestamp.size());
+            for(const auto& kMarker : timestamp){
+                auto& kCurveKey = kMarker.curveKey;
+                FbxDouble4 kVal = GetLocalTransform(kNode, kCurveKey.GetTime()).GetQ();
+                curKeys.emplace_back(eastl::move(kCurveKey), eastl::move(kVal));
+            }
         }
     }
 
@@ -89,69 +126,168 @@ static void ins_addAnimationRecursive(
             auto* kCurveZ = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
             ins_updateTimestamp(kCurveZ, timestamp);
         }
-    }
 
-    for(auto eNode = kNode->GetChildCount(), iNode = 0; iNode < eNode; ++iNode){
-        auto* kChildNode = kNode->GetChild(iNode);
-        if(!kChildNode)
-            continue;
+        {
+            auto& curKeys = animationLayer.scaleKeys;
 
-        ins_addAnimationRecursive(
-            kAnimLayer,
-            kChildNode,
-            animationList
-        );
+            curKeys.clear();
+            curKeys.reserve(timestamp.size());
+            for(const auto& kMarker : timestamp){
+                auto& kCurveKey = kMarker.curveKey;
+                FbxDouble3 kVal = GetLocalTransform(kNode, kCurveKey.GetTime()).GetS();
+                curKeys.emplace_back(eastl::move(kCurveKey), eastl::move(kVal));
+            }
+        }
     }
 }
 
+template<typename EXPORT_TYPE, typename FBX_TYPE>
+static inline void ins_convAnimationKey(EXPORT_TYPE& expKey, FBX_TYPE& fbxKey){
+    expKey.Time = decltype(expKey.Time)(fbxKey.curveKey.GetTime().GetSecondDouble());
 
-bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene){
-    auto** pAnim = &shr_root->Animations;
-    for(auto eAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>(), iAnimStack = 0; iAnimStack < eAnimStack; ++iAnimStack){
-        auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(iAnimStack);
+    switch(fbxKey.curveKey.GetInterpolation()){
+    case FbxAnimCurveDef::eInterpolationConstant:
+        expKey.InterpolationType = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+        break;
+    case FbxAnimCurveDef::eInterpolationLinear:
+        expKey.InterpolationType = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear;
+        break;
+    case FbxAnimCurveDef::eInterpolationCubic:
+        expKey.InterpolationType = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear;
+        break;
+    }
+
+    CopyArrayData(expKey.Value.Values, fbxKey.value.mData);
+}
+
+
+bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const AnimationNodes& kNodeTable){
+    ins_animations.resize((size_t)kScene->GetSrcObjectCount<FbxAnimStack>());
+    for(auto edxAnimStack = (int)ins_animations.size(), idxAnimStack = 0; idxAnimStack < edxAnimStack; ++idxAnimStack){
+        auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
         if(!kAnimStack)
             continue;
 
-        for(auto eAnimLayer = kAnimStack->GetMemberCount<FbxAnimLayer>(), iAnimLayer = 0; iAnimLayer < eAnimLayer; ++iAnimLayer){
-            auto* kAnimLayer = kAnimStack->GetMember<FbxAnimLayer>(iAnimLayer);
+        const auto edxAnimLayer = kAnimStack->GetMemberCount<FbxAnimLayer>();
+
+        auto& iAnimation = ins_animations[idxAnimStack];
+        {
+            iAnimation.strName = kAnimStack->GetName();
+
+            iAnimation.nodes.clear();
+            iAnimation.nodes.reserve(kNodeTable.size());
+            for(auto* kNode : kNodeTable){
+                AnimationLayerContainer newLayerContainer;
+
+                newLayerContainer.bindNode = kNode;
+
+                newLayerContainer.layers.clear();
+                newLayerContainer.layers.reserve(edxAnimLayer);
+
+                iAnimation.nodes.emplace_back(eastl::move(newLayerContainer));
+            }
+        }
+
+        for(auto idxAnimLayer = decltype(edxAnimLayer){ 0 }; idxAnimLayer < edxAnimLayer; ++idxAnimLayer){
+            auto* kAnimLayer = kAnimStack->GetMember<FbxAnimLayer>(idxAnimLayer);
             if(!kAnimLayer)
                 continue;
 
+            for(auto& iNode : iAnimation.nodes){
+                auto* kNode = iNode.bindNode;
 
+                iNode.layers.emplace_back(AnimationLayer());
+                auto& iAnimLayer = *iNode.layers.rbegin();
+
+                ins_addAnimation(
+                    kAnimLayer,
+                    kNode,
+                    iAnimLayer
+                );
+            }
         }
+    }
+
+    return true;
+}
+bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode){
+    static const char __name_of_this_func[] = "SHRLoadAnimations(FbxManager*, FbxScene*, const FbxNodeToExportNode&)";
 
 
-        // we will use keyframes only from layer 0
+    AnimationNodes kNodeTable;
+    {
+        kNodeTable.reserve(fbxNodeToExportNode.size());
+        ins_collectNodes(kNodeTable, kScene->GetRootNode());
+    }
 
+    ins_animations.clear();
+    SHRLoadAnimation(kSDKManager, kScene, kNodeTable);
 
-        auto* kAnimLayer = kAnimStack->GetMember<FbxAnimLayer>(0);
-        if(!kAnimLayer)
-            continue;
-
-        AnimationData genAnimData;
+    auto** pNewAnimation = &shr_root->Animations;
+    for(auto& iAnimation : ins_animations){
+        (*pNewAnimation) = FBXNew<FBXAnimation>();
+        auto* pAnimation = (*pNewAnimation);
 
         {
-            genAnimData.strName = kAnimStack->GetName();
+            const auto lenName = iAnimation.strName.length();
+            pAnimation->Name = FBXAllocate<char>(lenName + 1);
+            CopyArrayData(pAnimation->Name, iAnimation.strName.c_str(), lenName);
+            pAnimation->Name[lenName] = 0;
         }
 
-        ins_addAnimationRecursive(
-            kAnimLayer,
-            kScene->GetRootNode(),
-            genAnimData.animationList
-        );
+        pAnimation->AnimationNodes.Assign(iAnimation.nodes.size());
+        for(size_t idxNode = 0; idxNode < pAnimation->AnimationNodes.Length; ++idxNode){
+            auto& iNode = iAnimation.nodes[idxNode];
+            auto* pNode = &pAnimation->AnimationNodes.Values[idxNode];
 
-        {
-            _AnimationData_wrapper _new;
+            const eastl::string strNodeName = iNode.bindNode->GetName();
 
-            (*pAnim) = FBXNew<FBXAnimation>();
+            {
+                auto f = fbxNodeToExportNode.find(iNode.bindNode);
+                if(f == fbxNodeToExportNode.end()){
+                    eastl::string msg = "bind node not found";
+                    msg += "(errored in \"";
+                    msg += strNodeName;
+                    msg += "\")";
+                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    return false;
+                }
 
-            _new.ExportAnimations = (*pAnim);
-            _new.AnimationData = eastl::move(genAnimData);
+                pNode->BindNode = f->second;
+            }
 
-            ins_AnimationFinder.emplace(kAnimStack, eastl::move(_new));
+            pNode->LayeredElements.Assign(iNode.layers.size());
+            for(size_t idxLayer = 0; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
+                auto& iLayer = iNode.layers[idxLayer];
+                auto* pLayer = &pNode->LayeredElements.Values[idxLayer];
 
-            pAnim = &((*pAnim)->Next);
+                pLayer->ScaleKeys.Assign(iLayer.scaleKeys.size());
+                for(size_t idxKey = 0; idxKey < pLayer->ScaleKeys.Length; ++idxKey){
+                    auto& iKey = iLayer.scaleKeys[idxKey];
+                    auto* pKey = &pLayer->ScaleKeys.Values[idxKey];
+
+                    ins_convAnimationKey(*pKey, iKey);
+                }
+
+                pLayer->RotationKeys.Assign(iLayer.rotationKeys.size());
+                for(size_t idxKey = 0; idxKey < pLayer->RotationKeys.Length; ++idxKey){
+                    auto& iKey = iLayer.rotationKeys[idxKey];
+                    auto* pKey = &pLayer->RotationKeys.Values[idxKey];
+
+                    ins_convAnimationKey(*pKey, iKey);
+                }
+
+                pLayer->TranslationKeys.Assign(iLayer.translationKeys.size());
+                for(size_t idxKey = 0; idxKey < pLayer->TranslationKeys.Length; ++idxKey){
+                    auto& iKey = iLayer.translationKeys[idxKey];
+                    auto* pKey = &pLayer->TranslationKeys.Values[idxKey];
+
+                    ins_convAnimationKey(*pKey, iKey);
+                }
+            }
         }
+
+        pNewAnimation = &((*pNewAnimation)->Next);
     }
 
     return true;

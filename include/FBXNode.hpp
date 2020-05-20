@@ -23,27 +23,19 @@ public:
     FBXNode()
         :
         Child(nullptr),
-        Sibling(nullptr),
-
-        Name(nullptr)
+        Sibling(nullptr)
     {}
     virtual ~FBXNode(){
         if(Child)
             FBXDelete(Child);
         if(Sibling)
             FBXDelete(Sibling);
-
-        if(Name)
-            FBXFree(Name);
     }
 
 
 public:
     FBXNode* Child;
     FBXNode* Sibling;
-
-public:
-    char* Name;
 
 public:
     FBXStaticArray<float, 16> TransformMatrix;
