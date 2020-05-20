@@ -8,9 +8,13 @@
 #include "stdafx.h"
 
 #include <eastl/map.h>
+#include <eastl/vector.h>
 
 #include "FBXUtilites.h"
 #include "FBXShared.h"
+
+
+static eastl::vector<eastl::vector<int>> ins_newToOldIndexer;
 
 
 FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count){
@@ -240,6 +244,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     const eastl::string strName = pNode->Name;
 
     eastl::unordered_map<const FBXNode*, FbxCluster*> clusterFinder;
+    eastl::unordered_map<const FBXNode*, float> tmpSkinTable;
 
     auto* kMesh = kNode->GetMesh();
 
@@ -251,6 +256,25 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
         msg += "\")";
         SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
         return false;
+    }
+
+    ins_newToOldIndexer.clear();
+    ins_newToOldIndexer.resize((size_t)kMesh->GetControlPointsCount());
+    for(int idxOld = 0, edxOld = (int)ctrlPointMergeMap.size(); idxOld < edxOld; ++idxOld){
+        const auto idxNew = (int)ctrlPointMergeMap[idxOld];
+
+        auto& iTable = ins_newToOldIndexer[idxNew];
+        iTable.emplace_back(idxOld);
+    }
+    for(const auto& i : ins_newToOldIndexer){
+        if(i.empty()){
+            eastl::string msg = "an error occurred while creating control point remapper";
+            msg += "(errored in \"";
+            msg += strName;
+            msg += "\")";
+            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            return false;
+        }
     }
 
     for(const auto* pDeform = pNode->SkinDeforms.Values; FBX_PTRDIFFU(pDeform - pNode->SkinDeforms.Values) < pNode->SkinDeforms.Length; ++pDeform){
@@ -311,13 +335,33 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
         poseNodeList.emplace(kTargetNode);
     }
 
-    for(size_t idxVert = 0, edxVert = pNode->SkinInfos.Length; idxVert < edxVert; ++idxVert){
-        const auto& iVert = pNode->SkinInfos.Values[idxVert];
+    for(int idxVert = 0, edxVert = (int)ins_newToOldIndexer.size(); idxVert < edxVert; ++idxVert){
+        tmpSkinTable.clear();
 
-        for(const auto* iCluster = iVert.Values; FBX_PTRDIFFU(iCluster - iVert.Values) < iVert.Length; ++iCluster){
+        for(const auto idxOld : ins_newToOldIndexer[idxVert]){
+            const auto& iVert = pNode->SkinInfos.Values[idxOld];
+
+            for(const auto* iCluster = iVert.Values; FBX_PTRDIFFU(iCluster - iVert.Values) < iVert.Length; ++iCluster){
+                auto f = tmpSkinTable.find(iCluster->BindNode);
+                if(f != tmpSkinTable.end()){
+                    if(iCluster->Weight > f->second)
+                        f->second = iCluster->Weight;
+                }
+                else
+                    tmpSkinTable.emplace(iCluster->BindNode, iCluster->Weight);
+            }
+        }
+
+        float totalWeight = 0.f;
+        for(const auto& iCluster : tmpSkinTable)
+            totalWeight += iCluster.second;
+        for(auto& iCluster : tmpSkinTable)
+            iCluster.second /= totalWeight;
+
+        for(const auto& iCluster : tmpSkinTable){
             FbxCluster* kCluster = nullptr;
             {
-                auto f = clusterFinder.find(iCluster->BindNode);
+                auto f = clusterFinder.find(iCluster.first);
                 if(f == clusterFinder.end()){
                     eastl::string msg = "failed to link cluster";
                     msg += "(errored in \"";
@@ -330,7 +374,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
                 kCluster = f->second;
             }
 
-            kCluster->AddControlPointIndex(idxVert, iCluster->Weight);
+            kCluster->AddControlPointIndex(idxVert, iCluster.second);
         }
     }
 

@@ -32,8 +32,14 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, un
 
     ins_ioFlag = (FBXIOType)ioFlag;
 
-    if(ioSetting)
+    if(ioSetting){
         shr_ioSetting = (*reinterpret_cast<const FBXIOSetting*>(ioSetting));
+
+        if(shr_ioSetting.MaxBoneCountPerMesh < shr_ioSetting.MaxParticipateClusterPerVertex){
+            SHRPushErrorMessage("\'MaxBoneCountPerMesh\' must be bigger or equal to \'MaxParticipateClusterPerVertex\'", __name_of_this_func);
+            return false;
+        }
+    }
 
     if((*mode == 'r') || (*mode == 'R')){
         ins_fileMode = 1;
