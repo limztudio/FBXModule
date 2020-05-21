@@ -341,7 +341,7 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
                 const auto iVertInfoHash = _VertexInfo::makeHash(iVertInfo);
                 auto fVertexInfo = ins_aosVertexFinder.find(_VertexInfoKey(iVertInfo, iVertInfoHash));
                 if(fVertexInfo == ins_aosVertexFinder.end()){
-                    idxVertInfo = ins_aosVertices.size();
+                    idxVertInfo = decltype(idxVertInfo)(ins_aosVertices.size());
                     ins_aosVertices.emplace_back(std::move(iVertInfo));
 
                     ins_aosVertexFinder.emplace(_VertexInfoKey(ins_aosVertices[idxVertInfo], iVertInfoHash), idxVertInfo);

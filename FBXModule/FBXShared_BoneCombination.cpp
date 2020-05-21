@@ -108,11 +108,11 @@ static void ins_genTempMeshAttribute(NodeData* pNodeData){
             if(f == ins_tmpMeshPolys.end()){
                 IntContainer polyIndices;
                 polyIndices.reserve(edxPoly);
-                polyIndices.emplace_back(idxPoly);
+                polyIndices.emplace_back((int)idxPoly);
                 ins_tmpMeshPolys.emplace(std::move(newKey), std::move(polyIndices));
             }
             else
-                f->second.emplace_back(idxPoly);
+                f->second.emplace_back((int)idxPoly);
         }
     }
 }
@@ -179,8 +179,8 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
 
     for(const auto& iAttr : ins_meshPolys){
         MeshAttributeElement meshAttribute;
-        meshAttribute.PolygonFirst = ins_bufIndices.size();
-        meshAttribute.VertexFirst = ins_vertNewToOld.size();
+        meshAttribute.PolygonFirst = decltype(meshAttribute.PolygonFirst)(ins_bufIndices.size());
+        meshAttribute.VertexFirst = decltype(meshAttribute.VertexFirst)(ins_vertNewToOld.size());
 
         _OrderdKeyWithIndex newOrderKey;
         newOrderKey.layers = iAttr.first.layers;
@@ -216,8 +216,8 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
             }
         }
 
-        meshAttribute.PolygonLast = ins_bufIndices.size() - 1u;
-        meshAttribute.VertexLast = ins_vertNewToOld.size() - 1u;
+        meshAttribute.PolygonLast = decltype(meshAttribute.PolygonLast)(ins_bufIndices.size() - 1u);
+        meshAttribute.VertexLast = decltype(meshAttribute.VertexLast)(ins_vertNewToOld.size() - 1u);
 
         pNodeData->bufMeshAttribute.emplace_back(std::move(meshAttribute));
     }

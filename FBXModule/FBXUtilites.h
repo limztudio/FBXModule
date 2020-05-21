@@ -347,49 +347,49 @@ private:
 
 extern void ConvertObjects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
-template<size_t LEN_LHS, size_t LEN_RHS, typename LHS, typename RHS>
+template<size_t LEN_LHS, size_t LEN_RHS, typename LHS, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], RHS(&&rhs)[LEN_RHS]){
-    for(size_t i = 0; i < LEN_LHS; ++i)
+    for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN_LHS); ++i)
         lhs[i] = std::move(static_cast<LHS>(rhs[i]));
 }
-template<size_t LEN_LHS, typename LHS, typename RHS>
+template<size_t LEN_LHS, typename LHS, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], const RHS* rhs){
-    for(size_t i = 0; i < LEN_LHS; ++i)
+    for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN_LHS); ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
-template<size_t LEN_LHS, typename LHS, typename RHS>
+template<size_t LEN_LHS, typename LHS, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], const RHS& rhs){
-    for(size_t i = 0; i < LEN_LHS; ++i)
+    for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN_LHS); ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
-template<size_t LEN_RHS, typename LHS, typename RHS>
+template<size_t LEN_RHS, typename LHS, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS* lhs, RHS(&&rhs)[LEN_RHS]){
-    for(size_t i = 0; i < LEN_RHS; ++i)
+    for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN_RHS); ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
-template<size_t LEN_RHS, template<typename> typename LHS, typename LHS_T, typename RHS>
+template<size_t LEN_RHS, template<typename> typename LHS, typename LHS_T, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS<LHS_T>& lhs, RHS(&&rhs)[LEN_RHS]){
-    for(size_t i = 0; i < LEN_RHS; ++i)
+    for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN_RHS); ++i)
         lhs[i] = static_cast<LHS_T>(rhs[i]);
 }
-template<size_t LEN, typename LHS, typename RHS>
+template<size_t LEN, typename LHS, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS* lhs, const RHS* rhs){
-    for(size_t i = 0; i < LEN; ++i)
+    for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN); ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
-template<size_t LEN, template<typename> typename LHS, typename LHS_T, typename RHS>
+template<size_t LEN, template<typename> typename LHS, typename LHS_T, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs){
-    for(size_t i = 0; i < LEN; ++i)
+    for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN); ++i)
         lhs[i] = static_cast<LHS_T>(rhs[i]);
 }
-template<typename LHS, typename RHS>
-static inline void CopyArrayData(LHS* lhs, const RHS* rhs, size_t len){
-    for(size_t i = 0; i < len; ++i)
+template<typename LHS, typename RHS, typename INDEX_TYPE = size_t>
+static inline void CopyArrayData(LHS* lhs, const RHS* rhs, INDEX_TYPE len){
+    for(INDEX_TYPE i = 0; i < len; ++i)
         lhs[i] = static_cast<LHS>(rhs[i]);
 }
-template<template<typename> typename LHS, typename LHS_T, typename RHS>
-static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs, size_t len){
-    for(size_t i = 0; i < len; ++i)
+template<template<typename> typename LHS, typename LHS_T, typename RHS, typename INDEX_TYPE = size_t>
+static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs, INDEX_TYPE len){
+    for(INDEX_TYPE i = 0; i < len; ++i)
         lhs[i] = static_cast<LHS_T>(rhs[i]);
 }
 

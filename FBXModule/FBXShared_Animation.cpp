@@ -305,6 +305,8 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
 
 
     if(pAnimStack){
+        FbxAnimCurveFilterUnroll kFilterUnroll;
+
         const std::string strStackName = pAnimStack->Name.Values;
 
         auto* kAnimStack = FbxAnimStack::Create(kScene, strStackName.c_str());
@@ -490,6 +492,23 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                         kCurveY->KeyModifyEnd();
                         kCurveZ->KeyModifyEnd();
                     }
+
+                    {
+                        FbxAnimCurve* kCurves[] = { kCurveX, kCurveY, kCurveZ };
+
+                        kFilterUnroll.Reset();
+                        kFilterUnroll.SetTestForPath(true);
+                        if(!kFilterUnroll.Apply((FbxAnimCurve**)&kCurves, _countof(kCurves))){
+                            std::string msg = "failed to unroll rotation component";
+                            msg += "(errored in \"";
+                            msg += strLayerName;
+                            msg += "\" of stack \"";
+                            msg += strStackName;
+                            msg += "\")";
+                            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                            return false;
+                        }
+                    }
                 }
 
                 { // scaling
@@ -575,8 +594,6 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                 return false;
             }
         }
-
-
 
         if(!SHRStoreAnimation(kSDKManager, kScene, importNodeToFbxNode, pAnimStack->Next))
             return false;

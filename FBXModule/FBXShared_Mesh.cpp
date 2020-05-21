@@ -652,7 +652,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
             for(const auto& iPolyIndex : pPoly->Values){
                 const auto convIndex = ctrlPointMergeMap[iPolyIndex];
 
-                kMesh->AddPolygon(convIndex);
+                kMesh->AddPolygon((int)convIndex);
             }
 
             kMesh->EndPolygon();
@@ -661,7 +661,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
     // reserve layer
     for(size_t idxLayer = 0; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
-        auto* kLayer = kMesh->GetLayer(idxLayer);
+        auto* kLayer = kMesh->GetLayer((int)idxLayer);
         if(!kLayer){
             const auto idxNewLayer = kMesh->CreateLayer();
             if(idxNewLayer < 0){
@@ -687,7 +687,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
     for(size_t idxLayer = 0; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
         const auto& iLayer = pNode->LayeredElements.Values[idxLayer];
-        auto* kLayer = kMesh->GetLayer(idxLayer);
+        auto* kLayer = kMesh->GetLayer((int)idxLayer);
 
         if(iLayer.Material.Length){
 
