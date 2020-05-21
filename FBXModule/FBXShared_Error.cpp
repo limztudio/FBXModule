@@ -12,33 +12,33 @@
 #include "FBXShared.h"
 
 
-eastl::stack<eastl::string> shr_errorStack;
+std::stack<std::string> shr_errorStack;
 
 
 void SHRPushErrorMessage(const char* strMessage, const char* strCallPos){
-    eastl::string _new = strMessage;
+    std::string _new = strMessage;
     _new += "\nfrom: ";
     _new += strCallPos;
     _new += '\n';
 
     assert(!_new.c_str());
-    shr_errorStack.emplace(eastl::move(_new));
+    shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(const eastl::string& strMessage, const char* strCallPos){
+void SHRPushErrorMessage(const std::string& strMessage, const char* strCallPos){
     auto _new = strMessage;
     _new += "\nfrom: ";
     _new += strCallPos;
     _new += '\n';
 
     assert(!_new.c_str());
-    shr_errorStack.emplace(eastl::move(_new));
+    shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(eastl::string&& strMessage, const char* strCallPos){
-    auto _new = eastl::move(strMessage);
+void SHRPushErrorMessage(std::string&& strMessage, const char* strCallPos){
+    auto _new = std::move(strMessage);
     _new += "\nfrom: ";
     _new += strCallPos;
     _new += '\n';
 
     assert(!_new.c_str());
-    shr_errorStack.emplace(eastl::move(_new));
+    shr_errorStack.emplace(std::move(_new));
 }

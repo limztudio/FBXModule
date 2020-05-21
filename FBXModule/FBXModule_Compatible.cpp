@@ -9,10 +9,10 @@
 
 #include <intrin.h>
 
-#include <eastl/string.h>
-#include <eastl/bitset.h>
-#include <eastl/array.h>
-#include <eastl/vector.h>
+#include <string>
+#include <bitset>
+#include <array>
+#include <vector>
 
 #include <FBXModule.hpp>
 #include "FBXShared.h"
@@ -25,8 +25,8 @@ class _InstructionSet{
 
 public:
     // getters
-    static const eastl::string& Vendor(void){ return CPU_Rep.vendor_; }
-    static const eastl::string& Brand(void){ return CPU_Rep.brand_; }
+    static const std::string& Vendor(void){ return CPU_Rep.vendor_; }
+    static const std::string& Brand(void){ return CPU_Rep.brand_; }
 
     static bool SSE3(void){ return CPU_Rep.f_1_ECX_[0]; }
     static bool PCLMULQDQ(void){ return CPU_Rep.f_1_ECX_[1]; }
@@ -106,7 +106,7 @@ private:
             extdata_{}
         {
             //int cpuInfo[4] = {-1};
-            eastl::array<int, 4> cpui;
+            std::array<int, 4> cpui;
 
             // Calling __cpuid with 0x0 as the function_id argument
             // gets the number of the highest valid function ID.
@@ -182,18 +182,18 @@ private:
 
         int nIds_;
         int nExIds_;
-        eastl::string vendor_;
-        eastl::string brand_;
+        std::string vendor_;
+        std::string brand_;
         bool isIntel_;
         bool isAMD_;
-        eastl::bitset<32> f_1_ECX_;
-        eastl::bitset<32> f_1_EDX_;
-        eastl::bitset<32> f_7_EBX_;
-        eastl::bitset<32> f_7_ECX_;
-        eastl::bitset<32> f_81_ECX_;
-        eastl::bitset<32> f_81_EDX_;
-        eastl::vector<eastl::array<int, 4>> data_;
-        eastl::vector<eastl::array<int, 4>> extdata_;
+        std::bitset<32> f_1_ECX_;
+        std::bitset<32> f_1_EDX_;
+        std::bitset<32> f_7_EBX_;
+        std::bitset<32> f_7_ECX_;
+        std::bitset<32> f_81_ECX_;
+        std::bitset<32> f_81_EDX_;
+        std::vector<std::array<int, 4>> data_;
+        std::vector<std::array<int, 4>> extdata_;
     };
 };
 

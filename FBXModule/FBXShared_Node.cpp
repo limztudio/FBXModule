@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include <eastl/unordered_map.h>
+#include <unordered_map>
 
 #include <FBXAssign.hpp>
 
@@ -446,7 +446,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
     importNodeToFbxNode.clear();
 
     if(pRootNode){
-        const eastl::string strName = pRootNode->Name.Values;
+        const std::string strName = pRootNode->Name.Values;
 
         if(pRootNode->Child){
             auto* kRootNode = kScene->GetRootNode();
@@ -456,11 +456,11 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
                 return false;
 
             if(!kRootNode->AddChild(kNewNode)){
-                eastl::string msg = "an error occurred while adding child node";
+                std::string msg = "an error occurred while adding child node";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -494,29 +494,29 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
     for(auto& i : importNodeToFbxNode){
         const auto curID = i.first->getID();
 
-        const eastl::string strName = i.first->Name.Values;
+        const std::string strName = i.first->Name.Values;
 
         auto* kNode = i.second;
 
         if(FBXTypeHasMember(curID, FBXType::FBXType_Mesh)){
             auto* kNodeAttribute = kNode->GetNodeAttribute();
             if(!kNodeAttribute){
-                eastl::string msg = "node must have attribute";
+                std::string msg = "node must have attribute";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
             auto* kMesh = static_cast<FbxMesh*>(kNodeAttribute);
 
             if(kMesh->RemoveBadPolygons() < 0){
-                eastl::string msg = "failed to remove bad polygons";
+                std::string msg = "failed to remove bad polygons";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -531,15 +531,15 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
 
 
     if(pNode){
-        const eastl::string strName = pNode->Name.Values;
+        const std::string strName = pNode->Name.Values;
 
         auto* kNode = FbxNode::Create(kSDKManager, strName.c_str());
         if(!kNode){
-            eastl::string msg = "failed to create FbxNode";
+            std::string msg = "failed to create FbxNode";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
-            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return nullptr;
         }
 
@@ -548,22 +548,22 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
         if(FBXTypeHasMember(curID, FBXType::FBXType_Bone)){
             auto* kSkeleton = FbxSkeleton::Create(kSDKManager, "");
             if(!kSkeleton){
-                eastl::string msg = "failed to create FbxSkeleton";
+                std::string msg = "failed to create FbxSkeleton";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return nullptr;
             }
 
             kNode->SetNodeAttribute(kSkeleton);
 
             if(kNode->GetNodeAttribute() != kSkeleton){
-                eastl::string msg = "failed to set node attribute";
+                std::string msg = "failed to set node attribute";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return nullptr;
             }
             importNodeToFbxNode.emplace(pNode, kNode);
@@ -572,22 +572,22 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
         if(FBXTypeHasMember(curID, FBXType::FBXType_Mesh)){
             auto* kMesh = FbxMesh::Create(kSDKManager, "");
             if(!kMesh){
-                eastl::string msg = "failed to create FbxMesh";
+                std::string msg = "failed to create FbxMesh";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return nullptr;
             }
 
             kNode->SetNodeAttribute(kMesh);
 
             if(kNode->GetNodeAttribute() != kMesh){
-                eastl::string msg = "failed to set node attribute";
+                std::string msg = "failed to set node attribute";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return nullptr;
             }
             importNodeToFbxNode.emplace(pNode, kNode);
@@ -608,11 +608,11 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
                 return nullptr;
 
             if(!kNode->AddChild(kNewNode)){
-                eastl::string msg = "an error occurred while adding child node";
+                std::string msg = "an error occurred while adding child node";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return nullptr;
             }
         }
@@ -622,11 +622,11 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
                 return nullptr;
 
             if(!kParentNode->AddChild(kNewNode)){
-                eastl::string msg = "an error occurred while adding sibling node";
+                std::string msg = "an error occurred while adding sibling node";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return nullptr;
             }
         }
@@ -651,15 +651,15 @@ bool SHRCreateBindPose(FbxManager* kSDKManager, FbxScene* kScene, const PoseNode
         kPose->SetIsBindPose(true);
 
         for(auto* kNode : poseNodeList){
-            const eastl::string strName = kNode->GetName();
+            const std::string strName = kNode->GetName();
 
             auto kMat = GetGlobalTransform(kNode);
             if(kPose->Add(kNode, kMat) < 0){
-                eastl::string msg = "an error occurred while adding pose matrix. cannot find bind node";
+                std::string msg = "an error occurred while adding pose matrix. cannot find bind node";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
         }

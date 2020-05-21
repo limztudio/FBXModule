@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include <eastl/unordered_map.h>
+#include <unordered_map>
 
 #include "FBXUtilites.h"
 #include "FBXShared.h"
@@ -17,7 +17,7 @@ FBXIOSetting shr_ioSetting;
 
 FBXRoot* shr_root = nullptr;
 
-static eastl::unordered_map<const FBXNode*, FBXNode*> ins_nodeBinder;
+static std::unordered_map<const FBXNode*, FBXNode*, PointerHasher<const FBXNode*>> ins_nodeBinder;
 
 
 void SHRCreateRoot(){

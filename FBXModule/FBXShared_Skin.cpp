@@ -7,14 +7,14 @@
 
 #include "stdafx.h"
 
-#include <eastl/map.h>
-#include <eastl/vector.h>
+#include <map>
+#include <vector>
 
 #include "FBXUtilites.h"
 #include "FBXShared.h"
 
 
-static eastl::vector<eastl::vector<int>> ins_newToOldIndexer;
+static std::vector<std::vector<int>> ins_newToOldIndexer;
 
 
 FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count){
@@ -54,9 +54,9 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         skinTable.resize(pNodeData->bufPositions.size());
     }
 
-    eastl::vector<FbxCluster*> clusterFinder(clusterCount, nullptr);
-    eastl::vector<eastl::unordered_map<int, FbxDouble>> boneMapList(clusterCount);
-    eastl::vector<eastl::multimap<double, int>> vertexBoneList(pNodeData->bufPositions.size());
+    std::vector<FbxCluster*> clusterFinder(clusterCount, nullptr);
+    std::vector<std::unordered_map<int, FbxDouble>> boneMapList(clusterCount);
+    std::vector<std::multimap<double, int>> vertexBoneList(pNodeData->bufPositions.size());
 
     auto ctrlPointCount = kMesh->GetControlPointsCount();
 
@@ -215,7 +215,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
             
             {
                 SkinInfo _emplace = { curCluster, iWeightBone.first };
-                skinTable[idxVert].emplace_back(eastl::move(_emplace));
+                skinTable[idxVert].emplace_back(std::move(_emplace));
             }
         }
     }
@@ -230,7 +230,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
 
         auto kVertexTransformMatrix = kTransformLinkMatrix.Inverse() * kTransformMatrix;
 
-        boneOffsetMatrixMap.emplace(iCluster, eastl::move(kVertexTransformMatrix));
+        boneOffsetMatrixMap.emplace(iCluster, std::move(kVertexTransformMatrix));
     }
 
     return true;
@@ -241,20 +241,20 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, PoseNodeList&, const FBXNodeToFbxNode&, const ControlPointMergeMap&, const FBXSkinnedMesh*, FbxNode*)";
 
 
-    const eastl::string strName = pNode->Name.Values;
+    const std::string strName = pNode->Name.Values;
 
-    eastl::unordered_map<const FBXNode*, FbxCluster*> clusterFinder;
-    eastl::unordered_map<const FBXNode*, float> tmpSkinTable;
+    std::unordered_map<const FBXNode*, FbxCluster*, PointerHasher<const FBXNode*>> clusterFinder;
+    std::unordered_map<const FBXNode*, float, PointerHasher<const FBXNode*>> tmpSkinTable;
 
     auto* kMesh = kNode->GetMesh();
 
     auto* kSkin = FbxSkin::Create(kSDKManager, "");
     if(!kSkin){
-        eastl::string msg = "failed to create FbxSkin";
+        std::string msg = "failed to create FbxSkin";
         msg += "(errored in \"";
         msg += strName;
         msg += "\")";
-        SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+        SHRPushErrorMessage(std::move(msg), __name_of_this_func);
         return false;
     }
 
@@ -268,22 +268,22 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     }
     for(const auto& i : ins_newToOldIndexer){
         if(i.empty()){
-            eastl::string msg = "an error occurred while creating control point remapper";
+            std::string msg = "an error occurred while creating control point remapper";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
-            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
     }
 
     for(const auto* pDeform = pNode->SkinDeforms.Values; FBX_PTRDIFFU(pDeform - pNode->SkinDeforms.Values) < pNode->SkinDeforms.Length; ++pDeform){
         if(!pDeform->TargetNode){
-            eastl::string msg = "skin deformer must have value not null";
+            std::string msg = "skin deformer must have value not null";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
-            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
 
@@ -291,9 +291,9 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
         {
             auto f = nodeBinder.find(pDeform->TargetNode);
             if(f == nodeBinder.cend()){
-                eastl::string msg = "failed to find bind node of ";
+                std::string msg = "failed to find bind node of ";
                 msg += pDeform->TargetNode->Name.Values;
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -302,11 +302,11 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
 
         auto* kCluster = FbxCluster::Create(kSDKManager, "");
         if(!kCluster){
-            eastl::string msg = "failed to create FbxCluster";
+            std::string msg = "failed to create FbxCluster";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
-            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
 
@@ -323,11 +323,11 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
         kCluster->SetTransformLinkMatrix(kMatLink);
 
         if(!kSkin->AddCluster(kCluster)){
-            eastl::string msg = "failed to add cluster";
+            std::string msg = "failed to add cluster";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
-            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
 
@@ -363,11 +363,11 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             {
                 auto f = clusterFinder.find(iCluster.first);
                 if(f == clusterFinder.end()){
-                    eastl::string msg = "failed to link cluster";
+                    std::string msg = "failed to link cluster";
                     msg += "(errored in \"";
                     msg += strName;
                     msg += "\")";
-                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
 
@@ -379,11 +379,11 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     }
 
     if(kMesh->AddDeformer(kSkin) < 0){
-        eastl::string msg = "an error occurred while adding deformer";
+        std::string msg = "an error occurred while adding deformer";
         msg += "(errored in \"";
         msg += strName;
         msg += "\")";
-        SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+        SHRPushErrorMessage(std::move(msg), __name_of_this_func);
         return false;
     }
 

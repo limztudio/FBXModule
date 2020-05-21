@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include <eastl/unordered_set.h>
+#include <unordered_set>
 
 #include <FBXAssign.hpp>
 
@@ -18,7 +18,7 @@
 using namespace fbxsdk;
 
 
-static eastl::unordered_set<const FbxCluster*> ins_nodeUsageChecker;
+static std::unordered_set<const FbxCluster*, PointerHasher<const FbxCluster*>> ins_nodeUsageChecker;
 
 
 class _VertexInfo{
@@ -78,7 +78,7 @@ public:
 public:
     fbxsdk::FbxDouble3 position;
 
-    eastl::vector<SkinInfo> skinData;
+    std::vector<SkinInfo> skinData;
 
     Vector4Container layeredColor;
 
@@ -86,7 +86,7 @@ public:
     Unit3Container layeredBinormal;
     Unit3Container layeredTangent;
 
-    eastl::vector<eastl::pair<eastl::string, fbxsdk::FbxDouble2>> layeredUV;
+    std::vector<std::pair<std::string, fbxsdk::FbxDouble2>> layeredUV;
 };
 static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
     {
@@ -229,11 +229,11 @@ static inline bool operator==(const _VertexInfoKey& lhs, const _VertexInfoKey& r
 }
 
 
-static eastl::vector<_VertexInfo> ins_aosVertices;
-static eastl::vector<_PolygonInfo> ins_aosPolygons;
+static std::vector<_VertexInfo> ins_aosVertices;
+static std::vector<_PolygonInfo> ins_aosPolygons;
 
-static eastl::unordered_map<_VertexInfoKey, int> ins_aosVertexFinder;
-static eastl::vector<int> ins_flatVertexBinder;
+static std::unordered_map<_VertexInfoKey, int, CustomHasher<_VertexInfoKey>> ins_aosVertexFinder;
+static std::vector<int> ins_flatVertexBinder;
 
 
 static inline void ins_fillAOSContainers(const NodeData* pNodeData){
@@ -342,7 +342,7 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
                 auto fVertexInfo = ins_aosVertexFinder.find(_VertexInfoKey(iVertInfo, iVertInfoHash));
                 if(fVertexInfo == ins_aosVertexFinder.end()){
                     idxVertInfo = ins_aosVertices.size();
-                    ins_aosVertices.emplace_back(eastl::move(iVertInfo));
+                    ins_aosVertices.emplace_back(std::move(iVertInfo));
 
                     ins_aosVertexFinder.emplace(_VertexInfoKey(ins_aosVertices[idxVertInfo], iVertInfoHash), idxVertInfo);
                 }
@@ -374,7 +374,7 @@ static inline void ins_genOptimizeMesh(NodeData* pNodeData){
     if(isSkinned){
         pNodeData->bufSkinData.clear();
         for(const auto& iVertInfo : ins_aosVertices)
-            pNodeData->bufSkinData.emplace_back(eastl::move(iVertInfo.skinData));
+            pNodeData->bufSkinData.emplace_back(std::move(iVertInfo.skinData));
     }
 
     for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){

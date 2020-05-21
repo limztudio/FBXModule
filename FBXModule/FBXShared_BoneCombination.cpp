@@ -7,13 +7,13 @@
 
 #include "stdafx.h"
 
-#include <eastl/map.h>
-#include <eastl/unordered_set.h>
+#include <map>
+#include <unordered_set>
 
 #include "FBXShared.h"
 
 
-using _ClusterCountChecker = eastl::unordered_set<FbxCluster*>;
+using _ClusterCountChecker = std::unordered_set<FbxCluster*, PointerHasher<FbxCluster*>>;
 
 class _OrderedKey{
 public:
@@ -58,8 +58,8 @@ struct _MeshPolyValue{
     IntContainer polyIndices;
 };
 
-using _TempMeshPolys = eastl::map<_OrderedKey, IntContainer>;
-using _MeshPolys = eastl::multimap<_OrderedKey, _MeshPolyValue>;
+using _TempMeshPolys = std::map<_OrderedKey, IntContainer>;
+using _MeshPolys = std::multimap<_OrderedKey, _MeshPolyValue>;
 
 
 static _TempMeshPolys ins_tmpMeshPolys;
@@ -67,13 +67,13 @@ static _MeshPolys ins_meshPolys;
 
 static _ClusterCountChecker ins_localClusterCounterChecker[2];
 
-static eastl::unordered_map<_OrderdKeyWithIndex, int> ins_vertOldToNew;
-static eastl::vector<int> ins_vertNewToOld;
+static std::unordered_map<_OrderdKeyWithIndex, int, CustomHasher<_OrderdKeyWithIndex>> ins_vertOldToNew;
+static std::vector<int> ins_vertNewToOld;
 
 static Vector3Container ins_bufPositions;
 static Int3Container ins_bufIndices;
 
-static eastl::vector<LayerElement> ins_bufLayers;
+static std::vector<LayerElement> ins_bufLayers;
 
 static SkinInfoContainer ins_bufSkinData;
 
@@ -90,12 +90,12 @@ static void ins_genTempMeshAttribute(NodeData* pNodeData){
         for(int idxPoly = 0, edxPoly = (int)pNodeData->bufIndices.size(); idxPoly < edxPoly; ++idxPoly)
             polyIndices.emplace_back(idxPoly);
 
-        ins_tmpMeshPolys.emplace(eastl::move(newKey), eastl::move(polyIndices));
+        ins_tmpMeshPolys.emplace(std::move(newKey), std::move(polyIndices));
     }
     else{
         for(size_t idxPoly = 0, edxPoly = pNodeData->bufIndices.size(); idxPoly < edxPoly; ++idxPoly){
             _OrderedKey newKey;
-            newKey.layers.reserve(edxLayer);
+            newKey.layers.resize(edxLayer);
 
             for(size_t idxLayer = 0; idxLayer < edxLayer; ++idxLayer){
                 const auto& iLayer = pNodeData->bufLayers[idxLayer];
@@ -109,7 +109,7 @@ static void ins_genTempMeshAttribute(NodeData* pNodeData){
                 IntContainer polyIndices;
                 polyIndices.reserve(edxPoly);
                 polyIndices.emplace_back(idxPoly);
-                ins_tmpMeshPolys.emplace(eastl::move(newKey), eastl::move(polyIndices));
+                ins_tmpMeshPolys.emplace(std::move(newKey), std::move(polyIndices));
             }
             else
                 f->second.emplace_back(idxPoly);
@@ -121,9 +121,9 @@ static void ins_genMeshAttribute(NodeData* pNodeData){
     ins_meshPolys.clear();
     for(const auto& iAttr : ins_tmpMeshPolys){
         _MeshPolyValue newPolyVal;
-        newPolyVal.polyIndices = eastl::move(iAttr.second);
+        newPolyVal.polyIndices = std::move(iAttr.second);
 
-        ins_meshPolys.emplace(eastl::move(iAttr.first), eastl::move(newPolyVal));
+        ins_meshPolys.emplace(std::move(iAttr.first), std::move(newPolyVal));
     }
 }
 static void ins_genSkinnedMeshAttribute(NodeData* pNodeData){
@@ -135,7 +135,7 @@ static void ins_genSkinnedMeshAttribute(NodeData* pNodeData){
             reservePolyVal.polyIndices.reserve(iAttr.second.size());
             reservePolyVal.participatedClusters.rehash(pNodeData->mapBoneDeformMatrices.size() << 1);
 
-            itrCurPoly = ins_meshPolys.emplace(iAttr.first, eastl::move(reservePolyVal));
+            itrCurPoly = ins_meshPolys.emplace(iAttr.first, std::move(reservePolyVal));
         }
 
         for(const auto& idxPoly : iAttr.second){
@@ -155,16 +155,16 @@ static void ins_genSkinnedMeshAttribute(NodeData* pNodeData){
             if(itrCurPoly->second.participatedClusters.size() <= shr_ioSetting.MaxBoneCountPerMesh)
                 itrCurPoly->second.polyIndices.emplace_back(idxPoly);
             else{
-                eastl::swap(itrCurPoly->second.participatedClusters, ins_localClusterCounterChecker[0]);
+                std::swap(itrCurPoly->second.participatedClusters, ins_localClusterCounterChecker[0]);
 
                 _MeshPolyValue newPolyVal;
                 newPolyVal.polyIndices.reserve(iAttr.second.size());
                 newPolyVal.participatedClusters.rehash(pNodeData->mapBoneDeformMatrices.size() << 1);
                 newPolyVal.polyIndices.emplace_back(idxPoly);
 
-                itrCurPoly = ins_meshPolys.emplace(iAttr.first, eastl::move(newPolyVal));
+                itrCurPoly = ins_meshPolys.emplace(iAttr.first, std::move(newPolyVal));
 
-                eastl::swap(itrCurPoly->second.participatedClusters, ins_localClusterCounterChecker[1]);
+                std::swap(itrCurPoly->second.participatedClusters, ins_localClusterCounterChecker[1]);
             }
         }
     }
@@ -204,7 +204,7 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
                     idxNewVert = f->second;
             }
 
-            ins_bufIndices.emplace_back(eastl::move(iNewPoly));
+            ins_bufIndices.emplace_back(std::move(iNewPoly));
 
             if(!iAttr.first.layers.empty()){
                 for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
@@ -219,7 +219,7 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
         meshAttribute.PolygonLast = ins_bufIndices.size() - 1u;
         meshAttribute.VertexLast = ins_vertNewToOld.size() - 1u;
 
-        pNodeData->bufMeshAttribute.emplace_back(eastl::move(meshAttribute));
+        pNodeData->bufMeshAttribute.emplace_back(std::move(meshAttribute));
     }
 
     for(const auto& idxOldVert : ins_vertNewToOld)
@@ -258,7 +258,7 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
             for(auto* iCluster : iAttr.second.participatedClusters)
                 boneCombination.emplace_back(iCluster);
 
-            pNodeData->bufBoneCombination.emplace_back(eastl::move(boneCombination));
+            pNodeData->bufBoneCombination.emplace_back(std::move(boneCombination));
         }
 
         for(const auto& idxOldVert : ins_vertNewToOld)
@@ -312,7 +312,7 @@ void SHRGenerateMeshAttribute(NodeData* pNodeData){
             lhsLayer.tangents.clear();
             lhsLayer.tangents.reserve(vertReserveSize);
 
-            lhsLayer.texcoords.name = eastl::move(rhsLayer.texcoords.name);
+            lhsLayer.texcoords.name = std::move(rhsLayer.texcoords.name);
             lhsLayer.texcoords.table.clear();
             lhsLayer.texcoords.table.reserve(vertReserveSize);
         }
@@ -324,9 +324,9 @@ void SHRGenerateMeshAttribute(NodeData* pNodeData){
     ins_rearrangeMesh(pNodeData);
 
     {
-        eastl::swap(pNodeData->bufPositions, ins_bufPositions);
-        eastl::swap(pNodeData->bufIndices, ins_bufIndices);
-        eastl::swap(pNodeData->bufLayers, ins_bufLayers);
-        eastl::swap(pNodeData->bufSkinData, ins_bufSkinData);
+        std::swap(pNodeData->bufPositions, ins_bufPositions);
+        std::swap(pNodeData->bufIndices, ins_bufIndices);
+        std::swap(pNodeData->bufLayers, ins_bufLayers);
+        std::swap(pNodeData->bufSkinData, ins_bufSkinData);
     }
 }

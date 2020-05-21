@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include <eastl/string.h>
+#include <string>
 
 #include <FBXModule.hpp>
 
@@ -20,7 +20,7 @@ using namespace fbxsdk;
 
 static FbxIOSettings* ins_IOSettings = nullptr;
 
-static eastl::string ins_fileName;
+static std::string ins_fileName;
 static unsigned char ins_fileMode = 0;
 
 static FBXIOType ins_ioFlag = FBXIOType::FBXIOType_None;

@@ -10,9 +10,9 @@
 
 #include <intrin.h>
 
-#include <eastl/string.h>
-#include <eastl/vector.h>
-#include <eastl/unordered_map.h>
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 #include <fbxsdk.h>
 #include <FBXNode.hpp>
@@ -39,6 +39,26 @@ static const XMMFloat XMMF_QNaN = { { { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7F
 static const XMMDouble XMMD_One = { { { 1., 1. } } };
 static const XMMDouble XMMD_Epsilon = { { { DBL_EPSILON, DBL_EPSILON } } };
 static const XMMDouble XMMD_EpsilonSq = { { { DBL_EPSILON * DBL_EPSILON, DBL_EPSILON * DBL_EPSILON } } };
+
+
+template<typename KEY>
+class CustomHasher{
+public:
+    inline size_t operator()(const KEY& k)const{ return ((size_t)k); }
+};
+template<typename KEY>
+class PointerHasher{
+public:
+    inline size_t operator()(const KEY& k)const{
+        auto v = reinterpret_cast<size_t>(k);
+#ifdef _WIN64
+        v >>= 3;
+#else
+        v >>= 2;
+#endif
+        return v;
+    }
+};
 
 
 template<size_t LEN, typename T>
@@ -84,7 +104,7 @@ class Container2{
 public:
     Container2(){}
     Container2(const T& _x, const T& _y) : x(_x), y(_y){}
-    Container2(T&& _x, T&& _y) : x(eastl::move(_x)), y(eastl::move(_y)){}
+    Container2(T&& _x, T&& _y) : x(std::move(_x)), y(std::move(_y)){}
     Container2(const T* rhs) : x(rhs[0]), y(rhs[1]){}
 
 
@@ -119,7 +139,7 @@ class Container3{
 public:
     Container3(){}
     Container3(const T& _x, const T& _y, const T& _z) : x(_x), y(_y), z(_z){}
-    Container3(T&& _x, T&& _y, T&& _z) : x(eastl::move(_x)), y(eastl::move(_y)), z(eastl::move(_z)){}
+    Container3(T&& _x, T&& _y, T&& _z) : x(std::move(_x)), y(std::move(_y)), z(std::move(_z)){}
     Container3(const T* rhs) : x(rhs[0]), y(rhs[1]), z(rhs[2]){}
 
 
@@ -156,7 +176,7 @@ class Container4{
 public:
     Container4(){}
     Container4(const T& _x, const T& _y, const T& _z, const T& _w) : x(_x), y(_y), z(_z), w(_w){}
-    Container4(T&& _x, T&& _y, T&& _z, T&& _w) : x(eastl::move(_x)), y(eastl::move(_y)), z(eastl::move(_z)), w(eastl::move(_w)){}
+    Container4(T&& _x, T&& _y, T&& _z, T&& _w) : x(std::move(_x)), y(std::move(_y)), z(std::move(_z)), w(std::move(_w)){}
     Container4(const T* rhs) : x(rhs[0]), y(rhs[1]), z(rhs[2]), w(rhs[3]){}
 
 
@@ -235,8 +255,8 @@ public:
 
 
 private:
-    eastl::string m_fileName;
-    eastl::string m_fileMode;
+    std::string m_fileName;
+    std::string m_fileMode;
 
     FILE* m_file;
 
@@ -284,8 +304,8 @@ public:
         for(size_t i = 0; i < len; ++i)
             m_oldData[i] = func(i);
     }
-    OverlapReducer(const eastl::vector<T>& data) : m_oldData(data){}
-    OverlapReducer(eastl::vector<T>&& data) : m_oldData(eastl::move(data)){}
+    OverlapReducer(const std::vector<T>& data) : m_oldData(data){}
+    OverlapReducer(std::vector<T>&& data) : m_oldData(std::move(data)){}
 
 
 public:
@@ -295,8 +315,8 @@ public:
         for(size_t i = 0; i < len; ++i)
             m_oldData[i] = func(i);
     }
-    inline void init(const eastl::vector<T>& data){ m_oldData = data; }
-    inline void init(eastl::vector<T>&& data){ m_oldData = eastl::(data); }
+    inline void init(const std::vector<T>& data){ m_oldData = data; }
+    inline void init(std::vector<T>&& data){ m_oldData = std::(data); }
 
 
 public:
@@ -323,7 +343,7 @@ public:
             if(f == m_comparer.cend()){
                 const size_t idxNew = m_convData.size();
 
-                m_convData.emplace_back(eastl::move(iNew));
+                m_convData.emplace_back(std::move(iNew));
                 m_oldToConvIndexer.emplace_back(idxNew);
 
                 m_comparer.emplace(__hidden_FBXModule::_OverlapReducer_Compare_Key<T>(m_convData[idxNew], iNewHash), idxNew);
@@ -334,19 +354,19 @@ public:
     }
 
 public:
-    inline const eastl::vector<T>& getConvertedTable()const{ return m_convData; }
-    inline eastl::vector<T>& getConvertedTable(){ return m_convData; }
+    inline const std::vector<T>& getConvertedTable()const{ return m_convData; }
+    inline std::vector<T>& getConvertedTable(){ return m_convData; }
 
-    inline const eastl::vector<size_t>& getOldToConvertIndexer()const{ return m_oldToConvIndexer; }
-    inline eastl::vector<size_t>& getOldToConvertIndexer(){ return m_oldToConvIndexer; }
+    inline const std::vector<size_t>& getOldToConvertIndexer()const{ return m_oldToConvIndexer; }
+    inline std::vector<size_t>& getOldToConvertIndexer(){ return m_oldToConvIndexer; }
 
 
 private:
-    eastl::vector<T> m_oldData;
-    eastl::vector<T> m_convData;
+    std::vector<T> m_oldData;
+    std::vector<T> m_convData;
 
-    eastl::vector<size_t> m_oldToConvIndexer;
-    eastl::unordered_map<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>, size_t> m_comparer;
+    std::vector<size_t> m_oldToConvIndexer;
+    std::unordered_map<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>, size_t, CustomHasher<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>>> m_comparer;
 };
 
 
@@ -355,7 +375,7 @@ extern void ConvertObjects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kS
 template<size_t LEN_LHS, size_t LEN_RHS, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], RHS(&&rhs)[LEN_RHS]){
     for(size_t i = 0; i < LEN_LHS; ++i)
-        lhs[i] = eastl::move(static_cast<LHS>(rhs[i]));
+        lhs[i] = std::move(static_cast<LHS>(rhs[i]));
 }
 template<size_t LEN_LHS, typename LHS, typename RHS>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], const RHS* rhs){

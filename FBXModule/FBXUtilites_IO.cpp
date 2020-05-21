@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include <eastl/algorithm.h>
+#include <algorithm>
 
 #include "FBXUtilites.h"
 
@@ -28,7 +28,7 @@ CustomStream::CustomStream(FbxManager* kSDKManager, const char* fileName, const 
     if(m_fileMode.empty())
         return;
 
-    eastl::transform(m_fileMode.begin(), m_fileMode.end(), m_fileMode.begin(), tolower);
+    std::transform(m_fileMode.begin(), m_fileMode.end(), m_fileMode.begin(), tolower);
 
     if(*m_fileMode.cbegin() == 'r'){
         static const char format[] = "FBX (*.fbx)";

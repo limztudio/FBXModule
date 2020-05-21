@@ -63,11 +63,6 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EASTL\EASTL.vcxproj">
-      <Project>{dd7e4847-0d7b-4e5f-be13-6fe38aaabef4}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Natvis Include="FBXModule.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

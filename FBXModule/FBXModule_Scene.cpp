@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include <eastl/string.h>
+#include <string>
 
 #include <FBXModule.hpp>
 

@@ -8,12 +8,11 @@
 #pragma once
 
 
-#include <eastl/stack.h>
-#include <eastl/vector.h>
-#include <eastl/fixed_vector.h>
-#include <eastl/unordered_set.h>
-#include <eastl/unordered_map.h>
-#include <eastl/string.h>
+#include <stack>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+#include <string>
 
 #include <fbxsdk.h>
 
@@ -25,11 +24,11 @@
 // structures
 // Common ////////////////////////////////////////////////////////////////////////////////////////////
 
-using IntContainer = eastl::vector<int>;
-using Int3Container = eastl::vector<Int3>;
-using Vector3Container = eastl::vector<fbxsdk::FbxDouble3>;
-using Vector4Container = eastl::vector<fbxsdk::FbxDouble4>;
-using Unit3Container = eastl::vector<fbxsdk::FbxDouble3>;
+using IntContainer = std::vector<int>;
+using Int3Container = std::vector<Int3>;
+using Vector3Container = std::vector<fbxsdk::FbxDouble3>;
+using Vector4Container = std::vector<fbxsdk::FbxDouble4>;
+using Unit3Container = std::vector<fbxsdk::FbxDouble3>;
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
@@ -40,11 +39,11 @@ using Unit3Container = eastl::vector<fbxsdk::FbxDouble3>;
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 struct TexcoordTable{
-    eastl::string name;
-    eastl::vector<fbxsdk::FbxDouble2> table;
+    std::string name;
+    std::vector<fbxsdk::FbxDouble2> table;
 };
 
-using ControlPointRemap = eastl::vector<eastl::unordered_set<int>>;
+using ControlPointRemap = std::vector<std::unordered_set<int>>;
 
 struct LayerElement{
     IntContainer materials;
@@ -56,7 +55,7 @@ struct LayerElement{
     TexcoordTable texcoords;
 };
 
-using ControlPointMergeMap = eastl::vector<size_t>;
+using ControlPointMergeMap = std::vector<size_t>;
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,9 +68,9 @@ struct SkinData{
     fbxsdk::FbxDouble weight;
 };
 
-using SkinInfoContainer = eastl::vector<eastl::vector<SkinInfo>>;
+using SkinInfoContainer = std::vector<std::vector<SkinInfo>>;
 
-using BoneOffsetMatrixMap = eastl::unordered_map<fbxsdk::FbxCluster*, fbxsdk::FbxAMatrix>;
+using BoneOffsetMatrixMap = std::unordered_map<fbxsdk::FbxCluster*, fbxsdk::FbxAMatrix, PointerHasher<fbxsdk::FbxCluster*>>;
 
 // FBXShared_BoneCombination /////////////////////////////////////////////////////////////////////////
 
@@ -83,32 +82,32 @@ struct MeshAttributeElement{
     unsigned long VertexLast;
 };
 
-using MeshAttribute = eastl::vector<MeshAttributeElement>;
-using BoneCombination = eastl::vector<fbxsdk::FbxCluster*>;
+using MeshAttribute = std::vector<MeshAttributeElement>;
+using BoneCombination = std::vector<fbxsdk::FbxCluster*>;
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
 struct NodeData{
-    eastl::string strName;
+    std::string strName;
 
     FbxAMatrix kTransformMatrix;
 
     MeshAttribute bufMeshAttribute;
-    eastl::vector<BoneCombination> bufBoneCombination;
+    std::vector<BoneCombination> bufBoneCombination;
 
     Vector3Container bufPositions;
     Int3Container bufIndices;
 
-    eastl::vector<LayerElement> bufLayers;
+    std::vector<LayerElement> bufLayers;
 
     SkinInfoContainer bufSkinData;
     BoneOffsetMatrixMap mapBoneDeformMatrices;
 };
 
-using FbxNodeToExportNode = eastl::unordered_map<FbxNode*, FBXNode*>;
-using ImportNodeToFbxNode = eastl::unordered_map<const FBXNode*, fbxsdk::FbxNode*>;
+using FbxNodeToExportNode = std::unordered_map<fbxsdk::FbxNode*, FBXNode*, PointerHasher<fbxsdk::FbxNode*>>;
+using ImportNodeToFbxNode = std::unordered_map<const FBXNode*, fbxsdk::FbxNode*, PointerHasher<const FBXNode*>>;
 
-using PoseNodeList = eastl::unordered_set<FbxNode*>;
+using PoseNodeList = std::unordered_set<fbxsdk::FbxNode*, PointerHasher<fbxsdk::FbxNode*>>;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
@@ -123,8 +122,8 @@ public:
     {}
     AnimationKeyFrame(fbxsdk::FbxAnimCurveKey&& _curveKey, T&& _value)
         :
-        curveKey(eastl::move(_curveKey)),
-        value(eastl::move(_value))
+        curveKey(std::move(_curveKey)),
+        value(std::move(_value))
     {}
 
 
@@ -133,7 +132,7 @@ public:
     T value;
 };
 template<typename T>
-using AnimationKeyFrames = eastl::vector<AnimationKeyFrame<T>>;
+using AnimationKeyFrames = std::vector<AnimationKeyFrame<T>>;
 
 class AnimationNode{
 public:
@@ -157,15 +156,15 @@ public:
     AnimationKeyFrames<fbxsdk::FbxDouble3> translationKeys;
 };
 struct AnimationLayer{
-    eastl::string strName;
-    eastl::vector<AnimationNode> nodes;
+    std::string strName;
+    std::vector<AnimationNode> nodes;
 };
 struct AnimationStack{
-    eastl::string strName;
-    eastl::vector<AnimationLayer> layers;
+    std::string strName;
+    std::vector<AnimationLayer> layers;
 };
 
-using AnimationNodes = eastl::vector<fbxsdk::FbxNode*>;
+using AnimationNodes = std::vector<fbxsdk::FbxNode*>;
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
@@ -181,7 +180,7 @@ extern FBXRoot* shr_root;
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
-extern eastl::stack<eastl::string> shr_errorStack;
+extern std::stack<std::string> shr_errorStack;
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
@@ -228,8 +227,8 @@ extern void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src);
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
 extern void SHRPushErrorMessage(const char* strMessage, const char* strCallPos);
-extern void SHRPushErrorMessage(const eastl::string& strMessage, const char* strCallPos);
-extern void SHRPushErrorMessage(eastl::string&& strMessage, const char* strCallPos);
+extern void SHRPushErrorMessage(const std::string& strMessage, const char* strCallPos);
+extern void SHRPushErrorMessage(std::string&& strMessage, const char* strCallPos);
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 

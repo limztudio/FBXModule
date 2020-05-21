@@ -102,7 +102,7 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
     static const char __name_of_this_func[] = "SHRLoadMeshFromNode(ControlPointRemap&, FbxNode*, NodeData*)";
 
 
-    const eastl::string strName = kNode->GetName();
+    const std::string strName = kNode->GetName();
 
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();
 
@@ -127,11 +127,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(vertID != ctrlPointIndex){
-                eastl::string msg = "vertex index and control point index are not matched";
+                std::string msg = "vertex index and control point index are not matched";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
         }
@@ -140,18 +140,18 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
     controlPointRemap.clear();
     controlPointRemap.resize(ctrlPointsCount);
 
-    eastl::vector<int> flatIndexToCtrlPoint(polyCount * 3);
+    std::vector<int> flatIndexToCtrlPoint(polyCount * 3);
 
     int t = 0;
     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
         auto polySize = kMesh->GetPolygonSize(iPoly);
 
         if(polySize != 3){
-            eastl::string msg = "polygon size must be 3";
+            std::string msg = "polygon size must be 3";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
-            SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
 
@@ -159,21 +159,21 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(ctrlPointIndex < 0){
-                eastl::string msg = "vertex index must be bigger than or equal to 0";
+                std::string msg = "vertex index must be bigger than or equal to 0";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
             auto flatIndex = iPoly * 3 + iVert;
             if(t != flatIndex){
-                eastl::string msg = "vertex index is invalid";
+                std::string msg = "vertex index is invalid";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -265,11 +265,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                 default:
                 {
-                    eastl::string msg = "material has unsupported mapping mode";
+                    std::string msg = "material has unsupported mapping mode";
                     msg += "(errored in \"";
                     msg += strName;
                     msg += "\")";
-                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
                 }
@@ -301,11 +301,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             default:
                             {
-                                eastl::string msg = "vertex color has unsupported reference mode";
+                                std::string msg = "vertex color has unsupported reference mode";
                                 msg += "(errored in \"";
                                 msg += strName;
                                 msg += "\")";
-                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
                             }
@@ -331,11 +331,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             default:
                             {
-                                eastl::string msg = "vertex color has unsupported reference mode";
+                                std::string msg = "vertex color has unsupported reference mode";
                                 msg += "(errored in \"";
                                 msg += strName;
                                 msg += "\")";
-                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
                             }
@@ -345,11 +345,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                 default:
                 {
-                    eastl::string msg = "vertex color has unsupported mapping mode";
+                    std::string msg = "vertex color has unsupported mapping mode";
                     msg += "(errored in \"";
                     msg += strName;
                     msg += "\")";
-                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
                 }
@@ -384,11 +384,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             default:
                             {
-                                eastl::string msg = "vertex color has unsupported reference mode";
+                                std::string msg = "vertex color has unsupported reference mode";
                                 msg += "(errored in \"";
                                 msg += strName;
                                 msg += "\")";
-                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
                             }
@@ -412,11 +412,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             default:
                             {
-                                eastl::string msg = "vertex color has unsupported reference mode";
+                                std::string msg = "vertex color has unsupported reference mode";
                                 msg += "(errored in \"";
                                 msg += strName;
                                 msg += "\")";
-                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
                             }
@@ -428,11 +428,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                 default:
                 {
-                    eastl::string msg = "texcoord has unsupported mapping mode";
+                    std::string msg = "texcoord has unsupported mapping mode";
                     msg += "(errored in \"";
                     msg += strName;
                     msg += "\")";
-                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
                 }
@@ -468,11 +468,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             default:
                             {
-                                eastl::string msg = "vertex normal has unsupported reference mode";
+                                std::string msg = "vertex normal has unsupported reference mode";
                                 msg += "(errored in \"";
                                 msg += strName;
                                 msg += "\")";
-                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
                             }
@@ -485,11 +485,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                 default:
                 {
-                    eastl::string msg = "vertex normal has unsupported mapping mode";
+                    std::string msg = "vertex normal has unsupported mapping mode";
                     msg += "(errored in \"";
                     msg += strName;
                     msg += "\")";
-                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
                 }
@@ -520,11 +520,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             default:
                             {
-                                eastl::string msg = "vertex binormal has unsupported reference mode";
+                                std::string msg = "vertex binormal has unsupported reference mode";
                                 msg += "(errored in \"";
                                 msg += strName;
                                 msg += "\")";
-                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
                             }
@@ -537,11 +537,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                 default:
                 {
-                    eastl::string msg = "vertex binormal has unsupported mapping mode";
+                    std::string msg = "vertex binormal has unsupported mapping mode";
                     msg += "(errored in \"";
                     msg += strName;
                     msg += "\")";
-                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
                 }
@@ -572,11 +572,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             default:
                             {
-                                eastl::string msg = "vertex tangent has unsupported reference mode";
+                                std::string msg = "vertex tangent has unsupported reference mode";
                                 msg += "(errored in \"";
                                 msg += strName;
                                 msg += "\")";
-                                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
                             }
@@ -589,11 +589,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                 default:
                 {
-                    eastl::string msg = "vertex tangent has unsupported mapping mode";
+                    std::string msg = "vertex tangent has unsupported mapping mode";
                     msg += "(errored in \"";
                     msg += strName;
                     msg += "\")";
-                    SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
                 }
@@ -612,7 +612,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
     if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_SkinnedMesh))
         pSkinnedNode = static_cast<decltype(pSkinnedNode)>(pNode);
 
-    const eastl::string strName = pNode->Name.Values;
+    const std::string strName = pNode->Name.Values;
     auto* kMesh = kNode->GetMesh();
 
     { // create control point & make convert table
@@ -641,7 +641,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
             kPoints->mData[3] = 1.;
         }
 
-        ctrlPointMergeMap = eastl::move(reducer.getOldToConvertIndexer());
+        ctrlPointMergeMap = std::move(reducer.getOldToConvertIndexer());
     }
 
     { // create polygon
@@ -664,19 +664,19 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
         if(!kLayer){
             const auto idxNewLayer = kMesh->CreateLayer();
             if(idxNewLayer < 0){
-                eastl::string msg = "failed to create layer";
+                std::string msg = "failed to create layer";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
             else if(idxLayer != idxNewLayer){
-                eastl::string msg = "the created layer has unexpected index number";
+                std::string msg = "the created layer has unexpected index number";
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -699,11 +699,11 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 kColor->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element vertex color in the layer " + eastl::to_string(idxLayer);
+                std::string msg = "failed to create element vertex color in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -740,11 +740,11 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 kNormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element normal in the layer " + eastl::to_string(idxLayer);
+                std::string msg = "failed to create element normal in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -782,11 +782,11 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 kBinormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element binormal in the layer " + eastl::to_string(idxLayer);
+                std::string msg = "failed to create element binormal in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -824,11 +824,11 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 kTangent->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element tangent in the layer " + eastl::to_string(idxLayer);
+                std::string msg = "failed to create element tangent in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
@@ -866,11 +866,11 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 kUV->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
             }
             else{
-                eastl::string msg = "failed to create element UV in the layer " + eastl::to_string(idxLayer);
+                std::string msg = "failed to create element UV in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
                 msg += "\")";
-                SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
