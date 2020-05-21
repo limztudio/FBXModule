@@ -8,37 +8,12 @@
 #pragma once
 
 
-#include <intrin.h>
-
 #include <string>
 #include <vector>
 #include <unordered_map>
 
 #include <fbxsdk.h>
 #include <FBXNode.hpp>
-
-
-struct alignas(16) XMMFloat{
-    union{
-        float f[4];
-        __m128 v;
-    };
-};
-struct alignas(16) XMMDouble{
-    union{
-        double d[2];
-        __m128d v;
-    };
-};
-
-static const float FLT_PI = 3.141592654f;
-
-static const XMMFloat XMMF_Infinity = { { { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 } } };
-static const XMMFloat XMMF_QNaN = { { { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 } } };
-
-static const XMMDouble XMMD_One = { { { 1., 1. } } };
-static const XMMDouble XMMD_Epsilon = { { { DBL_EPSILON, DBL_EPSILON } } };
-static const XMMDouble XMMD_EpsilonSq = { { { DBL_EPSILON * DBL_EPSILON, DBL_EPSILON * DBL_EPSILON } } };
 
 
 template<typename KEY>
@@ -63,7 +38,7 @@ public:
 
 template<size_t LEN, typename T>
 static inline size_t MakeHash(const T(&data)[LEN]){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    size_t c, result = 2166136261U; //FNV1 hash
     for(const auto& i : data){
         c = static_cast<size_t>(i);
         result = (result * 16777619) ^ c;
@@ -72,7 +47,7 @@ static inline size_t MakeHash(const T(&data)[LEN]){
 }
 template<template<typename> typename C, typename T>
 static inline size_t MakeHash(const C<T>& data){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    size_t c, result = 2166136261U; //FNV1 hash
     for(const auto& i : data){
         c = static_cast<size_t>(i);
         result = (result * 16777619) ^ c;
@@ -81,7 +56,7 @@ static inline size_t MakeHash(const C<T>& data){
 }
 template<size_t LEN, typename T>
 static inline size_t MakeHash(const T* data){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    size_t c, result = 2166136261U; //FNV1 hash
     for(const auto* p = data; FBX_PTRDIFFU(p - data) < LEN; ++p){
         c = static_cast<size_t>(*p);
         result = (result * 16777619) ^ c;
@@ -90,7 +65,7 @@ static inline size_t MakeHash(const T* data){
 }
 template<typename T>
 static inline size_t MakeHash(const T* data, size_t len){
-    size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+    size_t c, result = 2166136261U; //FNV1 hash
     for(const auto* p = data; FBX_PTRDIFFU(p - data) < len; ++p){
         c = static_cast<size_t>(*p);
         result = (result * 16777619) ^ c;
@@ -439,183 +414,4 @@ static inline fbxsdk::FbxAMatrix GetGeometry(fbxsdk::FbxNode* kNode){
     kS = kNode->GetGeometricScaling(fbxsdk::FbxNode::eSourcePivot);
 
     return fbxsdk::FbxAMatrix(kT, kR, kS);
-}
-
-static inline fbxsdk::FbxDouble4x4 Scale44(const fbxsdk::FbxDouble4x4& kMatrix, const fbxsdk::FbxDouble& kFactor){
-    alignas(16) fbxsdk::FbxDouble4x4 kOut44;
-
-    auto xmm_factor = _mm_set1_pd(kFactor);
-
-    for(int i = 0; i < 4; ++i){
-        const auto& kRow = kMatrix[i];
-        auto& kOutRow = kOut44[i];
-
-        auto xmm_xy = _mm_loadu_pd(kRow.Buffer());
-        auto xmm_zw = _mm_loadu_pd(kRow.Buffer() + 2);
-
-        xmm_xy = _mm_mul_pd(xmm_xy, xmm_factor);
-        xmm_zw = _mm_mul_pd(xmm_zw, xmm_factor);
-
-        _mm_store_pd(kOutRow.Buffer(), xmm_xy);
-        _mm_store_pd(kOutRow.Buffer() + 2, xmm_zw);
-    }
-
-    return kOut44;
-}
-
-static inline fbxsdk::FbxDouble4x4 Add44(const fbxsdk::FbxDouble4x4& kLhs, const fbxsdk::FbxDouble4x4& kRhs){
-    alignas(16) fbxsdk::FbxDouble4x4 kOut44;
-
-    for(int i = 0; i < 4; ++i){
-        const auto& kRowLhs = kLhs[i];
-        const auto& kRowRhs = kRhs[i];
-        auto& kOutRow = kOut44[i];
-
-        auto xmm_xy_lhs = _mm_loadu_pd(kRowLhs.Buffer());
-        auto xmm_zw_lhs = _mm_loadu_pd(kRowLhs.Buffer() + 2);
-
-        auto xmm_xy_rhs = _mm_loadu_pd(kRowRhs.Buffer());
-        auto xmm_zw_rhs = _mm_loadu_pd(kRowRhs.Buffer() + 2);
-
-        auto xmm_xy = _mm_add_pd(xmm_xy_lhs, xmm_xy_rhs);
-        auto xmm_zw = _mm_add_pd(xmm_zw_lhs, xmm_zw_rhs);
-
-        _mm_store_pd(kOutRow.Buffer(), xmm_xy);
-        _mm_store_pd(kOutRow.Buffer() + 2, xmm_zw);
-    }
-
-    return kOut44;
-}
-
-static inline fbxsdk::FbxDouble3 Transform44(const fbxsdk::FbxDouble4x4& kMatrix, const fbxsdk::FbxDouble3& kVector3){
-    fbxsdk::FbxDouble4 kOut4;
-
-    for(int i = 0; i < 4; ++i){
-        kOut4[i] = kVector3[0] * kMatrix[0][i];
-        kOut4[i] += kVector3[1] * kMatrix[1][i];
-        kOut4[i] += kVector3[2] * kMatrix[2][i];
-        kOut4[i] += kMatrix[3][i];
-    }
-
-    fbxsdk::FbxDouble3 kOut3;
-    {
-        kOut3[0] = kOut4[0];
-        kOut3[1] = kOut4[1];
-        kOut3[2] = kOut4[2];
-    }
-
-    {
-        auto& w = kOut4[3];
-
-        kOut3[0] /= w;
-        kOut3[1] /= w;
-        kOut3[2] /= w;
-    }
-
-    return kOut3;
-}
-static inline fbxsdk::FbxDouble3 Transform33(const fbxsdk::FbxDouble4x4& kMatrix, const fbxsdk::FbxDouble3& kVector3){
-    fbxsdk::FbxDouble3 kOut3;
-
-    for(int i = 0; i < 3; ++i){
-        kOut3[i] = kVector3[0] * kMatrix[0][i];
-        kOut3[i] += kVector3[1] * kMatrix[1][i];
-        kOut3[i] += kVector3[2] * kMatrix[2][i];
-    }
-
-    return kOut3;
-}
-
-static inline fbxsdk::FbxDouble3 Normalize3(const fbxsdk::FbxDouble3& kVector3){
-    auto xmm_xy = _mm_loadu_pd(kVector3.Buffer());
-    auto xmm_zw = _mm_loadu_pd(kVector3.Buffer() + 2);
-
-#ifdef _SIMD_FMA
-    auto xmm_lenSq = _mm_dp_pd(xmm_xy, xmm_xy, 0xf1);
-    xmm_lenSq = _mm_fmadd_pd(xmm_zw, xmm_zw, xmm_lenSq);
-#else
-    auto xmm_zwSq = _mm_mul_pd(xmm_zw, xmm_zw);
-
-    auto xmm_lenSq = _mm_dp_pd(xmm_xy, xmm_xy, 0xf1);
-    xmm_lenSq = _mm_add_pd(xmm_lenSq, xmm_zwSq);
-#endif
-
-    if((_mm_movemask_pd(_mm_cmpge_pd(xmm_lenSq, XMMD_EpsilonSq.v)) & 1) == 1){
-#ifdef _SIMD_AVX
-        xmm_lenSq = _mm_permute_pd(xmm_lenSq, _MM_SHUFFLE2(0, 0));
-#else
-        xmm_lenSq = _mm_shuffle_pd(xmm_lenSq, xmm_lenSq, _MM_SHUFFLE2(0, 0));
-#endif
-        auto xmm_len = _mm_sqrt_pd(xmm_lenSq);
-
-        xmm_xy = _mm_div_pd(xmm_xy, xmm_len);
-        xmm_zw = _mm_div_pd(xmm_zw, xmm_len);
-
-        alignas(16) fbxsdk::FbxDouble3 kRet;
-        _mm_store_pd(kRet.Buffer(), xmm_xy);
-        kRet[2] = _mm_cvtsd_f64(xmm_zw);
-
-        return kRet;
-    }
-
-    return fbxsdk::FbxDouble3(0., 0., 0.);
-}
-
-static inline Float3 Normalize3(const Float3& flt3){
-    __m128 xmm_xyz;
-    {
-        auto xmm_xy = _mm_castpd_ps(_mm_load_sd(reinterpret_cast<const double*>(flt3.raw)));
-        auto xmm_z = _mm_load_ss(&flt3.z);
-        xmm_xyz = _mm_insert_ps(xmm_xy, xmm_z, 0x20);
-    }
-
-    auto xmm_lenSq = _mm_dp_ps(xmm_xyz, xmm_xyz, 0x7f);
-
-    auto xmm_res = _mm_sqrt_ps(xmm_lenSq);
-    auto xmm_zeroMask = _mm_setzero_ps();
-    xmm_zeroMask = _mm_cmpneq_ps(xmm_zeroMask, xmm_res);
-
-    xmm_lenSq = _mm_cmpneq_ps(xmm_lenSq, XMMF_Infinity.v);
-    xmm_res = _mm_div_ps(xmm_xyz, xmm_res);
-    xmm_res = _mm_and_ps(xmm_res, xmm_zeroMask);
-
-    auto xmm_tmp0 = _mm_andnot_ps(xmm_lenSq, XMMF_QNaN.v);
-    auto xmm_tmp1 = _mm_and_ps(xmm_res, xmm_lenSq);
-    xmm_res = _mm_or_ps(xmm_tmp0, xmm_tmp1);
-
-    alignas(16) Float3 ret;
-    _mm_store_sd(reinterpret_cast<double*>(ret.raw), _mm_castps_pd(xmm_res));
-    *reinterpret_cast<int*>(&ret.z) = _mm_extract_ps(xmm_res, 2);
-
-    return ret;
-}
-
-static inline Float3 MakeRotation(const Float4& quaternion){
-    const float s = 2.f * (quaternion.w * quaternion.y - quaternion.x * quaternion.z);
-
-    // It is invalid to pass values outside
-    // of the range -1,1 to asin()... so don't.
-
-    Float3 ret;
-
-    if(s < 1.f){
-        if(-1.f < s){
-            ret.z = atan2f(2.f * (quaternion.x * quaternion.y + quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.y * quaternion.y + quaternion.z * quaternion.z));
-            ret.y = asinf(s);
-            ret.x = atan2f(2.f * (quaternion.y * quaternion.z + quaternion.w * quaternion.x), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.y * quaternion.y));
-        }
-        else{
-            ret.z = 0;
-            ret.y = -FLT_PI * 0.5f;
-            ret.x = -atan2f(2.f * (quaternion.x * quaternion.y - quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.z * quaternion.z));
-        }
-
-    }
-    else{
-        ret.z = 0;
-        ret.y = FLT_PI * 0.5f;
-        ret.x = atan2f(2.f * (quaternion.x * quaternion.y - quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.z * quaternion.z));
-    }
-
-    return ret;
 }

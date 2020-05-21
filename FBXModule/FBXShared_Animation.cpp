@@ -13,6 +13,7 @@
 #include <FBXAssign.hpp>
 
 #include "FBXUtilites.h"
+#include "FBXMath.h"
 #include "FBXShared.h"
 
 

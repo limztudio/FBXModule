@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="FBXMath.cpp" />
     <ClCompile Include="FBXModule.cpp" />
     <ClCompile Include="FBXModule_Compatible.cpp" />
     <ClCompile Include="FBXModule_Error.cpp" />
@@ -64,6 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="FBXModule.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FBXMath.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -145,7 +149,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SIMD_FMA;_SIMD_AVX;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;../EASTL</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -162,7 +166,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SIMD_FMA;_SIMD_AVX;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;../EASTL</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -181,7 +185,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SIMD_FMA;_SIMD_AVX;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;../EASTL</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
@@ -206,7 +210,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SIMD_FMA;_SIMD_AVX;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;../EASTL</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "FBXUtilites.h"
+#include "FBXMath.h"
 #include "FBXShared.h"
 
 

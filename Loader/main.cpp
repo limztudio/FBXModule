@@ -6,14 +6,6 @@
 
 #include <FBXModule.hpp>
 
-#define _XM_SSE4_INTRINSICS_
-#define _XM_AVX_INTRINSICS_
-#define _XM_FMA3_INTRINSICS_
-#include "DirectXMath/Inc/DirectXMath.h"
-#include "DirectXMath/Extensions/DirectXMathSSE4.h"
-#include "DirectXMath/Extensions/DirectXMathAVX.h"
-#include "DirectXMath/Extensions/DirectXMathFMA3.h"
-
 
 static HMODULE library = nullptr;
 static FBXRoot* fbxRoot = nullptr;

@@ -20,6 +20,7 @@
     <ClCompile Include="FBXShared_Optimizer.cpp" />
     <ClCompile Include="FBXModule_Compatible.cpp" />
     <ClCompile Include="FBXShared_BoneCombination.cpp" />
+    <ClCompile Include="FBXMath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -70,5 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="FBXModule.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FBXMath.h" />
   </ItemGroup>
 </Project>

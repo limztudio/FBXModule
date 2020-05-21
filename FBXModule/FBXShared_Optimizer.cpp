@@ -24,7 +24,7 @@ static std::unordered_set<const FbxCluster*, PointerHasher<const FbxCluster*>> i
 class _VertexInfo{
 public:
     static inline size_t makeHash(const _VertexInfo& data){
-        size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+        size_t c, result = 2166136261U; //FNV1 hash
 
 #define __CAL_RESULT result = (result * 16777619) ^ c;
 

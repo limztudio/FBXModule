@@ -8,6 +8,7 @@
 #include "stdafx.h"
 
 #include "FBXUtilites.h"
+#include "FBXMath.h"
 #include "FBXShared.h"
 
 
@@ -44,7 +45,7 @@ public:
 
 public:
     inline size_t makeHash()const{
-        size_t c, result = 2166136261U; //FNV1 hash. Perhaps the best string hash
+        size_t c, result = 2166136261U; //FNV1 hash
 
 #define __CAL_RESULT result = (result * 16777619) ^ c;
 
