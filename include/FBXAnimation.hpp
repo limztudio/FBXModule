@@ -22,7 +22,7 @@ enum class FBXAnimationInterpolationType : unsigned char{
 };
 
 template<typename T>
-class FBXAnimationFrameElement{
+class FBXAnimationKeyFrame{
 public:
     float Time;
     FBXAnimationInterpolationType InterpolationType;
@@ -30,18 +30,21 @@ public:
 public:
     T Value;
 };
-class FBXAnimationLayerElement{
-public:
-    FBXDynamicArray<FBXAnimationFrameElement<FBXStaticArray<float, 3>>> ScaleKeys;
-    FBXDynamicArray<FBXAnimationFrameElement<FBXStaticArray<float, 4>>> RotationKeys;
-    FBXDynamicArray<FBXAnimationFrameElement<FBXStaticArray<float, 3>>> TranslationKeys;
-};
 class FBXAnimationNode{
 public:
     FBXNode* BindNode;
 
 public:
-    FBXDynamicArray<FBXAnimationLayerElement> LayeredElements;
+    FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 3>>> ScalingKeys;
+    FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 4>>> RotationKeys;
+    FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 3>>> TranslationKeys;
+};
+class FBXAnimationLayer{
+public:
+    FBXDynamicArray<char> Name;
+
+public:
+    FBXDynamicArray<FBXAnimationNode> AnimationNodes;
 };
 
 
@@ -65,5 +68,5 @@ public:
     FBXAnimation* Next;
 
 public:
-    FBXDynamicArray<FBXAnimationNode> AnimationNodes;
+    FBXDynamicArray<FBXAnimationLayer> AnimationLayers;
 };

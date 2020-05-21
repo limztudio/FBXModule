@@ -65,8 +65,7 @@ using _MeshPolys = eastl::multimap<_OrderedKey, _MeshPolyValue>;
 static _TempMeshPolys ins_tmpMeshPolys;
 static _MeshPolys ins_meshPolys;
 
-//static _ClusterCountChecker ins_clusterCountChecker;
-static _ClusterCountChecker ins_localClusterCounterChecker;
+static _ClusterCountChecker ins_localClusterCounterChecker[2];
 
 static eastl::unordered_map<_OrderdKeyWithIndex, int> ins_vertOldToNew;
 static eastl::vector<int> ins_vertNewToOld;
@@ -142,19 +141,22 @@ static void ins_genSkinnedMeshAttribute(NodeData* pNodeData){
         for(const auto& idxPoly : iAttr.second){
             const auto& iPoly = pNodeData->bufIndices[idxPoly];
 
-            ins_localClusterCounterChecker.clear();
+            ins_localClusterCounterChecker[0] = itrCurPoly->second.participatedClusters;
+            ins_localClusterCounterChecker[1].clear();
 
             for(const auto& idxVert : iPoly.raw){
                 const auto& iSkin = pNodeData->bufSkinData[idxVert];
                 for(const auto& iWeight : iSkin){
                     itrCurPoly->second.participatedClusters.emplace(iWeight.cluster);
-                    ins_localClusterCounterChecker.emplace(iWeight.cluster);
+                    ins_localClusterCounterChecker[1].emplace(iWeight.cluster);
                 }
             }
 
             if(itrCurPoly->second.participatedClusters.size() <= shr_ioSetting.MaxBoneCountPerMesh)
                 itrCurPoly->second.polyIndices.emplace_back(idxPoly);
             else{
+                eastl::swap(itrCurPoly->second.participatedClusters, ins_localClusterCounterChecker[0]);
+
                 _MeshPolyValue newPolyVal;
                 newPolyVal.polyIndices.reserve(iAttr.second.size());
                 newPolyVal.participatedClusters.rehash(pNodeData->mapBoneDeformMatrices.size() << 1);
@@ -162,7 +164,7 @@ static void ins_genSkinnedMeshAttribute(NodeData* pNodeData){
 
                 itrCurPoly = ins_meshPolys.emplace(iAttr.first, eastl::move(newPolyVal));
 
-                eastl::swap(itrCurPoly->second.participatedClusters, ins_localClusterCounterChecker);
+                eastl::swap(itrCurPoly->second.participatedClusters, ins_localClusterCounterChecker[1]);
             }
         }
     }

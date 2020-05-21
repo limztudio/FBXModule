@@ -612,7 +612,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
     if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_SkinnedMesh))
         pSkinnedNode = static_cast<decltype(pSkinnedNode)>(pNode);
 
-    const eastl::string strName = pNode->Name;
+    const eastl::string strName = pNode->Name.Values;
     auto* kMesh = kNode->GetMesh();
 
     { // create control point & make convert table

@@ -68,8 +68,7 @@ void SHRCopyNode(FBXNode* dest, const FBXNode* src){
         }
 
         { // FBXNode member
-            strcpy(dest->Name, src->Name);
-
+            dest->Name = src->Name;
             dest->TransformMatrix = src->TransformMatrix;
         }
 
@@ -138,17 +137,18 @@ void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src){
 
 
     if(dest && src){
-        strcpy(dest->Name, src->Name);
+        dest->Name = src->Name;
+        dest->AnimationLayers = src->AnimationLayers;
 
-        dest->AnimationNodes = src->AnimationNodes;
+        for(auto* p0 = dest->AnimationLayers.Values; FBX_PTRDIFFU(p0 - dest->AnimationLayers.Values) < dest->AnimationLayers.Length; ++p0){
+            for(auto* p1 = p0->AnimationNodes.Values; FBX_PTRDIFFU(p1 - p0->AnimationNodes.Values) < p0->AnimationNodes.Length; ++p1){
+                auto f = ins_nodeBinder.find(p1->BindNode);
 
-        for(auto* p = dest->AnimationNodes.Values; FBX_PTRDIFFU(p - dest->AnimationNodes.Values) < dest->AnimationNodes.Length; ++p){
-            auto f = ins_nodeBinder.find(p->BindNode);
-
-            if(f != ins_nodeBinder.cend())
-                p->BindNode = f->second;
-            else
-                SHRPushErrorMessage("an error occurred while binding node pointer on Animation", __name_of_this_func);
+                if(f != ins_nodeBinder.cend())
+                    p1->BindNode = f->second;
+                else
+                    SHRPushErrorMessage("an error occurred while binding node pointer on Animation", __name_of_this_func);
+            }
         }
 
         SHRCopyAnimation(dest->Next, src->Next);

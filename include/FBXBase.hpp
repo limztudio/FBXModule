@@ -39,16 +39,5 @@ public:
 
 
 public:
-    FBXBase()
-        :
-        Name(nullptr)
-    {}
-    virtual ~FBXBase(){
-        if(Name)
-            FBXFree(Name);
-    }
-
-
-public:
-    char* Name;
+    FBXDynamicArray<char> Name;
 };

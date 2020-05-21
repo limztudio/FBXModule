@@ -50,11 +50,7 @@ namespace __hidden_FBXModule{
                 return;
             }
 
-            if(src->Name){
-                const auto i = FBXUtilites::Memlen(src->Name);
-                dest->Name = FBXAllocate<char>(i + 1);
-                dest->Name[i] = 0;
-            }
+            dest->Name = src->Name;
 
             if(FBXTypeHasMember(srcID, FBXType::FBXType_Bone)){
                 auto* dest_c = static_cast<FBXBone*>(dest);
@@ -88,13 +84,8 @@ namespace __hidden_FBXModule{
         if(src){
             dest = FBXNew<FBXAnimation>();
 
-            if(src->Name){
-                const auto i = FBXUtilites::Memlen(src->Name);
-                dest->Name = FBXAllocate<char>(i + 1);
-                dest->Name[i] = 0;
-            }
-
-            dest->AnimationNodes = src->AnimationNodes;
+            dest->Name = src->Name;
+            dest->AnimationLayers = src->AnimationLayers;
 
             allocateAnimation(dest->Next, src->Next);
         }

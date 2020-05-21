@@ -113,15 +113,15 @@ using PoseNodeList = eastl::unordered_set<FbxNode*>;
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-class AnimationFrameElement{
+class AnimationKeyFrame{
 public:
-    AnimationFrameElement(){}
-    AnimationFrameElement(const fbxsdk::FbxAnimCurveKey& _curveKey, const T& _value)
+    AnimationKeyFrame(){}
+    AnimationKeyFrame(const fbxsdk::FbxAnimCurveKey& _curveKey, const T& _value)
         :
         curveKey(_curveKey),
         value(_value)
     {}
-    AnimationFrameElement(fbxsdk::FbxAnimCurveKey&& _curveKey, T&& _value)
+    AnimationKeyFrame(fbxsdk::FbxAnimCurveKey&& _curveKey, T&& _value)
         :
         curveKey(eastl::move(_curveKey)),
         value(eastl::move(_value))
@@ -133,20 +133,36 @@ public:
     T value;
 };
 template<typename T>
-using AnimationFrameQueue = eastl::vector<AnimationFrameElement<T>>;
+using AnimationKeyFrames = eastl::vector<AnimationKeyFrame<T>>;
 
-struct AnimationLayer{
-    AnimationFrameQueue<fbxsdk::FbxDouble3> scaleKeys;
-    AnimationFrameQueue<fbxsdk::FbxDouble4> rotationKeys;
-    AnimationFrameQueue<fbxsdk::FbxDouble3> translationKeys;
-};
-struct AnimationLayerContainer{
+class AnimationNode{
+public:
+    inline bool isEmpty()const{
+        if(!scalingKeys.empty())
+            return false;
+        if(!rotationKeys.empty())
+            return false;
+        if(!translationKeys.empty())
+            return false;
+
+        return true;
+    }
+
+
+public:
     fbxsdk::FbxNode* bindNode;
-    eastl::vector<AnimationLayer> layers;
+
+    AnimationKeyFrames<fbxsdk::FbxDouble3> scalingKeys;
+    AnimationKeyFrames<fbxsdk::FbxDouble4> rotationKeys;
+    AnimationKeyFrames<fbxsdk::FbxDouble3> translationKeys;
 };
-struct AnimationData{
+struct AnimationLayer{
     eastl::string strName;
-    eastl::vector<AnimationLayerContainer> nodes;
+    eastl::vector<AnimationNode> nodes;
+};
+struct AnimationStack{
+    eastl::string strName;
+    eastl::vector<AnimationLayer> layers;
 };
 
 using AnimationNodes = eastl::vector<fbxsdk::FbxNode*>;
@@ -187,6 +203,7 @@ extern fbxsdk::FbxScene* shr_scene;
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
 extern FbxNodeToExportNode shr_fbxNodeToExportNode;
+extern ImportNodeToFbxNode shr_importNodeToFbxNode;
 extern PoseNodeList shr_poseNodeList;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
@@ -244,8 +261,8 @@ extern void SHRGenerateMeshAttribute(NodeData* pNodeData);
 
 extern bool SHRGenerateNodeTree(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, FbxNodeToExportNode& fbxNodeToExportNode);
 
-extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXNode* pRootNode, PoseNodeList& poseNodeList);
-extern fbxsdk::FbxNode* SHRStoreNode(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxNode* kParentNode, const FBXNode* pNode);
+extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, ImportNodeToFbxNode& importNodeToFbxNode, PoseNodeList& poseNodeList, const FBXNode* pRootNode);
+extern fbxsdk::FbxNode* SHRStoreNode(fbxsdk::FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeToFbxNode, fbxsdk::FbxNode* kParentNode, const FBXNode* pNode);
 
 extern bool SHRCreateBindPose(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const PoseNodeList& poseNodeList);
 
@@ -253,6 +270,9 @@ extern bool SHRCreateBindPose(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene*
 
 extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const AnimationNodes& kNodeTable);
 extern bool SHRLoadAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode);
+
+extern bool SHRStoreAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pAnimStack);
+extern bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pRootAnimStack);
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 

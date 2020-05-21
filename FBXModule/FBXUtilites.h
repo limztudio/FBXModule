@@ -31,8 +31,10 @@ struct alignas(16) XMMDouble{
     };
 };
 
-static XMMFloat XMMF_Infinity = { { { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 } } };
-static XMMFloat XMMF_QNaN = { { { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 } } };
+static const float FLT_PI = 3.141592654f;
+
+static const XMMFloat XMMF_Infinity = { { { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 } } };
+static const XMMFloat XMMF_QNaN = { { { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 } } };
 
 static const XMMDouble XMMD_One = { { { 1., 1. } } };
 static const XMMDouble XMMD_Epsilon = { { { DBL_EPSILON, DBL_EPSILON } } };
@@ -83,6 +85,7 @@ public:
     Container2(){}
     Container2(const T& _x, const T& _y) : x(_x), y(_y){}
     Container2(T&& _x, T&& _y) : x(eastl::move(_x)), y(eastl::move(_y)){}
+    Container2(const T* rhs) : x(rhs[0]), y(rhs[1]){}
 
 
 public:
@@ -117,6 +120,7 @@ public:
     Container3(){}
     Container3(const T& _x, const T& _y, const T& _z) : x(_x), y(_y), z(_z){}
     Container3(T&& _x, T&& _y, T&& _z) : x(eastl::move(_x)), y(eastl::move(_y)), z(eastl::move(_z)){}
+    Container3(const T* rhs) : x(rhs[0]), y(rhs[1]), z(rhs[2]){}
 
 
 public:
@@ -153,6 +157,7 @@ public:
     Container4(){}
     Container4(const T& _x, const T& _y, const T& _z, const T& _w) : x(_x), y(_y), z(_z), w(_w){}
     Container4(T&& _x, T&& _y, T&& _z, T&& _w) : x(eastl::move(_x)), y(eastl::move(_y)), z(eastl::move(_z)), w(eastl::move(_w)){}
+    Container4(const T* rhs) : x(rhs[0]), y(rhs[1]), z(rhs[2]), w(rhs[3]){}
 
 
 public:
@@ -561,6 +566,36 @@ static inline Float3 Normalize3(const Float3& flt3){
     alignas(16) Float3 ret;
     _mm_store_sd(reinterpret_cast<double*>(ret.raw), _mm_castps_pd(xmm_res));
     *reinterpret_cast<int*>(&ret.z) = _mm_extract_ps(xmm_res, 2);
+
+    return ret;
+}
+
+static inline Float3 MakeRotation(const Float4& quaternion){
+    const float s = 2.f * (quaternion.w * quaternion.y - quaternion.x * quaternion.z);
+
+    // It is invalid to pass values outside
+    // of the range -1,1 to asin()... so don't.
+
+    Float3 ret;
+
+    if(s < 1.f){
+        if(-1.f < s){
+            ret.z = atan2f(2.f * (quaternion.x * quaternion.y + quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.y * quaternion.y + quaternion.z * quaternion.z));
+            ret.y = asinf(s);
+            ret.x = atan2f(2.f * (quaternion.y * quaternion.z + quaternion.w * quaternion.x), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.y * quaternion.y));
+        }
+        else{
+            ret.z = 0;
+            ret.y = -FLT_PI * 0.5f;
+            ret.x = -atan2f(2.f * (quaternion.x * quaternion.y - quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.z * quaternion.z));
+        }
+
+    }
+    else{
+        ret.z = 0;
+        ret.y = FLT_PI * 0.5f;
+        ret.x = atan2f(2.f * (quaternion.x * quaternion.y - quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.z * quaternion.z));
+    }
 
     return ret;
 }

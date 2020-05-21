@@ -68,4 +68,7 @@
       <UniqueIdentifier>{d2d24384-d8f5-4382-9df2-691f02620a84}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="FBXModule.natvis" />
+  </ItemGroup>
 </Project>

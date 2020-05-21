@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+     This is a Microsoft natvis file, which allows visualization of complex variables in the
+     Microsoft debugger starting with VS2012. It's a successor to the AutoExp.dat file format. 
+
+     This file needs to go into your C:\Users\<user>\Documents\Visual Studio 2011\Visualizers\
+     folder. Microsoft documentation states that it should go into a 2012 folder, but testing 
+     in June of 2013 suggests that it still needs to be the 2011 folder.
+
+     You don't need to restart Visual Studio to use it, you just need to restart the debug 
+     session. You can have multiple .natvis files and they will all be used.
+
+	 VS2017 natvis documentation:
+	https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects
+-->
+
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+<Type Name="FBXDynamicArray&lt;*&gt;">
+	<DisplayString Condition="Length == 0">[{Length}] {{}}</DisplayString>
+	<DisplayString Condition="Length == 1">[{Length}] {{ {*Values} }}</DisplayString>
+	<DisplayString Condition="Length == 2">[{Length}] {{ {*Values}, {*(Values+1)} }}</DisplayString>
+	<DisplayString Condition="Length == 3">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)} }}</DisplayString>
+	<DisplayString Condition="Length == 4">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)} }}</DisplayString>
+	<DisplayString Condition="Length == 5">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)} }}</DisplayString>
+	<DisplayString Condition="Length == 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)} }}</DisplayString>
+	<DisplayString Condition="Length &gt; 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)}, ... }}</DisplayString>
+    <Expand>
+        <Item Name="[size]">Length</Item>
+        <ArrayItems>
+            <Size>Length</Size>
+            <ValuePointer>Values</ValuePointer>
+        </ArrayItems>
+    </Expand>
+</Type>
+
+  <Type Name="FBXStaticArray&lt;*&gt;">
+    <DisplayString Condition="Length == 0">[{Length}] {{}}</DisplayString>
+    <DisplayString Condition="Length == 1">[{Length}] {{ {*Values} }}</DisplayString>
+    <DisplayString Condition="Length == 2">[{Length}] {{ {*Values}, {*(Values+1)} }}</DisplayString>
+    <DisplayString Condition="Length == 3">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)} }}</DisplayString>
+    <DisplayString Condition="Length == 4">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)} }}</DisplayString>
+    <DisplayString Condition="Length == 5">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)} }}</DisplayString>
+    <DisplayString Condition="Length == 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)} }}</DisplayString>
+    <DisplayString Condition="Length &gt; 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)}, ... }}</DisplayString>
+    <Expand>
+      <Item Name="[size]">Length</Item>
+      <ArrayItems>
+        <Size>Length</Size>
+        <ValuePointer>Values</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+</AutoVisualizer>

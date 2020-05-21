@@ -241,7 +241,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, PoseNodeList&, const FBXNodeToFbxNode&, const ControlPointMergeMap&, const FBXSkinnedMesh*, FbxNode*)";
 
 
-    const eastl::string strName = pNode->Name;
+    const eastl::string strName = pNode->Name.Values;
 
     eastl::unordered_map<const FBXNode*, FbxCluster*> clusterFinder;
     eastl::unordered_map<const FBXNode*, float> tmpSkinTable;
@@ -292,7 +292,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             auto f = nodeBinder.find(pDeform->TargetNode);
             if(f == nodeBinder.cend()){
                 eastl::string msg = "failed to find bind node of ";
-                msg += pDeform->TargetNode->Name;
+                msg += pDeform->TargetNode->Name.Values;
                 SHRPushErrorMessage(eastl::move(msg), __name_of_this_func);
                 return false;
             }
