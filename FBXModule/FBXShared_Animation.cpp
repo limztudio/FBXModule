@@ -104,6 +104,9 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
     // and Evaluator shows up only the animation of default FbxAnimStack(and guess the default will be 0 index of FbxAnimStack).
     // so what I'm gonna do is, disconnect all animation stacks from scene, and re-connect only one of them by iterating animation stacks.
 
+    // well, it ain't work properly...
+    // but later, try to connect animation stack object as dstObject
+
     {
         const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
 
