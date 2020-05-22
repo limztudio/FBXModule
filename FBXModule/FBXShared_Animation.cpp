@@ -24,6 +24,40 @@ static std::vector<AnimationStack> ins_animationStacks;
 static std::set<FbxTime> ins_animationKeyFrames[3];
 
 
+template<typename KEY_TABLE, typename VALUE>
+static inline void ins_keyTypeOptimze(KEY_TABLE& keyTable, const VALUE& kVal){
+    const auto keycount = keyTable.size();
+    if(keycount > 1){
+        auto& iPrevKey = keyTable[keycount - 2];
+        const auto& kPrevVal = iPrevKey.value;
+
+        if(kPrevVal == kVal)
+            iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+    }
+}
+
+template<typename KEY_TABLE>
+static inline void ins_keyReduce(KEY_TABLE& keyTable){
+    if(keyTable.size() > 2){
+        size_t idxPivot = 1;
+        while((keyTable.size() > 2) && ((idxPivot + 1) < keyTable.size())){
+            const auto& iLhs = keyTable[idxPivot - 1];
+            const auto& iCur = keyTable[idxPivot];
+            const auto& iRhs = keyTable[idxPivot + 1];
+
+            if((iLhs.value == iRhs.value) && (iLhs.value == iCur.value)){
+                auto itr = keyTable.begin();
+                std::advance(itr, idxPivot);
+
+                keyTable.erase(itr);
+                continue;
+            }
+
+            ++idxPivot;
+        }
+    }
+}
+
 static inline void ins_updateTimestamp(FbxAnimCurve* kAnimCurve, size_t idx){
     if(!kAnimCurve)
         return;
@@ -174,16 +208,10 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     auto kValRaw = kMat.GetT();
                     FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
                     newNodes.translationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
-
-                    const auto keycount = newNodes.translationKeys.size();
-                    if(keycount > 1){
-                        auto& iPrevKey = newNodes.translationKeys[keycount - 2];
-                        const auto& kPrevVal = iPrevKey.value;
-
-                        if(kPrevVal == kVal)
-                            iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
-                    }
+                    ins_keyTypeOptimze(newNodes.translationKeys, kVal);
                 }
+
+                ins_keyReduce(newNodes.translationKeys);
 
                 if(newNodes.translationKeys.empty()){
                     newNodes.translationKeys.reserve(1);
@@ -200,16 +228,10 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     auto kMat = GetLocalTransform(kNode, kTime);
                     FbxDouble4 kVal = kMat.GetQ();
                     newNodes.rotationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
-
-                    const auto keycount = newNodes.rotationKeys.size();
-                    if(keycount > 1){
-                        auto& iPrevKey = newNodes.rotationKeys[keycount - 2];
-                        const auto& kPrevVal = iPrevKey.value;
-
-                        if(kPrevVal == kVal)
-                            iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
-                    }
+                    ins_keyTypeOptimze(newNodes.rotationKeys, kVal);
                 }
+
+                ins_keyReduce(newNodes.rotationKeys);
 
                 if(newNodes.rotationKeys.empty()){
                     newNodes.rotationKeys.reserve(1);
@@ -226,16 +248,10 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     auto kValRaw = kMat.GetS();
                     FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
                     newNodes.scalingKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
-
-                    const auto keycount = newNodes.scalingKeys.size();
-                    if(keycount > 1){
-                        auto& iPrevKey = newNodes.scalingKeys[keycount - 2];
-                        const auto& kPrevVal = iPrevKey.value;
-
-                        if(kPrevVal == kVal)
-                            iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
-                    }
+                    ins_keyTypeOptimze(newNodes.scalingKeys, kVal);
                 }
+
+                ins_keyReduce(newNodes.scalingKeys);
 
                 if(newNodes.scalingKeys.empty()){
                     newNodes.scalingKeys.reserve(1);
