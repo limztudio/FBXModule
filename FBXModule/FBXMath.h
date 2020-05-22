@@ -179,33 +179,3 @@ static inline Float3 Normalize3(const Float3& flt3){
 
     return ret;
 }
-
-static inline Float3 MakeRotation(const Float4& quaternion){
-    const float s = 2.f * (quaternion.w * quaternion.y - quaternion.x * quaternion.z);
-
-    // It is invalid to pass values outside
-    // of the range -1,1 to asin()... so don't.
-
-    Float3 ret;
-
-    if(s < 1.f){
-        if(-1.f < s){
-            ret.z = atan2f(2.f * (quaternion.x * quaternion.y + quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.y * quaternion.y + quaternion.z * quaternion.z));
-            ret.y = asinf(s);
-            ret.x = atan2f(2.f * (quaternion.y * quaternion.z + quaternion.w * quaternion.x), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.y * quaternion.y));
-        }
-        else{
-            ret.z = 0;
-            ret.y = -DirectX::XM_PIDIV2;
-            ret.x = -atan2f(2.f * (quaternion.x * quaternion.y - quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.z * quaternion.z));
-        }
-
-    }
-    else{
-        ret.z = 0;
-        ret.y = DirectX::XM_PIDIV2;
-        ret.x = atan2f(2.f * (quaternion.x * quaternion.y - quaternion.w * quaternion.z), 1.f - 2.f * (quaternion.x * quaternion.x + quaternion.z * quaternion.z));
-    }
-
-    return ret;
-}

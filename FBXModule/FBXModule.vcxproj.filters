@@ -9,7 +9,6 @@
     <ClCompile Include="FBXUtilites_IO.cpp" />
     <ClCompile Include="FBXShared_Error.cpp" />
     <ClCompile Include="FBXModule_Scene.cpp" />
-    <ClCompile Include="FBXUtilites_Hierarchy.cpp" />
     <ClCompile Include="FBXShared_Node.cpp" />
     <ClCompile Include="FBXShared_FbxSdk.cpp" />
     <ClCompile Include="FBXShared_Mesh.cpp" />
@@ -21,6 +20,7 @@
     <ClCompile Include="FBXModule_Compatible.cpp" />
     <ClCompile Include="FBXShared_BoneCombination.cpp" />
     <ClCompile Include="FBXMath.cpp" />
+    <ClCompile Include="FBXShared_Converter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

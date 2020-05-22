@@ -293,11 +293,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxColor, int>(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxColor, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
                                 break;
 
                             default:
@@ -323,11 +323,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxColor, int>(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxColor, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:
@@ -376,11 +376,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector2, int>(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector2, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
                                 break;
 
                             default:
@@ -408,7 +408,7 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
                             case FbxLayerElement::eIndexToDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(uvIndex));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector2, int>(vert.mData, kObject->GetDirectArray().GetAt(uvIndex));
                                 break;
 
                             default:
@@ -460,11 +460,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:
@@ -512,11 +512,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:
@@ -564,11 +564,11 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                             switch(kObject->GetReferenceMode()){
                             case FbxLayerElement::eDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(flatIndex));
                                 break;
 
                             case FbxLayerElement::eIndexToDirect:
-                                CopyArrayData(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(flatIndex)));
                                 break;
 
                             default:

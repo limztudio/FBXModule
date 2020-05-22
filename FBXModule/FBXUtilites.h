@@ -345,8 +345,6 @@ private:
 };
 
 
-extern void ConvertObjects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
-
 template<size_t LEN_LHS, size_t LEN_RHS, typename LHS, typename RHS, typename INDEX_TYPE = size_t>
 static inline void CopyArrayData(LHS(&lhs)[LEN_LHS], RHS(&&rhs)[LEN_RHS]){
     for(INDEX_TYPE i = 0; i < INDEX_TYPE(LEN_LHS); ++i)

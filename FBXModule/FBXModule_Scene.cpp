@@ -47,7 +47,10 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
         }
     }
 
-    ConvertObjects(shr_SDKManager, shr_scene);
+    if(!SHRConvertOjbects(shr_SDKManager, shr_scene)){
+        SHRPushErrorMessage("failed convert fbx objects", __name_of_this_func);
+        return false;
+    }
 
     {
         shr_fbxNodeToExportNode.clear();

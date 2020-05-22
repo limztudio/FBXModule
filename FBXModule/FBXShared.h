@@ -34,6 +34,8 @@ using Unit3Container = std::vector<fbxsdk::FbxDouble3>;
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
+// FBXShared_Converter ///////////////////////////////////////////////////////////////////////////////
+
 // FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
@@ -115,20 +117,17 @@ template<typename T>
 class AnimationKeyFrame{
 public:
     AnimationKeyFrame(){}
-    AnimationKeyFrame(const fbxsdk::FbxAnimCurveKey& _curveKey, const T& _value)
+    AnimationKeyFrame(const FbxTime& _time, const FBXAnimationInterpolationType& _type, const T& _value)
         :
-        curveKey(_curveKey),
+        time(_time),
+        type(_type),
         value(_value)
-    {}
-    AnimationKeyFrame(fbxsdk::FbxAnimCurveKey&& _curveKey, T&& _value)
-        :
-        curveKey(std::move(_curveKey)),
-        value(std::move(_value))
     {}
 
 
 public:
-    fbxsdk::FbxAnimCurveKey curveKey;
+    FbxTime time;
+    FBXAnimationInterpolationType type;
     T value;
 };
 template<typename T>
@@ -157,6 +156,7 @@ public:
 };
 struct AnimationLayer{
     std::string strName;
+    float weight;
     std::vector<AnimationNode> nodes;
 };
 struct AnimationStack{
@@ -190,6 +190,8 @@ extern fbxsdk::FbxSystemUnit shr_systemUnit;
 extern fbxsdk::FbxManager* shr_SDKManager;
 
 extern fbxsdk::FbxScene* shr_scene;
+
+// FBXShared_Converter ///////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
 
@@ -233,6 +235,12 @@ extern void SHRPushErrorMessage(std::string&& strMessage, const char* strCallPos
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
 extern void SHRDestroyFbxSdkObjects();
+
+// FBXShared_Converter ///////////////////////////////////////////////////////////////////////////////
+
+extern bool SHRConvertNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxNode* kNode);
+extern bool SHRConvertAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+extern bool SHRConvertOjbects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
 // FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
 
