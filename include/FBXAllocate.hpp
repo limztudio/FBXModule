@@ -85,7 +85,7 @@ namespace __hidden_FBXModule{
             dest = FBXNew<FBXAnimation>();
 
             dest->Name = src->Name;
-            dest->AnimationLayers = src->AnimationLayers;
+            dest->AnimationNodes = src->AnimationNodes;
 
             allocateAnimation(dest->Next, src->Next);
         }

@@ -75,17 +75,24 @@ bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
     static const char __name_of_this_func[] = "SHRConvertAnimations(FbxManager*, FbxScene*)";
 
 
-    FbxAnimCurveFilterKeyReducer keyFilter;
+    FbxAnimCurveFilterKeyReducer kReducer;
+    FbxAnimCurveFilterConstantKeyReducer kConstantReducer;
 
     for(auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>(), idxAnimStack = 0; idxAnimStack < edxAnimStack; ++idxAnimStack){
         auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
         if(!kAnimStack)
             continue;
 
-        keyFilter.Reset();
-        keyFilter.SetPrecision(KEY_REDUCER_PRECISION);
-        if(!keyFilter.Apply(kAnimStack)){
+        kReducer.Reset();
+        kReducer.SetPrecision(KEY_REDUCER_PRECISION);
+        if(!kReducer.Apply(kAnimStack)){
             SHRPushErrorMessage("failed to apply reduction filter to animation", __name_of_this_func);
+            return false;
+        }
+
+        kConstantReducer.Reset();
+        if(!kConstantReducer.Apply(kAnimStack)){
+            SHRPushErrorMessage("failed to apply constant reduction filter to animation", __name_of_this_func);
             return false;
         }
     }

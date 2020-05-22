@@ -39,13 +39,6 @@ public:
     FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 4>>> RotationKeys;
     FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 3>>> TranslationKeys;
 };
-class FBXAnimationLayer{
-public:
-    FBXDynamicArray<char> Name;
-
-public:
-    FBXDynamicArray<FBXAnimationNode> AnimationNodes;
-};
 
 
 class FBXAnimation : public FBXBase{
@@ -68,5 +61,5 @@ public:
     FBXAnimation* Next;
 
 public:
-    FBXDynamicArray<FBXAnimationLayer> AnimationLayers;
+    FBXDynamicArray<FBXAnimationNode> AnimationNodes;
 };

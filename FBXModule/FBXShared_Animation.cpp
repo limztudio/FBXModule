@@ -8,7 +8,6 @@
 #include "stdafx.h"
 
 #include <set>
-#include <unordered_map>
 
 #include <FBXAssign.hpp>
 
@@ -20,123 +19,18 @@
 using namespace fbxsdk;
 
 
-struct _Marker{
-    FbxAnimCurveKey curveKey;
-};
-static inline bool operator==(const _Marker& lhs, const _Marker& rhs){
-    return (lhs.curveKey.GetTime() == rhs.curveKey.GetTime());
-}
-static inline bool operator<(const _Marker& lhs, const _Marker& rhs){
-    return (lhs.curveKey.GetTime() < rhs.curveKey.GetTime());
-}
-class _Timestamp{
-public:
-    inline void clear(){
-        for(auto& i : Curves)
-            i.clear();
-
-        Markers.clear();
-    }
-
-
-public:
-    std::vector<_Marker> Curves[3];
-    std::set<FbxTime> Markers;
-};
-
-
 static std::vector<AnimationStack> ins_animationStacks;
 
-static std::set<_Marker> ins_localMarkers;
-static _Timestamp ins_localTimestamp;
+static std::set<FbxTime> ins_animationKeyFrames[3];
 
 
-static inline void ins_updateTimestamp(FbxAnimCurve* kAnimCurve, size_t index){
+static inline void ins_updateTimestamp(FbxAnimCurve* kAnimCurve, size_t idx){
     if(!kAnimCurve)
         return;
 
-    ins_localMarkers.clear();
-
-    for(auto e = kAnimCurve->KeyGetCount(), i = 0; i < e; ++i){
-        _Marker newMaker;
-        newMaker.curveKey = kAnimCurve->KeyGet(i);
-
-        ins_localTimestamp.Markers.emplace(newMaker.curveKey.GetTime());
-        ins_localMarkers.emplace(std::move(newMaker));
-    }
-
-    auto& curves = ins_localTimestamp.Curves[index];
-    curves.reserve(ins_localMarkers.size());
-    for(auto& i : ins_localMarkers)
-        curves.emplace_back(std::move(i));
+    for(auto e = kAnimCurve->KeyGetCount(), i = 0; i < e; ++i)
+        ins_animationKeyFrames[idx].emplace(kAnimCurve->KeyGet(i).GetTime());
 }
-template<typename FUNC>
-static inline void ins_fillTimeData(FUNC func){
-    static const size_t keyCount = 3;
-    size_t lastFrame[keyCount] = { 0, };
-
-    for(const auto& curTime : ins_localTimestamp.Markers){
-        FBXAnimationInterpolationType curType[keyCount];
-        float curValue[keyCount];
-
-        for(size_t idxCurve = 0; idxCurve < keyCount; ++idxCurve){
-            auto& iCurve = ins_localTimestamp.Curves[idxCurve];
-
-            for(size_t idxFrame = lastFrame[idxCurve], edxFrame = iCurve.size(); idxFrame < edxFrame; ++idxFrame){
-                auto& kCurve = iCurve[idxFrame].curveKey;
-                const auto kTime = kCurve.GetTime();
-
-                if(curTime >= kTime){
-                    if(curTime > kTime){
-                        switch(kCurve.GetInterpolation()){
-                        case FbxAnimCurveDef::eInterpolationConstant:
-                            curType[idxCurve] = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
-                            curValue[idxCurve] = kCurve.GetValue();
-                            break;
-                        case FbxAnimCurveDef::eInterpolationLinear:
-                        case FbxAnimCurveDef::eInterpolationCubic:
-                            curType[idxCurve] = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear;
-                            if((idxFrame + 1) >= edxFrame)
-                                curValue[idxCurve] = kCurve.GetValue();
-                            else{
-                                auto& kNextCurve = iCurve[idxFrame + 1].curveKey;
-                                const auto kNextTime = kNextCurve.GetTime();
-
-                                auto dCurTime = curTime.GetSecondDouble();
-                                auto dTime = kTime.GetSecondDouble();
-                                auto dNextTime = kNextTime.GetSecondDouble();
-
-                                auto dCurPos = (dCurTime - dTime) / (dNextTime - dTime);
-
-                                auto fVal = kCurve.GetValue();
-                                auto fNextVal = kNextCurve.GetValue();
-
-                                curValue[idxCurve] = float(fVal + dCurPos * (fNextVal - fVal));
-                            }
-                            break;
-                        }
-                    }
-                    else
-                        curValue[idxCurve] = kCurve.GetValue();
-
-                    lastFrame[idxCurve] = idxFrame;
-                    break;
-                }
-            }
-        }
-
-        FBXAnimationInterpolationType genType = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
-        for(const auto iType : curType){
-            if(iType == FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear){
-                genType = iType;
-                break;
-            }
-        }
-
-        func(curTime, genType, curValue);
-    }
-}
-
 
 static void ins_collectNodes(AnimationNodes& nodeTable, FbxNode* kNode){
     if(kNode){
@@ -171,145 +65,215 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
     static const char __name_of_this_func[] = "SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)";
 
 
-    ins_animationStacks.resize((size_t)kScene->GetSrcObjectCount<FbxAnimStack>());
-    for(auto edxAnimStack = (int)ins_animationStacks.size(), idxAnimStack = 0; idxAnimStack < edxAnimStack; ++idxAnimStack){
-        auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
-        if(!kAnimStack)
-            continue;
+    // attempt: the transform of key frames are able to earn from Evaluator.
+    // but since Evaluator looks it has no relation with FbxAnimStack or FbxAnimLayer(well, seems FbxAnimLayer are calculated on that so far)
+    // and Evaluator shows up only the animation of default FbxAnimStack(and guess the default will be 0 index of FbxAnimStack).
+    // so what I'm gonna do is, disconnect all animation stacks from scene, and re-connect only one of them by iterating animation stacks.
+
+    {
+        const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
+
+        ins_animationStacks.clear();
+        ins_animationStacks.reserve((size_t)edxAnimStack);
+
+        for(auto idxAnimStack = decltype(edxAnimStack){ 0 }; idxAnimStack < edxAnimStack; ++idxAnimStack){
+            auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
+            if(!kAnimStack)
+                continue;
+
+            ins_animationStacks.emplace_back(AnimationStack());
+            auto& iAnimStack = *ins_animationStacks.rbegin();
+
+            iAnimStack.animStack = kAnimStack;
+        }
+
+        for(auto& iAnimStack : ins_animationStacks){
+            auto* kAnimStack = iAnimStack.animStack;
+
+            if(!kScene->RemoveMember(kAnimStack)){
+                std::string msg = "unable to disconnect FbxAnimStack";
+                msg += "(errored in \"";
+                msg += kAnimStack->GetName();
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+        }
+    }
+
+    for(auto& iAnimStack : ins_animationStacks){
+        auto* kAnimStack = iAnimStack.animStack;
 
         const std::string strStackName = kAnimStack->GetName();
 
-        auto& iAnimStack = ins_animationStacks[idxAnimStack];
+        if(!kScene->AddMember(kAnimStack)){
+            std::string msg = "unable to connect FbxAnimStack";
+            msg += "(errored in \"";
+            msg += kAnimStack->GetName();
+            msg += "\")";
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+            return false;
+        }
 
-        iAnimStack.strName = strStackName.c_str();
+        iAnimStack.nodes.clear();
+        iAnimStack.nodes.reserve(kNodeTable.size());
 
-        iAnimStack.layers.resize((size_t)kAnimStack->GetMemberCount<FbxAnimLayer>());
-        for(auto edxAnimLayer = (int)iAnimStack.layers.size(), idxAnimLayer = 0; idxAnimLayer < edxAnimLayer; ++idxAnimLayer){
-            auto* kAnimLayer = kAnimStack->GetMember<FbxAnimLayer>(idxAnimLayer);
-            if(!kAnimLayer)
-                continue;
+        for(auto* kNode : kNodeTable){
+            for(auto& keyTable : ins_animationKeyFrames)
+                keyTable.clear();
 
-            const std::string strLayerName = kAnimLayer->GetName();
-
-            auto& iAnimLayer = iAnimStack.layers[idxAnimLayer];
-
-            iAnimLayer.strName = strLayerName.c_str();
-            iAnimLayer.weight = decltype(iAnimLayer.weight)(kAnimLayer->Weight);
-
-            iAnimLayer.nodes.clear();
-            iAnimLayer.nodes.reserve(kNodeTable.size());
-            for(auto* kNode : kNodeTable){
-                AnimationNode newNodes;
-
-                newNodes.bindNode = kNode;
+            for(auto edxAnimLayer = kAnimStack->GetMemberCount<FbxAnimLayer>(), idxAnimLayer = 0; idxAnimLayer < edxAnimLayer; ++idxAnimLayer){
+                auto* kAnimLayer = kAnimStack->GetMember<FbxAnimLayer>(idxAnimLayer);
+                if(!kAnimLayer)
+                    continue;
 
                 { // translation
-                    ins_localTimestamp.clear();
-                    {
-                        auto* kCurveX = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-                        ins_updateTimestamp(kCurveX, 0);
+                    auto* kCurveX = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+                    ins_updateTimestamp(kCurveX, 0);
 
-                        auto* kCurveY = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-                        ins_updateTimestamp(kCurveY, 1);
+                    auto* kCurveY = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+                    ins_updateTimestamp(kCurveY, 0);
 
-                        auto* kCurveZ = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
-                        ins_updateTimestamp(kCurveZ, 2);
-                    }
-
-                    {
-                        auto& curKeys = newNodes.translationKeys;
-
-                        curKeys.clear();
-                        curKeys.reserve(ins_localTimestamp.Markers.size());
-                        ins_fillTimeData([&curKeys](const FbxTime& kTime, FBXAnimationInterpolationType iType, const float(&fValue)[3]){
-                            FbxDouble3 kVal(fValue[0], fValue[1], fValue[2]);
-                            curKeys.emplace_back(kTime, iType, kVal);
-                        });
-                    }
+                    auto* kCurveZ = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+                    ins_updateTimestamp(kCurveZ, 0);
                 }
 
                 { // rotation
-                    ins_localTimestamp.clear();
-                    {
-                        auto* kCurveX = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-                        ins_updateTimestamp(kCurveX, 0);
+                    auto* kCurveX = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+                    ins_updateTimestamp(kCurveX, 1);
 
-                        auto* kCurveY = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-                        ins_updateTimestamp(kCurveY, 1);
+                    auto* kCurveY = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+                    ins_updateTimestamp(kCurveY, 1);
 
-                        auto* kCurveZ = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
-                        ins_updateTimestamp(kCurveZ, 2);
-                    }
-
-                    {
-                        auto& curKeys = newNodes.rotationKeys;
-
-                        curKeys.clear();
-                        curKeys.reserve(ins_localTimestamp.Markers.size());
-                        ins_fillTimeData([&curKeys, &kNode](const FbxTime& kTime, FBXAnimationInterpolationType iType, const float(&fValue)[3]){
-                            FbxAMatrix kMat;
-                            kMat.SetR(FbxVector4(fValue[0], fValue[1], fValue[2]), kNode->RotationOrder.Get());
-
-                            auto kVal = kMat.GetQ();
-                            curKeys.emplace_back(kTime, iType, kVal);
-                        });
-                    }
+                    auto* kCurveZ = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+                    ins_updateTimestamp(kCurveZ, 1);
                 }
 
                 { // scaling
-                    ins_localTimestamp.clear();
-                    {
-                        auto* kCurveX = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-                        ins_updateTimestamp(kCurveX, 0);
+                    auto* kCurveX = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+                    ins_updateTimestamp(kCurveX, 2);
 
-                        auto* kCurveY = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-                        ins_updateTimestamp(kCurveY, 1);
+                    auto* kCurveY = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+                    ins_updateTimestamp(kCurveY, 2);
 
-                        auto* kCurveZ = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
-                        ins_updateTimestamp(kCurveZ, 2);
-                    }
-
-                    {
-                        auto& curKeys = newNodes.scalingKeys;
-
-                        curKeys.clear();
-                        curKeys.reserve(ins_localTimestamp.Markers.size());
-                        ins_fillTimeData([&curKeys](const FbxTime& kTime, FBXAnimationInterpolationType iType, const float(&fValue)[3]){
-                            FbxDouble3 kVal(fValue[0], fValue[1], fValue[2]);
-                            curKeys.emplace_back(kTime, iType, kVal);
-                        });
-                    }
+                    auto* kCurveZ = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+                    ins_updateTimestamp(kCurveZ, 2);
                 }
-
-                if(newNodes.isEmpty()){
-                    auto matDefault = GetLocalTransform(kNode);
-
-                    {
-                        newNodes.translationKeys.clear();
-                        newNodes.translationKeys.reserve(1);
-                        auto kValRaw = matDefault.GetT();
-                        FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
-                        newNodes.translationKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
-                    }
-                    {
-                        newNodes.rotationKeys.clear();
-                        newNodes.rotationKeys.reserve(1);
-                        auto kVal = matDefault.GetQ();
-                        newNodes.rotationKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
-                    }
-                    {
-                        newNodes.scalingKeys.clear();
-                        newNodes.scalingKeys.reserve(1);
-                        auto kValRaw = matDefault.GetS();
-                        FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
-                        newNodes.scalingKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
-                    }
-
-                    iAnimLayer.nodes.emplace_back(std::move(newNodes));
-                }
-                else
-                    iAnimLayer.nodes.emplace_back(std::move(newNodes));
             }
+
+            auto kDefaultMat = GetLocalTransform(kNode);
+            AnimationNode newNodes;
+
+            newNodes.bindNode = kNode;
+
+            { // translation
+                newNodes.translationKeys.clear();
+                newNodes.translationKeys.reserve(ins_animationKeyFrames[0].size());
+                for(const auto& kTime : ins_animationKeyFrames[0]){
+                    auto kMat = GetLocalTransform(kNode, kTime);
+                    auto kValRaw = kMat.GetT();
+                    FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
+                    newNodes.translationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
+
+                    const auto keycount = newNodes.translationKeys.size();
+                    if(keycount > 1){
+                        auto& iPrevKey = newNodes.translationKeys[keycount - 2];
+                        const auto& kPrevVal = iPrevKey.value;
+
+                        if(kPrevVal == kVal)
+                            iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+                    }
+                }
+
+                if(newNodes.translationKeys.empty()){
+                    newNodes.translationKeys.reserve(1);
+                    auto kValRaw = kDefaultMat.GetT();
+                    FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
+                    newNodes.translationKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
+                }
+            }
+
+            { // rotation
+                newNodes.rotationKeys.clear();
+                newNodes.rotationKeys.reserve(ins_animationKeyFrames[0].size());
+                for(const auto& kTime : ins_animationKeyFrames[0]){
+                    auto kMat = GetLocalTransform(kNode, kTime);
+                    FbxDouble4 kVal = kMat.GetQ();
+                    newNodes.rotationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
+
+                    const auto keycount = newNodes.rotationKeys.size();
+                    if(keycount > 1){
+                        auto& iPrevKey = newNodes.rotationKeys[keycount - 2];
+                        const auto& kPrevVal = iPrevKey.value;
+
+                        if(kPrevVal == kVal)
+                            iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+                    }
+                }
+
+                if(newNodes.rotationKeys.empty()){
+                    newNodes.rotationKeys.reserve(1);
+                    auto kVal = kDefaultMat.GetQ();
+                    newNodes.rotationKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
+                }
+            }
+
+            { // scaling
+                newNodes.scalingKeys.clear();
+                newNodes.scalingKeys.reserve(ins_animationKeyFrames[0].size());
+                for(const auto& kTime : ins_animationKeyFrames[0]){
+                    auto kMat = GetLocalTransform(kNode, kTime);
+                    auto kValRaw = kMat.GetS();
+                    FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
+                    newNodes.scalingKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
+
+                    const auto keycount = newNodes.scalingKeys.size();
+                    if(keycount > 1){
+                        auto& iPrevKey = newNodes.scalingKeys[keycount - 2];
+                        const auto& kPrevVal = iPrevKey.value;
+
+                        if(kPrevVal == kVal)
+                            iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+                    }
+                }
+
+                if(newNodes.scalingKeys.empty()){
+                    newNodes.scalingKeys.reserve(1);
+                    auto kValRaw = kDefaultMat.GetS();
+                    FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
+                    newNodes.scalingKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
+                }
+            }
+
+            {
+                newNodes.translationKeys.rbegin()->type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+                newNodes.rotationKeys.rbegin()->type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+                newNodes.scalingKeys.rbegin()->type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
+            }
+
+            iAnimStack.nodes.emplace_back(std::move(newNodes));
+        }
+
+        if(!kScene->RemoveMember(kAnimStack)){
+            std::string msg = "unable to disconnect FbxAnimStack";
+            msg += "(errored in \"";
+            msg += kAnimStack->GetName();
+            msg += "\")";
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+            return false;
+        }
+    }
+
+    for(auto& iAnimStack : ins_animationStacks){
+        auto* kAnimStack = iAnimStack.animStack;
+
+        if(!kScene->AddMember(kAnimStack)){
+            std::string msg = "unable to connect FbxAnimStack";
+            msg += "(errored in \"";
+            msg += kAnimStack->GetName();
+            msg += "\")";
+            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+            return false;
         }
     }
 
@@ -333,69 +297,58 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
         (*pNewAnimation) = FBXNew<FBXAnimation>();
         auto* pAnimation = (*pNewAnimation);
 
+        const std::string strStackName = iAnimation.animStack->GetName();
+
         {
-            const auto lenName = iAnimation.strName.length();
+            const auto lenName = strStackName.length();
             pAnimation->Name.Assign(lenName + 1);
-            CopyArrayData(pAnimation->Name.Values, iAnimation.strName.c_str(), lenName);
+            CopyArrayData(pAnimation->Name.Values, strStackName.c_str(), lenName);
             pAnimation->Name.Values[lenName] = 0;
         }
 
-        pAnimation->AnimationLayers.Assign(iAnimation.layers.size());
-        for(size_t idxLayer = 0; idxLayer < pAnimation->AnimationLayers.Length; ++idxLayer){
-            auto& iLayer = iAnimation.layers[idxLayer];
-            auto* pLayer = &pAnimation->AnimationLayers.Values[idxLayer];
+        pAnimation->AnimationNodes.Assign(iAnimation.nodes.size());
+        for(size_t idxNode = 0; idxNode < pAnimation->AnimationNodes.Length; ++idxNode){
+            auto& iNode = iAnimation.nodes[idxNode];
+            auto* pNode = &pAnimation->AnimationNodes.Values[idxNode];
+
+            const std::string strNodeName = iNode.bindNode->GetName();
 
             {
-                const auto lenName = iLayer.strName.length();
-                pLayer->Name.Assign(lenName + 1);
-                CopyArrayData(pLayer->Name.Values, iLayer.strName.c_str(), lenName);
-                pLayer->Name.Values[lenName] = 0;
+                auto f = fbxNodeToExportNode.find(iNode.bindNode);
+                if(f == fbxNodeToExportNode.end()){
+                    std::string msg = "bind node not found";
+                    msg += "(errored in \"";
+                    msg += strNodeName;
+                    msg += "\")";
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                    return false;
+                }
+
+                pNode->BindNode = f->second;
             }
-            
-            pLayer->AnimationNodes.Assign(iLayer.nodes.size());
-            for(size_t idxNode = 0; idxNode < pLayer->AnimationNodes.Length; ++idxNode){
-                auto& iNode = iLayer.nodes[idxNode];
-                auto* pNode = &pLayer->AnimationNodes.Values[idxNode];
 
-                const std::string strNodeName = iNode.bindNode->GetName();
+            pNode->ScalingKeys.Assign(iNode.scalingKeys.size());
+            for(size_t idxKey = 0; idxKey < pNode->ScalingKeys.Length; ++idxKey){
+                auto& iKey = iNode.scalingKeys[idxKey];
+                auto* pKey = &pNode->ScalingKeys.Values[idxKey];
 
-                {
-                    auto f = fbxNodeToExportNode.find(iNode.bindNode);
-                    if(f == fbxNodeToExportNode.end()){
-                        std::string msg = "bind node not found";
-                        msg += "(errored in \"";
-                        msg += strNodeName;
-                        msg += "\")";
-                        SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-                        return false;
-                    }
+                ins_convAnimationKey(*pKey, iKey);
+            }
 
-                    pNode->BindNode = f->second;
-                }
+            pNode->RotationKeys.Assign(iNode.rotationKeys.size());
+            for(size_t idxKey = 0; idxKey < pNode->RotationKeys.Length; ++idxKey){
+                auto& iKey = iNode.rotationKeys[idxKey];
+                auto* pKey = &pNode->RotationKeys.Values[idxKey];
 
-                pNode->ScalingKeys.Assign(iNode.scalingKeys.size());
-                for(size_t idxKey = 0; idxKey < pNode->ScalingKeys.Length; ++idxKey){
-                    auto& iKey = iNode.scalingKeys[idxKey];
-                    auto* pKey = &pNode->ScalingKeys.Values[idxKey];
+                ins_convAnimationKey(*pKey, iKey);
+            }
 
-                    ins_convAnimationKey(*pKey, iKey);
-                }
+            pNode->TranslationKeys.Assign(iNode.translationKeys.size());
+            for(size_t idxKey = 0; idxKey < pNode->TranslationKeys.Length; ++idxKey){
+                auto& iKey = iNode.translationKeys[idxKey];
+                auto* pKey = &pNode->TranslationKeys.Values[idxKey];
 
-                pNode->RotationKeys.Assign(iNode.rotationKeys.size());
-                for(size_t idxKey = 0; idxKey < pNode->RotationKeys.Length; ++idxKey){
-                    auto& iKey = iNode.rotationKeys[idxKey];
-                    auto* pKey = &pNode->RotationKeys.Values[idxKey];
-
-                    ins_convAnimationKey(*pKey, iKey);
-                }
-
-                pNode->TranslationKeys.Assign(iNode.translationKeys.size());
-                for(size_t idxKey = 0; idxKey < pNode->TranslationKeys.Length; ++idxKey){
-                    auto& iKey = iNode.translationKeys[idxKey];
-                    auto* pKey = &pNode->TranslationKeys.Values[idxKey];
-
-                    ins_convAnimationKey(*pKey, iKey);
-                }
+                ins_convAnimationKey(*pKey, iKey);
             }
         }
 
@@ -424,8 +377,8 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
             return false;
         }
 
-        for(auto* pAnimLayer = pAnimStack->AnimationLayers.Values; FBX_PTRDIFFU(pAnimLayer - pAnimStack->AnimationLayers.Values) < pAnimStack->AnimationLayers.Length; ++pAnimLayer){
-            const std::string strLayerName = pAnimLayer->Name.Values;
+        {
+            static const std::string strLayerName = "Base Layer";
 
             auto* kAnimLayer = FbxAnimLayer::Create(kScene, strLayerName.c_str());
             if(!kAnimLayer){
@@ -439,7 +392,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                 return false;
             }
 
-            for(auto* pAnimNode = pAnimLayer->AnimationNodes.Values; FBX_PTRDIFFU(pAnimNode - pAnimLayer->AnimationNodes.Values) < pAnimLayer->AnimationNodes.Length; ++pAnimNode){
+            for(auto* pAnimNode = pAnimStack->AnimationNodes.Values; FBX_PTRDIFFU(pAnimNode - pAnimStack->AnimationNodes.Values) < pAnimStack->AnimationNodes.Length; ++pAnimNode){
                 const std::string strNodeName = pAnimNode->BindNode->Name.Values;
 
                 FbxNode* kNode = nullptr;

@@ -133,35 +133,16 @@ public:
 template<typename T>
 using AnimationKeyFrames = std::vector<AnimationKeyFrame<T>>;
 
-class AnimationNode{
-public:
-    inline bool isEmpty()const{
-        if(!scalingKeys.empty())
-            return false;
-        if(!rotationKeys.empty())
-            return false;
-        if(!translationKeys.empty())
-            return false;
-
-        return true;
-    }
-
-
-public:
+struct AnimationNode{
     fbxsdk::FbxNode* bindNode;
 
     AnimationKeyFrames<fbxsdk::FbxDouble3> scalingKeys;
     AnimationKeyFrames<fbxsdk::FbxDouble4> rotationKeys;
     AnimationKeyFrames<fbxsdk::FbxDouble3> translationKeys;
 };
-struct AnimationLayer{
-    std::string strName;
-    float weight;
-    std::vector<AnimationNode> nodes;
-};
 struct AnimationStack{
-    std::string strName;
-    std::vector<AnimationLayer> layers;
+    FbxAnimStack* animStack;
+    std::vector<AnimationNode> nodes;
 };
 
 using AnimationNodes = std::vector<fbxsdk::FbxNode*>;
