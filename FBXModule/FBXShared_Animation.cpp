@@ -99,13 +99,9 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
     static const char __name_of_this_func[] = "SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)";
 
 
-    // attempt: the transform of key frames are able to earn from Evaluator.
-    // but since Evaluator looks it has no relation with FbxAnimStack or FbxAnimLayer(well, seems FbxAnimLayer are calculated on that so far)
-    // and Evaluator shows up only the animation of default FbxAnimStack(and guess the default will be 0 index of FbxAnimStack).
-    // so what I'm gonna do is, disconnect all animation stacks from scene, and re-connect only one of them by iterating animation stacks.
+    auto* kDefaultAnimStack = kScene->GetCurrentAnimationStack();
 
-    // well, it ain't work properly...
-    // but later, try to connect animation stack object as dstObject
+    auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
 
     const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
 
@@ -128,8 +124,6 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
         iAnimStack.nodes.clear();
         iAnimStack.nodes.reserve(kNodeTable.size());
-
-        auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
 
         for(auto* kNode : kNodeTable){
             for(auto& keyTable : ins_animationKeyFrames)
@@ -254,6 +248,8 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
             iAnimStack.nodes.emplace_back(std::move(newNodes));
         }
     }
+
+    kScene->SetCurrentAnimationStack(kDefaultAnimStack);
 
     return true;
 }
