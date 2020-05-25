@@ -13,7 +13,7 @@
 #include "FBXShared.h"
 
 
-#define KEY_REDUCER_PRECISION 0.00001
+#define KEY_REDUCER_PRECISION 0.000001
 
 
 using namespace fbxsdk;
@@ -75,26 +75,34 @@ bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
     static const char __name_of_this_func[] = "SHRConvertAnimations(FbxManager*, FbxScene*)";
 
 
+    //FbxAnimCurveFilterKeyReducer kFilterReducer;
+    //{
+    //    kFilterReducer.SetPrecision(KEY_REDUCER_PRECISION);
+    //}
+
+    //FbxAnimCurveFilterConstantKeyReducer kFilterConstantReducer;
+    //{
+    //    kFilterConstantReducer.SetScalingThreshold(KEY_REDUCER_PRECISION);
+    //    kFilterConstantReducer.SetRotationThreshold(KEY_REDUCER_PRECISION);
+    //    kFilterConstantReducer.SetTranslationThreshold(KEY_REDUCER_PRECISION);
+    //    kFilterConstantReducer.SetDefaultThreshold(KEY_REDUCER_PRECISION);
+
+    //    kFilterConstantReducer.SetKeepFirstAndLastKeys(true);
+    //}
+
     for(auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>(), idxAnimStack = 0; idxAnimStack < edxAnimStack; ++idxAnimStack){
         auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
         if(!kAnimStack)
             continue;
 
-        //{
-        //    FbxAnimCurveFilterKeyReducer kFilter;
-        //    kFilter.SetPrecision(KEY_REDUCER_PRECISION);
-        //    if(!kFilter.Apply(kAnimStack)){
-        //        SHRPushErrorMessage("failed to apply reduction filter to animation", __name_of_this_func);
-        //        return false;
-        //    }
+        //if(!kFilterReducer.Apply(kAnimStack)){
+        //    SHRPushErrorMessage("failed to apply reduction filter to animation", __name_of_this_func);
+        //    return false;
         //}
 
-        //{
-        //    FbxAnimCurveFilterConstantKeyReducer kFilter;
-        //    if(!kFilter.Apply(kAnimStack)){
-        //        SHRPushErrorMessage("failed to apply constant reduction filter to animation", __name_of_this_func);
-        //        return false;
-        //    }
+        //if(!kFilterConstantReducer.Apply(kAnimStack)){
+        //    SHRPushErrorMessage("failed to apply constant reduction filter to animation", __name_of_this_func);
+        //    return false;
         //}
     }
 

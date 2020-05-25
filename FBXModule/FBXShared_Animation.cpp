@@ -339,10 +339,13 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
 bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pAnimStack){
     static const char __name_of_this_func[] = "SHRStoreAnimation(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXAnimation*)";
 
+    
+    FbxAnimCurveFilterUnroll kFilterUnroll;
+    {
+        kFilterUnroll.SetTestForPath(true);
+    }
 
     if(pAnimStack){
-        FbxAnimCurveFilterUnroll kFilterUnroll;
-
         const std::string strStackName = pAnimStack->Name.Values;
 
         auto* kAnimStack = FbxAnimStack::Create(kScene, strStackName.c_str());
@@ -535,8 +538,6 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                     {
                         FbxAnimCurve* kCurves[] = { kCurveX, kCurveY, kCurveZ };
 
-                        kFilterUnroll.Reset();
-                        kFilterUnroll.SetTestForPath(true);
                         if(!kFilterUnroll.Apply((FbxAnimCurve**)&kCurves, _countof(kCurves))){
                             std::string msg = "failed to unroll rotation component";
                             msg += "(errored in \"";

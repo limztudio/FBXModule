@@ -333,6 +333,9 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
         }
 
         clusterFinder.emplace(pDeform->TargetNode, kCluster);
+
+        for(auto* kParentNode = kTargetNode->GetParent(); (kParentNode && kParentNode->GetParent()); kParentNode = kParentNode->GetParent())
+            poseNodeList.emplace(kParentNode);
         poseNodeList.emplace(kTargetNode);
     }
 

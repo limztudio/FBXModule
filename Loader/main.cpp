@@ -84,7 +84,8 @@ static inline void storeNode(const char* name){
 }
 
 static inline void deleteFBXObjects(){
-    FBXDelete(fbxRoot);
+    if(fbxRoot)
+        FBXDelete(fbxRoot);
 }
 
 
