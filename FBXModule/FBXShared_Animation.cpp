@@ -107,50 +107,24 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
     // well, it ain't work properly...
     // but later, try to connect animation stack object as dstObject
 
-    {
-        const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
+    const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
 
-        ins_animationStacks.clear();
-        ins_animationStacks.reserve((size_t)edxAnimStack);
+    ins_animationStacks.clear();
+    ins_animationStacks.reserve((size_t)edxAnimStack);
 
-        for(auto idxAnimStack = decltype(edxAnimStack){ 0 }; idxAnimStack < edxAnimStack; ++idxAnimStack){
-            auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
-            if(!kAnimStack)
-                continue;
+    for(auto idxAnimStack = decltype(edxAnimStack){ 0 }; idxAnimStack < edxAnimStack; ++idxAnimStack){
+        auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
+        if(!kAnimStack)
+            continue;
 
-            ins_animationStacks.emplace_back(AnimationStack());
-            auto& iAnimStack = *ins_animationStacks.rbegin();
+        kScene->SetCurrentAnimationStack(kAnimStack);
 
-            iAnimStack.animStack = kAnimStack;
-        }
+        ins_animationStacks.emplace_back(AnimationStack());
+        auto& iAnimStack = *ins_animationStacks.rbegin();
 
-        for(auto& iAnimStack : ins_animationStacks){
-            auto* kAnimStack = iAnimStack.animStack;
-
-            if(!kScene->RemoveMember(kAnimStack)){
-                std::string msg = "unable to disconnect FbxAnimStack";
-                msg += "(errored in \"";
-                msg += kAnimStack->GetName();
-                msg += "\")";
-                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-                return false;
-            }
-        }
-    }
-
-    for(auto& iAnimStack : ins_animationStacks){
-        auto* kAnimStack = iAnimStack.animStack;
+        iAnimStack.animStack = kAnimStack;
 
         const std::string strStackName = kAnimStack->GetName();
-
-        if(!kScene->AddMember(kAnimStack)){
-            std::string msg = "unable to connect FbxAnimStack";
-            msg += "(errored in \"";
-            msg += kAnimStack->GetName();
-            msg += "\")";
-            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return false;
-        }
 
         iAnimStack.nodes.clear();
         iAnimStack.nodes.reserve(kNodeTable.size());
@@ -271,28 +245,6 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
             }
 
             iAnimStack.nodes.emplace_back(std::move(newNodes));
-        }
-
-        if(!kScene->RemoveMember(kAnimStack)){
-            std::string msg = "unable to disconnect FbxAnimStack";
-            msg += "(errored in \"";
-            msg += kAnimStack->GetName();
-            msg += "\")";
-            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return false;
-        }
-    }
-
-    for(auto& iAnimStack : ins_animationStacks){
-        auto* kAnimStack = iAnimStack.animStack;
-
-        if(!kScene->AddMember(kAnimStack)){
-            std::string msg = "unable to connect FbxAnimStack";
-            msg += "(errored in \"";
-            msg += kAnimStack->GetName();
-            msg += "\")";
-            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return false;
         }
     }
 
