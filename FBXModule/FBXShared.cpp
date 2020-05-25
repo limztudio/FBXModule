@@ -138,6 +138,7 @@ void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src){
 
     if(dest && src){
         dest->Name = src->Name;
+        dest->EndTime = src->EndTime;
         dest->AnimationNodes = src->AnimationNodes;
 
         for(auto* p = dest->AnimationNodes.Values; FBX_PTRDIFFU(p - dest->AnimationNodes.Values) < dest->AnimationNodes.Length; ++p){

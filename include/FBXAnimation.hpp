@@ -61,5 +61,6 @@ public:
     FBXAnimation* Next;
 
 public:
+    float EndTime;
     FBXDynamicArray<FBXAnimationNode> AnimationNodes;
 };

@@ -142,6 +142,7 @@ struct AnimationNode{
 };
 struct AnimationStack{
     FbxAnimStack* animStack;
+    FbxTime endTime;
     std::vector<AnimationNode> nodes;
 };
 

@@ -56,14 +56,25 @@ static inline void ins_keyReduce(KEY_TABLE& keyTable){
             ++idxPivot;
         }
     }
+
+    if(keyTable.size() == 2){
+        const auto& iLhs = keyTable[0];
+        const auto& iRhs = keyTable[1];
+
+        if(iLhs.value == iRhs.value)
+            keyTable.pop_back();
+    }
 }
 
-static inline void ins_updateTimestamp(FbxAnimCurve* kAnimCurve, size_t idx){
+static inline void ins_updateTimestamp(const FbxTime& kEndTime, FbxAnimCurve* kAnimCurve, size_t idx){
     if(!kAnimCurve)
         return;
 
-    for(auto e = kAnimCurve->KeyGetCount(), i = 0; i < e; ++i)
-        ins_animationKeyFrames[idx].emplace(kAnimCurve->KeyGet(i).GetTime());
+    for(auto e = kAnimCurve->KeyGetCount(), i = 0; i < e; ++i){
+        auto kCurTime = kAnimCurve->KeyGet(i).GetTime();
+        if(kCurTime <= kEndTime)
+            ins_animationKeyFrames[idx].emplace(kCurTime);
+    }
 }
 
 static void ins_collectNodes(AnimationNodes& nodeTable, FbxNode* kNode){
@@ -115,12 +126,15 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
         kScene->SetCurrentAnimationStack(kAnimStack);
 
+        const std::string strStackName = kAnimStack->GetName();
+
+        auto kTimeSpan = kAnimStack->GetLocalTimeSpan();
+
         ins_animationStacks.emplace_back(AnimationStack());
         auto& iAnimStack = *ins_animationStacks.rbegin();
 
         iAnimStack.animStack = kAnimStack;
-
-        const std::string strStackName = kAnimStack->GetName();
+        iAnimStack.endTime = kTimeSpan.GetStop();
 
         iAnimStack.nodes.clear();
         iAnimStack.nodes.reserve(kNodeTable.size());
@@ -136,35 +150,35 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                 { // translation
                     auto* kCurveX = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-                    ins_updateTimestamp(kCurveX, 0);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveX, 0);
 
                     auto* kCurveY = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-                    ins_updateTimestamp(kCurveY, 0);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveY, 0);
 
                     auto* kCurveZ = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
-                    ins_updateTimestamp(kCurveZ, 0);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveZ, 0);
                 }
 
                 { // rotation
                     auto* kCurveX = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-                    ins_updateTimestamp(kCurveX, 1);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveX, 1);
 
                     auto* kCurveY = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-                    ins_updateTimestamp(kCurveY, 1);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveY, 1);
 
                     auto* kCurveZ = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
-                    ins_updateTimestamp(kCurveZ, 1);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveZ, 1);
                 }
 
                 { // scaling
                     auto* kCurveX = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-                    ins_updateTimestamp(kCurveX, 2);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveX, 2);
 
                     auto* kCurveY = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-                    ins_updateTimestamp(kCurveY, 2);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveY, 2);
 
                     auto* kCurveZ = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
-                    ins_updateTimestamp(kCurveZ, 2);
+                    ins_updateTimestamp(iAnimStack.endTime, kCurveZ, 2);
                 }
             }
 
@@ -280,6 +294,8 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
             pAnimation->Name.Values[lenName] = 0;
         }
 
+        pAnimation->EndTime = decltype(pAnimation->EndTime)(iAnimation.endTime.GetSecondDouble());
+
         pAnimation->AnimationNodes.Assign(iAnimation.nodes.size());
         for(size_t idxNode = 0; idxNode < pAnimation->AnimationNodes.Length; ++idxNode){
             auto& iNode = iAnimation.nodes[idxNode];
@@ -352,6 +368,19 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
             msg += "\")";
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
+        }
+
+        {
+            FbxTime kTime;
+            FbxTimeSpan kTimeSpan;
+
+            kTime.SetSecondDouble(0.);
+            kTimeSpan.SetStart(kTime);
+
+            kTime.SetSecondDouble(pAnimStack->EndTime);
+            kTimeSpan.SetStop(kTime);
+
+            kAnimStack->SetLocalTimeSpan(kTimeSpan);
         }
 
         {
