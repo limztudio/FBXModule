@@ -129,6 +129,8 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
         iAnimStack.nodes.clear();
         iAnimStack.nodes.reserve(kNodeTable.size());
 
+        auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+
         for(auto* kNode : kNodeTable){
             for(auto& keyTable : ins_animationKeyFrames)
                 keyTable.clear();
@@ -172,6 +174,18 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 }
             }
 
+            FbxTime kDefaultTime;
+            FbxDouble3 kDefaultTranslation;
+            FbxDouble4 kDefaultQuaternion;
+            FbxDouble3 kDefaultScaling;
+            {
+                auto kMat = kAnimEvaluator->GetNodeLocalTransform(kNode);
+
+                kDefaultTranslation = kMat.GetT();
+                kDefaultQuaternion = kMat.GetQ();
+                kDefaultScaling = kMat.GetS();
+            }
+
             auto kDefaultMat = GetLocalTransform(kNode);
             AnimationNode newNodes;
 
@@ -181,8 +195,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 newNodes.translationKeys.clear();
                 newNodes.translationKeys.reserve(ins_animationKeyFrames[0].size());
                 for(const auto& kTime : ins_animationKeyFrames[0]){
-                    auto kMat = GetLocalTransform(kNode, kTime);
-                    auto kValRaw = kMat.GetT();
+                    auto kValRaw = kAnimEvaluator->GetNodeLocalTranslation(kNode, kTime);
                     FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
                     newNodes.translationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.translationKeys, kVal);
@@ -192,9 +205,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                 if(newNodes.translationKeys.empty()){
                     newNodes.translationKeys.reserve(1);
-                    auto kValRaw = kDefaultMat.GetT();
-                    FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
-                    newNodes.translationKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
+                    newNodes.translationKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultTranslation);
                 }
             }
 
@@ -202,7 +213,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 newNodes.rotationKeys.clear();
                 newNodes.rotationKeys.reserve(ins_animationKeyFrames[0].size());
                 for(const auto& kTime : ins_animationKeyFrames[0]){
-                    auto kMat = GetLocalTransform(kNode, kTime);
+                    auto kMat = kAnimEvaluator->GetNodeLocalTransform(kNode, kTime);
                     FbxDouble4 kVal = kMat.GetQ();
                     newNodes.rotationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.rotationKeys, kVal);
@@ -212,8 +223,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                 if(newNodes.rotationKeys.empty()){
                     newNodes.rotationKeys.reserve(1);
-                    auto kVal = kDefaultMat.GetQ();
-                    newNodes.rotationKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
+                    newNodes.rotationKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultQuaternion);
                 }
             }
 
@@ -221,8 +231,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 newNodes.scalingKeys.clear();
                 newNodes.scalingKeys.reserve(ins_animationKeyFrames[0].size());
                 for(const auto& kTime : ins_animationKeyFrames[0]){
-                    auto kMat = GetLocalTransform(kNode, kTime);
-                    auto kValRaw = kMat.GetS();
+                    auto kValRaw = kAnimEvaluator->GetNodeLocalScaling(kNode, kTime);
                     FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
                     newNodes.scalingKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.scalingKeys, kVal);
@@ -232,9 +241,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                 if(newNodes.scalingKeys.empty()){
                     newNodes.scalingKeys.reserve(1);
-                    auto kValRaw = kDefaultMat.GetS();
-                    FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
-                    newNodes.scalingKeys.emplace_back(0, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kVal);
+                    newNodes.scalingKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultScaling);
                 }
             }
 
