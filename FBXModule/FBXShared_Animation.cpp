@@ -187,7 +187,9 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
             FbxDouble4 kDefaultQuaternion;
             FbxDouble3 kDefaultScaling;
             {
-                auto kMat = kAnimEvaluator->GetNodeLocalTransform(kNode);
+                kDefaultTime.SetSecondDouble(0.);
+
+                auto kMat = kAnimEvaluator->GetNodeLocalTransform(kNode, kDefaultTime);
 
                 kDefaultTranslation = kMat.GetT();
                 kDefaultQuaternion = kMat.GetQ();
