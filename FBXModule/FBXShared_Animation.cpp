@@ -219,8 +219,8 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
             { // rotation
                 newNodes.rotationKeys.clear();
-                newNodes.rotationKeys.reserve(ins_animationKeyFrames[0].size());
-                for(const auto& kTime : ins_animationKeyFrames[0]){
+                newNodes.rotationKeys.reserve(ins_animationKeyFrames[1].size());
+                for(const auto& kTime : ins_animationKeyFrames[1]){
                     auto kMat = kAnimEvaluator->GetNodeLocalTransform(kNode, kTime);
                     FbxDouble4 kVal = kMat.GetQ();
                     newNodes.rotationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
@@ -237,8 +237,8 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
             { // scaling
                 newNodes.scalingKeys.clear();
-                newNodes.scalingKeys.reserve(ins_animationKeyFrames[0].size());
-                for(const auto& kTime : ins_animationKeyFrames[0]){
+                newNodes.scalingKeys.reserve(ins_animationKeyFrames[2].size());
+                for(const auto& kTime : ins_animationKeyFrames[2]){
                     auto kValRaw = kAnimEvaluator->GetNodeLocalScaling(kNode, kTime);
                     FbxDouble3 kVal(kValRaw[0], kValRaw[1], kValRaw[2]);
                     newNodes.scalingKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
@@ -351,7 +351,7 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
 bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pAnimStack){
     static const char __name_of_this_func[] = "SHRStoreAnimation(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXAnimation*)";
 
-    
+
     FbxAnimCurveFilterUnroll kFilterUnroll;
     {
         kFilterUnroll.SetTestForPath(true);
