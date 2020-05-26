@@ -80,6 +80,7 @@ void SHRCopyNode(FBXNode* dest, const FBXNode* src){
             auto* dest_c = static_cast<FBXMesh*>(dest);
             const auto* src_c = static_cast<const FBXMesh*>(src);
             
+            dest_c->Materials = src_c->Materials;
             dest_c->Attributes = src_c->Attributes;
             dest_c->Indices = src_c->Indices;
             dest_c->Vertices = src_c->Vertices;

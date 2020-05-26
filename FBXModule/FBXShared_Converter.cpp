@@ -13,7 +13,7 @@
 #include "FBXShared.h"
 
 
-#define KEY_REDUCER_PRECISION 0.000001
+#define KEY_REDUCER_PRECISION 0.00001
 
 
 using namespace fbxsdk;

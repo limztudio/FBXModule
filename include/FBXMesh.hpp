@@ -13,6 +13,14 @@
 #include "FBXNode.hpp"
 
 
+class FBXMeshMaterial{
+public:
+    FBXDynamicArray<char> Name;
+
+public:
+    FBXDynamicArray<char> DiffuseTexturePath;
+};
+
 class FBXMeshAttribute{
 public:
     unsigned long VertexStart;
@@ -48,6 +56,9 @@ public:
     FBXMesh(){}
     virtual ~FBXMesh(){}
 
+
+public:
+    FBXDynamicArray<FBXMeshMaterial> Materials;
 
 public:
     FBXDynamicArray<FBXMeshAttribute> Attributes;

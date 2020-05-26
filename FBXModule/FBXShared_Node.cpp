@@ -180,6 +180,16 @@ static inline bool ins_addMeshNode(
                     CopyArrayData(iObject.Values[idxElem].Values, nodeObject[idxElem].mData);
             }
         }
+
+        pMesh->Materials.Assign(pNodeData->bufMaterials.size());
+        for(size_t idxMaterial = 0; idxMaterial < pMesh->Materials.Length; ++idxMaterial){
+            auto& iMaterial = pMesh->Materials.Values[idxMaterial];
+            const auto& nodeMaterial = pNodeData->bufMaterials[idxMaterial];
+
+            CopyString(iMaterial.Name, nodeMaterial.name);
+
+            CopyString(iMaterial.DiffuseTexturePath, nodeMaterial.diffusePath);
+        }
     }
 
     if(!pNodeData->bufSkinData.empty()){
@@ -304,10 +314,7 @@ static void ins_addNodeRecursive(
 
     _ADD_NODE_AFTER_ALLOCATE:
         {
-            const auto lenName = genNodeData.strName.length();
-            pNode->Name.Assign(lenName + 1);
-            CopyArrayData(pNode->Name.Values, genNodeData.strName.c_str(), lenName);
-            pNode->Name.Values[lenName] = 0;
+            CopyString(pNode->Name, genNodeData.strName);
 
             const auto& matrix = genNodeData.kTransformMatrix;
             CopyArrayData(pNode->TransformMatrix.Values, (const double*)matrix);
@@ -591,7 +598,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
         ins_controlPointMergeMap.clear();
 
         if(FBXTypeHasMember(curID, FBXType::FBXType_Mesh)){
-            if(!SHRInitMeshNode(kSDKManager, ins_controlPointMergeMap, static_cast<const FBXMesh*>(i.first), i.second))
+            if(!SHRInitMeshNode(kSDKManager, kScene, ins_controlPointMergeMap, static_cast<const FBXMesh*>(i.first), i.second))
                 return false;
         }
 

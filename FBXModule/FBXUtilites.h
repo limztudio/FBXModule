@@ -391,6 +391,21 @@ static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs, INDEX_TYPE len
         lhs[i] = static_cast<LHS_T>(rhs[i]);
 }
 
+template<template<typename> typename LHS, typename LHS_T, typename RHS_T>
+static inline void CopyString(LHS<LHS_T>& lhs, const std::basic_string<RHS_T>& rhs){
+    const auto lenStr = rhs.length();
+    lhs.Assign(lenStr + 1);
+    CopyArrayData(lhs.Values, rhs.c_str(), lenStr);
+    lhs.Values[lenStr] = 0;
+}
+template<template<typename> typename LHS, typename LHS_T, typename RHS>
+static inline void CopyString(LHS<LHS_T>& lhs, const RHS* rhs){
+    const auto lenStr = FBXUtilites::Memlen<RHS>(rhs);
+    lhs.Assign(lenStr + 1);
+    CopyArrayData(lhs.Values, rhs, lenStr);
+    lhs.Values[lenStr] = 0;
+}
+
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode){
     return kNode->GetScene()->GetAnimationEvaluator()->GetNodeLocalTransform(kNode);
 }

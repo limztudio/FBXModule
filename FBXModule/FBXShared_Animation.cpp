@@ -289,12 +289,7 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
 
         const std::string strStackName = iAnimation.animStack->GetName();
 
-        {
-            const auto lenName = strStackName.length();
-            pAnimation->Name.Assign(lenName + 1);
-            CopyArrayData(pAnimation->Name.Values, strStackName.c_str(), lenName);
-            pAnimation->Name.Values[lenName] = 0;
-        }
+        CopyString(pAnimation->Name, strStackName);
 
         pAnimation->EndTime = decltype(pAnimation->EndTime)(iAnimation.endTime.GetSecondDouble());
 

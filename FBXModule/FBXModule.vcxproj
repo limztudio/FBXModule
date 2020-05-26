@@ -33,6 +33,7 @@
     <ClCompile Include="FBXShared_Converter.cpp" />
     <ClCompile Include="FBXShared_FbxSdk.cpp" />
     <ClCompile Include="FBXShared_Error.cpp" />
+    <ClCompile Include="FBXShared_Material.cpp" />
     <ClCompile Include="FBXShared_Mesh.cpp" />
     <ClCompile Include="FBXShared_Node.cpp" />
     <ClCompile Include="FBXShared_Optimizer.cpp" />

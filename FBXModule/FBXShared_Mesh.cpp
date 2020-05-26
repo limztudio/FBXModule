@@ -99,6 +99,28 @@ static inline bool operator==(const _PositionSkin& lhs, const _PositionSkin& rhs
 }
 
 
+static std::unordered_map<FbxSurfaceMaterial*, int, PointerHasher<FbxSurfaceMaterial*>> ins_materialFinder;
+static inline bool ins_addMaterial(std::vector<MaterialElement>& matTable, FbxSurfaceMaterial* kSurfMaterial, int* iPoly){
+    auto f = ins_materialFinder.find(kSurfMaterial);
+    if(f == ins_materialFinder.end()){
+        (*iPoly) = int(matTable.size());
+
+        matTable.emplace_back(MaterialElement());
+        auto& iMaterial = *matTable.rbegin();
+        if(kSurfMaterial){
+            if(!SHRLoadMaterial(iMaterial, kSurfMaterial))
+                return false;
+        }
+
+        ins_materialFinder.emplace(kSurfMaterial, (*iPoly));
+    }
+    else
+        (*iPoly) = f->second;
+
+    return true;
+}
+
+
 bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
     static const char __name_of_this_func[] = "SHRLoadMeshFromNode(ControlPointRemap&, FbxNode*, NodeData*)";
 
@@ -185,19 +207,24 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
         }
     }
 
+    ins_materialFinder.clear();
+
     { // load mesh
+        auto& materials = pNodeData->bufMaterials;
+
         auto& positions = pNodeData->bufPositions;
         auto& indices = pNodeData->bufIndices;
 
         auto& layers = pNodeData->bufLayers;
 
         { // reserve
-            {
-                positions.resize(polyCount * 3);
-                indices.resize(polyCount);
+            materials.clear();
+            materials.reserve(kNode->GetMaterialCount());
 
-                layers.resize((size_t)layerCount);
-            }
+            positions.resize(polyCount * 3);
+            indices.resize(polyCount);
+
+            layers.resize((size_t)layerCount);
         }
 
         {
@@ -252,17 +279,48 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
                         auto& poly = pObject[iPoly];
 
-                        poly = kObject->GetIndexArray().GetAt(iPoly);
+                        auto kIdxMaterial = kObject->GetIndexArray().GetAt(iPoly);
+                        auto* kSurfMaterial = kNode->GetMaterial(kIdxMaterial);
+                        if(!ins_addMaterial(materials, kSurfMaterial, &poly)){
+                            std::string msg = "cannot load material \"";
+                            msg += kSurfMaterial->GetName();
+                            msg += "\" while reading material by FbxLayerElement::eByPolygon";
+                            msg += "(errored in \"";
+                            msg += strName;
+                            msg += "\")";
+                            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                            return false;
+                        }
                     }
                     break;
 
                 case FbxLayerElement::eAllSame:
+                {
+                    int matIndex = -1;
+                    {
+                        auto kIdxMaterial = kObject->GetIndexArray().GetAt(0);
+                        auto* kSurfMaterial = kNode->GetMaterial(kIdxMaterial);
+
+                        if(!ins_addMaterial(materials, kSurfMaterial, &matIndex)){
+                            std::string msg = "cannot load material \"";
+                            msg += kSurfMaterial->GetName();
+                            msg += "\" while reading material by FbxLayerElement::eAllSame";
+                            msg += "(errored in \"";
+                            msg += strName;
+                            msg += "\")";
+                            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                            return false;
+                        }
+                    }
+
                     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
                         auto& poly = pObject[iPoly];
 
-                        poly = kObject->GetIndexArray().GetAt(0);
+                        poly = matIndex;
                     }
+
                     break;
+                }
 
                 default:
                 {
@@ -421,8 +479,6 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                                 return false;
                             }
                             }
-
-                            vert[1] = 1. - vert[1];
                         }
                     }
                     break;
@@ -605,8 +661,8 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
     return true;
 }
 
-bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, FbxNode* kNode){
-    static const char __name_of_this_func[] = "SHRInitMeshNode(FbxManager*, ControlPointMergeMap&, const FBXMesh*, FbxNode*)";
+bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, FbxNode* kNode){
+    static const char __name_of_this_func[] = "SHRInitMeshNode(FbxManager*, FbxScene*, ControlPointMergeMap&, const FBXMesh*, FbxNode*)";
 
 
     const FBXSkinnedMesh* pSkinnedNode = nullptr;
@@ -615,6 +671,35 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
     const std::string strName = pNode->Name.Values;
     auto* kMesh = kNode->GetMesh();
+
+    {
+        for(auto* pMaterial = pNode->Materials.Values; FBX_PTRDIFFU(pMaterial - pNode->Materials.Values) < pNode->Materials.Length; ++pMaterial){
+            const std::string strMaterialName = pMaterial->Name.Values;
+
+            auto* kMaterial = SHRCreateMaterial(kSDKManager, kScene, pMaterial);
+            if(!kMaterial){
+                std::string msg = "failed to create material \"";
+                msg += strMaterialName;
+                msg += "\"";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+
+            if(kNode->AddMaterial(kMaterial) < 0){
+                std::string msg = "failed to add material \"";
+                msg += strMaterialName;
+                msg += "\"";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+        }
+    }
 
     { // create control point & make convert table
         OverlapReducer<_PositionSkin> reducer(pNode->Vertices.Length, [&pNode, &pSkinnedNode](size_t idx)->_PositionSkin{
@@ -690,16 +775,54 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
         auto* kLayer = kMesh->GetLayer((int)idxLayer);
 
         if(iLayer.Material.Length){
+            auto* kMaterial = FbxLayerElementMaterial::Create(kMesh, "");
+            if(!kMaterial){
+                std::string msg = "failed to create element material in the layer " + std::to_string(idxLayer);
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
 
+            bool hasSameValue = true;
+            const auto matValue = iLayer.Material.Values[0];
+            if(iLayer.Material.Length > 1){
+                for(auto* pMat = iLayer.Material.Values + 1; FBX_PTRDIFFU(pMat - iLayer.Material.Values) < iLayer.Material.Length; ++pMat){
+                    if(matValue != (*pMat)){
+                        hasSameValue = false;
+                        break;
+                    }
+                }
+            }
+
+            if(hasSameValue){
+                kMaterial->SetMappingMode(FbxGeometryElement::eAllSame);
+                kMaterial->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+
+                auto& kIndices = kMaterial->GetIndexArray();
+                kIndices.Add(matValue);
+            }
+            else{
+                kMaterial->SetMappingMode(FbxGeometryElement::eByPolygon);
+                kMaterial->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+
+                auto& kIndices = kMaterial->GetIndexArray();
+                for(size_t idxAttribute = 0; idxAttribute < pNode->Attributes.Length; ++idxAttribute){
+                    const auto& iAttribute = pNode->Attributes.Values[idxAttribute];
+                    const auto iMaterial = iLayer.Material.Values[idxAttribute];
+
+                    for(auto idxPoly = iAttribute.IndexStart, edxPoly = iAttribute.IndexStart + iAttribute.IndexCount; idxPoly < edxPoly; ++idxPoly)
+                        kIndices.Add(iMaterial);
+                }
+            }
+
+            kLayer->SetMaterials(kMaterial);
         }
 
         if(iLayer.Color.Length){
             auto* kColor = FbxLayerElementVertexColor::Create(kMesh, "");
-            if(kColor){
-                kColor->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
-                kColor->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
-            }
-            else{
+            if(!kColor){
                 std::string msg = "failed to create element vertex color in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
@@ -707,6 +830,9 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
+
+            kColor->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+            kColor->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
             OverlapReducer<Float4> reducer(iLayer.Color.Length, [&iLayer](size_t idx)->Float4{
                 const auto& oldVal = iLayer.Color.Values[idx];
@@ -736,11 +862,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
         if(iLayer.Normal.Length){
             auto* kNormal = FbxLayerElementNormal::Create(kMesh, "");
-            if(kNormal){
-                kNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
-                kNormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
-            }
-            else{
+            if(!kNormal){
                 std::string msg = "failed to create element normal in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
@@ -748,6 +870,9 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
+
+            kNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+            kNormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
             OverlapReducer<Float3> reducer(iLayer.Normal.Length, [&iLayer](size_t idx)->Float3{
                 const auto& oldVal = iLayer.Normal.Values[idx];
@@ -778,11 +903,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
         if(iLayer.Binormal.Length){
             auto* kBinormal = FbxLayerElementBinormal::Create(kMesh, "");
-            if(kBinormal){
-                kBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
-                kBinormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
-            }
-            else{
+            if(!kBinormal){
                 std::string msg = "failed to create element binormal in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
@@ -790,6 +911,9 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
+
+            kBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+            kBinormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
             OverlapReducer<Float3> reducer(iLayer.Binormal.Length, [&iLayer](size_t idx)->Float3{
                 const auto& oldVal = iLayer.Binormal.Values[idx];
@@ -820,11 +944,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
         if(iLayer.Tangent.Length){
             auto* kTangent = FbxLayerElementTangent::Create(kMesh, "");
-            if(kTangent){
-                kTangent->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
-                kTangent->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
-            }
-            else{
+            if(!kTangent){
                 std::string msg = "failed to create element tangent in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
@@ -832,6 +952,9 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
+
+            kTangent->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+            kTangent->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
             OverlapReducer<Float3> reducer(iLayer.Tangent.Length, [&iLayer](size_t idx)->Float3{
                 const auto& oldVal = iLayer.Tangent.Values[idx];
@@ -862,11 +985,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
 
         if(iLayer.Texcoord.Length){
             auto* kUV = FbxLayerElementUV::Create(kMesh, "");
-            if(kUV){
-                kUV->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
-                kUV->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
-            }
-            else{
+            if(!kUV){
                 std::string msg = "failed to create element UV in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
                 msg += strName;
@@ -874,6 +993,9 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMer
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
+
+            kUV->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+            kUV->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
             OverlapReducer<Float2> reducer(iLayer.Texcoord.Length, [&iLayer](size_t idx)->Float2{
                 const auto& oldVal = iLayer.Texcoord.Values[idx];

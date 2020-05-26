@@ -21,6 +21,7 @@
     <ClCompile Include="FBXShared_BoneCombination.cpp" />
     <ClCompile Include="FBXMath.cpp" />
     <ClCompile Include="FBXShared_Converter.cpp" />
+    <ClCompile Include="FBXShared_Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

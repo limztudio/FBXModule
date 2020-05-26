@@ -38,6 +38,14 @@ using Unit3Container = std::vector<fbxsdk::FbxDouble3>;
 
 // FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
 
+// FBXShared_Material ////////////////////////////////////////////////////////////////////////////////
+
+struct MaterialElement{
+    std::string name;
+
+    std::string diffusePath;
+};
+
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 struct TexcoordTable{
@@ -93,6 +101,8 @@ struct NodeData{
     std::string strName;
 
     FbxAMatrix kTransformMatrix;
+
+    std::vector<MaterialElement> bufMaterials;
 
     MeshAttribute bufMeshAttribute;
     std::vector<BoneCombination> bufBoneCombination;
@@ -177,6 +187,8 @@ extern fbxsdk::FbxScene* shr_scene;
 
 // FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
 
+// FBXShared_Material ////////////////////////////////////////////////////////////////////////////////
+
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
@@ -228,11 +240,16 @@ extern bool SHRConvertOjbects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene*
 
 extern bool SHRInitBoneNode(fbxsdk::FbxManager* kSDKManager, const FBXBone* pNode, fbxsdk::FbxNode* kNode);
 
+// FBXShared_Material ////////////////////////////////////////////////////////////////////////////////
+
+extern bool SHRLoadMaterial(MaterialElement& iMaterial, fbxsdk::FbxSurfaceMaterial* kMaterial);
+extern fbxsdk::FbxSurfaceMaterial* SHRCreateMaterial(FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXMeshMaterial* pMaterial);
+
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 extern bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
-extern bool SHRInitMeshNode(fbxsdk::FbxManager* kSDKManager, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, fbxsdk::FbxNode* kNode);
+extern bool SHRInitMeshNode(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, fbxsdk::FbxNode* kNode);
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
 
