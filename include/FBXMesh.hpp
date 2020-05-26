@@ -32,18 +32,18 @@ public:
 
 class FBXMeshLayerElement{
 public:
-    FBXDynamicArray<long> Material;
+    FBXDynamicArray<long> Material; // must have same count with Attributes
 
 public:
-    FBXDynamicArray<FBXStaticArray<float, 4>> Color;
+    FBXDynamicArray<FBXStaticArray<float, 4>> Color; // must have same count with Vertices
 
 public:
-    FBXDynamicArray<FBXStaticArray<float, 3>> Normal;
-    FBXDynamicArray<FBXStaticArray<float, 3>> Binormal;
-    FBXDynamicArray<FBXStaticArray<float, 3>> Tangent;
+    FBXDynamicArray<FBXStaticArray<float, 3>> Normal; // must have same count with Vertices
+    FBXDynamicArray<FBXStaticArray<float, 3>> Binormal; // must have same count with Vertices
+    FBXDynamicArray<FBXStaticArray<float, 3>> Tangent; // must have same count with Vertices
 
 public:
-    FBXDynamicArray<FBXStaticArray<float, 2>> Texcoord;
+    FBXDynamicArray<FBXStaticArray<float, 2>> Texcoord; // must have same count with Vertices
 };
 
 

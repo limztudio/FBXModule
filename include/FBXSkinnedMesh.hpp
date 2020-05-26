@@ -39,7 +39,7 @@ public:
 
 
 public:
-    FBXBoneCombination BoneCombinations;
-    FBXDynamicArray<FBXDynamicArray<FBXSkinElement>> SkinInfos;
+    FBXBoneCombination BoneCombinations; // must have same count with Attributes
+    FBXDynamicArray<FBXDynamicArray<FBXSkinElement>> SkinInfos; // must have same count with Vertices
     FBXDynamicArray<FBXSkinDeformElement> SkinDeforms;
 };
