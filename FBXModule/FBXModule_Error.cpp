@@ -25,8 +25,10 @@ __FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage){
     const auto& lastMessage = shr_errorStack.top();
     auto messageLenth = (int)lastMessage.length();
 
-    if(!messageLenth)
+    if(!messageLenth){
+        shr_errorStack.pop();
         return 0;
+    }
 
     if(szMessage){
         CopyMemory(szMessage, lastMessage.c_str(), messageLenth);
