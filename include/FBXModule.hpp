@@ -53,7 +53,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void);
 __FBXM_MAKE_FUNC(bool, FBXReadScene, void);
 __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot);
 
-__FBXM_MAKE_FUNC(void*, FBXGetRoot, void);
+__FBXM_MAKE_FUNC(const void*, FBXGetRoot, void);
 __FBXM_MAKE_FUNC(void, FBXCopyRoot, void* pDest, const void* pSrc);
 
 __FBXM_MAKE_FUNC(void, FBXGetWorldMatrix, void* pOutMatrix, const void* pNode);
