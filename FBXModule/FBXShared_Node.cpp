@@ -253,7 +253,8 @@ static void ins_addNodeRecursive(
     FbxNodeToExportNode& fbxNodeToExportNode,
     FbxPose* kPose,
     FbxNode* kNode,
-    FBXNode*& pNode
+    FBXNode*& pNode,
+    FBXNode* pParentNode = nullptr
 )
 {
     if(!kNode)
@@ -329,6 +330,8 @@ static void ins_addNodeRecursive(
     }
 
     {
+        pNode->Parent = pParentNode;
+
         const auto e = kNode->GetChildCount();
         if(e){
             {
@@ -337,7 +340,8 @@ static void ins_addNodeRecursive(
                     fbxNodeToExportNode,
                     kPose,
                     kNode->GetChild(0),
-                    pNode->Child
+                    pNode->Child,
+                    pNode
                 );
             }
 
@@ -348,7 +352,8 @@ static void ins_addNodeRecursive(
                     fbxNodeToExportNode,
                     kPose,
                     kNode->GetChild(i),
-                    *pCurChildNode
+                    *pCurChildNode,
+                    pNode
                 );
             }
         }

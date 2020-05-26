@@ -22,6 +22,7 @@ public:
 public:
     FBXNode()
         :
+        Parent(nullptr),
         Child(nullptr),
         Sibling(nullptr)
     {}
@@ -34,6 +35,7 @@ public:
 
 
 public:
+    FBXNode* Parent;
     FBXNode* Child;
     FBXNode* Sibling;
 
