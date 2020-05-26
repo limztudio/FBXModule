@@ -64,6 +64,7 @@
     <ClInclude Include="..\include\FBXAllocate.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -75,5 +76,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FBXMath.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FBXModule.rc" />
   </ItemGroup>
 </Project>

@@ -16,8 +16,8 @@ using namespace fbxsdk;
 //FbxAxisSystem shr_axisSystem(FbxAxisSystem::eZAxis, FbxAxisSystem::eParityEven, FbxAxisSystem::eLeftHanded);
 //FbxSystemUnit shr_systemUnit(2.54);
 
-FbxAxisSystem shr_axisSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd, FbxAxisSystem::eRightHanded);
-FbxSystemUnit shr_systemUnit(1.);
+FbxAxisSystem shr_axisSystem(FbxAxisSystem::eDirectX);
+FbxSystemUnit shr_systemUnit(2.54, 1.);
 
 FbxManager* shr_SDKManager = nullptr;
 

@@ -55,6 +55,9 @@ namespace __hidden_FBXModule{
             if(FBXTypeHasMember(srcID, FBXType::FBXType_Bone)){
                 auto* dest_c = static_cast<FBXBone*>(dest);
                 const auto* src_c = static_cast<const FBXBone*>(src);
+
+                dest_c->Size = src_c->Size;
+                dest_c->Length = src_c->Length;
             }
             if(FBXTypeHasMember(srcID, FBXType::FBXType_Mesh)){
                 auto* dest_c = static_cast<FBXMesh*>(dest);

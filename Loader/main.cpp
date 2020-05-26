@@ -10,6 +10,8 @@
 static HMODULE library = nullptr;
 static FBXRoot* fbxRoot = nullptr;
 
+static FBXIOSetting setting;
+
 
 static inline std::string getLastError(){
     auto len = FBXGetLastError(nullptr);
@@ -46,7 +48,7 @@ static inline void closeLib(){
 
 
 static inline void loadFile(const char* name){
-    if(!FBXOpenFile(name, "rb", (unsigned long)FBXIOType::FBXIOType_None, nullptr)){
+    if(!FBXOpenFile(name, "rb", (unsigned long)FBXIOType::FBXIOType_None, &setting)){
         printf_s("%s", getLastError().c_str());
         return;
     }
@@ -70,7 +72,7 @@ static inline void loadFile(const char* name){
 }
 
 static inline void storeNode(const char* name){
-    if(!FBXOpenFile(name, "wb", (unsigned long)FBXIOType::FBXIOType_None, nullptr)){
+    if(!FBXOpenFile(name, "wb", (unsigned long)FBXIOType::FBXIOType_None, &setting)){
         printf_s("%s", getLastError().c_str());
         return;
     }
@@ -94,6 +96,8 @@ static inline void deleteFBXObjects(){
 
 
 int main(int argc, char* argv[]){
+    setting.AxisSystem = FBXAxisSystem::FBXAxisSystem_Preset_Max;
+
     loadLib();
 
     loadFile(argv[1]);

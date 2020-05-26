@@ -75,6 +75,24 @@ __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
 
     const auto* ext_root = reinterpret_cast<const FBXRoot*>(pRoot);
 
+    {
+        auto& kSceneGlobalSettings = shr_scene->GetGlobalSettings();
+
+        { // axis conversion
+            auto kSceneAxis = kSceneGlobalSettings.GetAxisSystem();
+            if(kSceneAxis != shr_axisSystem)
+                shr_axisSystem.ConvertScene(shr_scene);
+        }
+
+        { // unit conversion
+            // this may cause memory leaks
+
+            auto kSceneSystemUnit = kSceneGlobalSettings.GetSystemUnit();
+            if(kSceneSystemUnit != shr_systemUnit)
+                shr_systemUnit.ConvertScene(shr_scene);
+        }
+    }
+
     if(!shr_scene){
         SHRPushErrorMessage("scene must be created before write", __name_of_this_func);
         return false;

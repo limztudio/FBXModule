@@ -32,12 +32,75 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, un
 
     ins_ioFlag = (FBXIOType)ioFlag;
 
-    if(ioSetting){
+    if(ioSetting)
         shr_ioSetting = (*reinterpret_cast<const FBXIOSetting*>(ioSetting));
 
+    {
         if(shr_ioSetting.MaxBoneCountPerMesh < shr_ioSetting.MaxParticipateClusterPerVertex){
             SHRPushErrorMessage("\'MaxBoneCountPerMesh\' must be bigger or equal to \'MaxParticipateClusterPerVertex\'", __name_of_this_func);
             return false;
+        }
+
+        { // axis converter & unit setting
+            FbxAxisSystem::EUpVector kUpVector = FbxAxisSystem::eYAxis;
+            switch(FBXAxisSystem((unsigned long)shr_ioSetting.AxisSystem & (unsigned long)FBXAxisSystem::FBXAxisSystem_UpVector_Mask)){
+            case FBXAxisSystem::FBXAxisSystem_UpVector_XAxis:
+                kUpVector = FbxAxisSystem::eXAxis;
+                break;
+            case FBXAxisSystem::FBXAxisSystem_UpVector_NegXAxis:
+                kUpVector = decltype(kUpVector)(-FbxAxisSystem::eXAxis);
+                break;
+            case FBXAxisSystem::FBXAxisSystem_UpVector_YAxis:
+                kUpVector = FbxAxisSystem::eYAxis;
+                break;
+            case FBXAxisSystem::FBXAxisSystem_UpVector_NegYAxis:
+                kUpVector = decltype(kUpVector)(-FbxAxisSystem::eYAxis);
+                break;
+            case FBXAxisSystem::FBXAxisSystem_UpVector_ZAxis:
+                kUpVector = FbxAxisSystem::eZAxis;
+                break;
+            case FBXAxisSystem::FBXAxisSystem_UpVector_NegZAxis:
+                kUpVector = decltype(kUpVector)(-FbxAxisSystem::eZAxis);
+                break;
+            default:
+                SHRPushErrorMessage("UpVector in \'AxisSystem\' has invalid value", __name_of_this_func);
+                return false;
+            }
+
+            FbxAxisSystem::EFrontVector kFrontVector = FbxAxisSystem::eParityOdd;
+            switch(FBXAxisSystem((unsigned long)shr_ioSetting.AxisSystem & (unsigned long)FBXAxisSystem::FBXAxisSystem_FrontVector_Mask)){
+            case FBXAxisSystem::FBXAxisSystem_FrontVector_ParityEven:
+                kFrontVector = FbxAxisSystem::eParityEven;
+                break;
+            case FBXAxisSystem::FBXAxisSystem_FrontVector_NegParityEven:
+                kFrontVector = decltype(kFrontVector)(-FbxAxisSystem::eParityEven);
+                break;
+            case FBXAxisSystem::FBXAxisSystem_FrontVector_ParityOdd:
+                kFrontVector = FbxAxisSystem::eParityOdd;
+                break;
+            case FBXAxisSystem::FBXAxisSystem_FrontVector_NegParityOdd:
+                kFrontVector = decltype(kFrontVector)(-FbxAxisSystem::eParityOdd);
+                break;
+            default:
+                SHRPushErrorMessage("FrontVector in \'AxisSystem\' has invalid value", __name_of_this_func);
+                return false;
+            }
+
+            FbxAxisSystem::ECoordSystem kCoordSystem = FbxAxisSystem::eLeftHanded;
+            switch(FBXAxisSystem((unsigned long)shr_ioSetting.AxisSystem & (unsigned long)FBXAxisSystem::FBXAxisSystem_CoordSystem_Mask)){
+            case FBXAxisSystem::FBXAxisSystem_CoordSystem_LeftHanded:
+                kCoordSystem = FbxAxisSystem::eLeftHanded;
+                break;
+            case FBXAxisSystem::FBXAxisSystem_CoordSystem_RightHanded:
+                kCoordSystem = FbxAxisSystem::eRightHanded;
+                break;
+            default:
+                SHRPushErrorMessage("CoordSystem in \'AxisSystem\' has invalid value", __name_of_this_func);
+                return false;
+            }
+
+            shr_axisSystem = FbxAxisSystem(kUpVector, kFrontVector, kCoordSystem);
+            shr_systemUnit = FbxSystemUnit(shr_ioSetting.UnitScale, shr_ioSetting.UnitMultiplier);
         }
     }
 

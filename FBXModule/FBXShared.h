@@ -238,6 +238,7 @@ extern bool SHRConvertOjbects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene*
 
 // FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////
 
+extern bool SHRLoadBoneNode(fbxsdk::FbxManager* kSDKManager, const fbxsdk::FbxNode* kNode, FBXBone* pNode);
 extern bool SHRInitBoneNode(fbxsdk::FbxManager* kSDKManager, const FBXBone* pNode, fbxsdk::FbxNode* kNode);
 
 // FBXShared_Material ////////////////////////////////////////////////////////////////////////////////

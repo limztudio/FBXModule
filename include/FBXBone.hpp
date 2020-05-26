@@ -17,6 +17,15 @@ public:
 
 
 public:
-    FBXBone(){}
+    FBXBone()
+        :
+        Size(100.f),
+        Length(1.f)
+    {}
     virtual ~FBXBone(){}
+
+
+public:
+    float Size;
+    float Length;
 };

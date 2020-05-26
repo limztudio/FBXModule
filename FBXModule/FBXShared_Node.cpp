@@ -50,6 +50,9 @@ static inline bool ins_addBoneNode(
     auto* pBone = FBXNew<FBXBone>();
     pNode = pBone;
 
+    if(!SHRLoadBoneNode(kSDKManager, kNode, pBone))
+        return false;
+
     return true;
 }
 static inline bool ins_addMeshNode(
