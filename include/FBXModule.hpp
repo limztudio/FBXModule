@@ -43,7 +43,8 @@
 #endif
 
 
-__FBXM_MAKE_FUNC(bool, FBXIsCompetible, void);
+__FBXM_MAKE_FUNC(bool, FBXCheckCompatibility, void);
+__FBXM_MAKE_FUNC(unsigned long, FBXGetErrorCount, void);
 __FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage);
 
 __FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, unsigned long ioFlag, const void* ioSetting);

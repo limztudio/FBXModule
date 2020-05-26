@@ -12,6 +12,12 @@
 #include "FBXShared.h"
 
 
+__FBXM_MAKE_FUNC(unsigned long, FBXGetErrorCount, void){
+    auto count = shr_errorStack.size();
+
+    return unsigned long(count);
+}
+
 __FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage){
     if(shr_errorStack.empty())
         return -1;

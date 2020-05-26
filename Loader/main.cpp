@@ -26,6 +26,9 @@ static inline std::string getLastError(){
 static inline void loadLib(){
     library = LoadLibrary(TEXT("FBXModule.dll"));
 
+    __FBXM_BIND_FUNC(library, FBXCheckCompatibility);
+
+    __FBXM_BIND_FUNC(library, FBXGetErrorCount);
     __FBXM_BIND_FUNC(library, FBXGetLastError);
 
     __FBXM_BIND_FUNC(library, FBXOpenFile);
