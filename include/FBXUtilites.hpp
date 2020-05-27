@@ -11,29 +11,27 @@
 #include "FBXType.hpp"
 
 
-namespace FBXUtilites{
-    template<typename T>
-    static FBX_SIZE Memlen(const T* p){
-        FBX_SIZE i = 0;
-        for(; (*p); ++p, ++i);
-        return i;
-    }
+template<typename T>
+static FBX_SIZE FBXGetMemorylength(const T* p){
+    FBX_SIZE i = 0;
+    for(; (*p); ++p, ++i);
+    return i;
+}
 
-    template<typename NODE, typename FUNC>
-    static void IterateNode(NODE* p, FUNC func){
-        if(p){
-            IterateNode(p->Child, func);
-            IterateNode(p->Sibling, func);
-            func(p);
-        }
+template<typename NODE, typename FUNC>
+static void FBXIterateNode(NODE* p, FUNC func){
+    if(p){
+        FBXIterateNode(p->Child, func);
+        FBXIterateNode(p->Sibling, func);
+        func(p);
     }
-    template<typename NODE, typename FUNC>
-    static void BreakableIterateNode(NODE* p, FUNC func){
-        if(p){
-            BreakableIterateNode(p->Child, func);
-            BreakableIterateNode(p->Sibling, func);
-            if(!func(p))
-                return;
-        }
+}
+template<typename NODE, typename FUNC>
+static void FBXBreakableIterateNode(NODE* p, FUNC func){
+    if(p){
+        FBXBreakableIterateNode(p->Child, func);
+        FBXBreakableIterateNode(p->Sibling, func);
+        if(!func(p))
+            return;
     }
-};
+}

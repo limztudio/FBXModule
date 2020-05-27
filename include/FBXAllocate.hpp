@@ -27,7 +27,7 @@
 
 namespace __hidden_FBXModule{
     template<typename T>
-    void allocateNode(T*& dest, const T* src, T* pDestarent = nullptr){
+    static void allocateNode(T*& dest, const T* src, T* pDestarent = nullptr){
         if(src){
             const auto srcID = src->getID();
             switch(srcID){
@@ -89,7 +89,7 @@ namespace __hidden_FBXModule{
 
 
 template<typename T>
-void FBXAllocateRoot(T** pDest, const T* pSrc){
+static void FBXAllocateRoot(T** pDest, const T* pSrc){
     if(!pSrc)
         return;
 
