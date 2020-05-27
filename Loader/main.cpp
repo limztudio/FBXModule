@@ -62,7 +62,7 @@ static inline void loadFile(const char* name){
     {
         const auto* pRootNode = reinterpret_cast<const FBXRoot*>(FBXGetRoot());
 
-        FBXAllocateRoot((void**)&fbxRoot, pRootNode);
+        FBXAllocateRoot(&fbxRoot, pRootNode);
         FBXCopyRoot(fbxRoot, pRootNode);
     }
 

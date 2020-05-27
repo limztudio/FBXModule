@@ -5,16 +5,13 @@
 */
 
 
-#pragma once
-
-
 #ifndef __FBXM_DLL_EXPORT
 
 
 #include "FBXModulePreDef.hpp"
 
 
-#define __FBXM_MAKE_FUNC(type, name, ...) type (__FBXM_CALL_TYPE *name) (__VA_ARGS__) = nullptr;
+#define __FBXM_MAKE_FUNC(type, name, ...) type (__FBXM_CALL_TYPE *name) (__VA_ARGS__) = nullptr
 
 
 #include "FBXModuleDecl.hpp"

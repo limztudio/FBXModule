@@ -26,7 +26,8 @@
 
 
 namespace __hidden_FBXModule{
-    void allocateNode(FBXNode*& dest, const FBXNode* src, FBXNode* pDestarent = nullptr){
+    template<typename T>
+    void allocateNode(T*& dest, const T* src, T* pDestarent = nullptr){
         if(src){
             const auto srcID = src->getID();
             switch(srcID){
@@ -80,14 +81,15 @@ namespace __hidden_FBXModule{
             }
 
             dest->Parent = pDestarent;
-            allocateNode(dest->Child, src->Child, dest);
-            allocateNode(dest->Sibling, src->Sibling, dest);
+            allocateNode<T>(dest->Child, src->Child, dest);
+            allocateNode<T>(dest->Sibling, src->Sibling, dest);
         }
     }
 };
 
 
-void FBXAllocateRoot(void** pDest, const void* pSrc){
+template<typename T>
+void FBXAllocateRoot(T** pDest, const T* pSrc){
     if(!pSrc)
         return;
 
