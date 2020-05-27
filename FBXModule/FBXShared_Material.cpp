@@ -7,6 +7,8 @@
 
 #include "stdafx.h"
 
+#include <unordered_set>
+
 #include <FBXAssign.hpp>
 
 #include "FBXUtilites.h"
@@ -16,75 +18,129 @@
 using namespace fbxsdk;
 
 
-bool SHRLoadMaterial(MaterialElement& iMaterial, FbxSurfaceMaterial* kMaterial){
-    static const char __name_of_this_func[] = "SHRLoadMaterial(MaterialElement&, FbxSurfaceMaterial*)";
+MaterialTable shr_materialTable;
 
 
-    iMaterial.name = kMaterial->GetName();
+bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMaterial>* pMaterials){
+    static const char __name_of_this_func[] = "SHRLoadMaterials(const MaterialTable&, FBXDynamicArray<FBXMaterial>*)";
 
-    { // diffuse
-        auto kProperty = kMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
-        auto* kTexture = kProperty.GetSrcObject<FbxFileTexture>();
-        if(kTexture){
-            iMaterial.diffusePath = kTexture->GetFileName();
+
+    const auto& kMaterialTable = materialTable.getTable();
+    auto& iMaterialTable = *pMaterials;
+
+    iMaterialTable.Assign(kMaterialTable.size());
+
+    for(size_t idxMaterial = 0; idxMaterial < iMaterialTable.Length; ++idxMaterial){
+        auto* kMaterial = kMaterialTable[idxMaterial];
+        auto& iMaterial = iMaterialTable.Values[idxMaterial];
+
+        CopyString(iMaterial.Name, kMaterial->GetName());
+
+        { // diffuse
+            auto kProperty = kMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
+            auto* kTexture = kProperty.GetSrcObject<FbxFileTexture>();
+            if(kTexture){
+                CopyString(iMaterial.DiffuseTexturePath, kTexture->GetFileName());
+            }
         }
     }
 
     return true;
 }
-FbxSurfaceMaterial* SHRCreateMaterial(FbxManager* kSDKManager, FbxScene* kScene, const FBXMeshMaterial* pMaterial){
-    static const char __name_of_this_func[] = "SHRCreateMaterial(FbxManager*, FbxScene*, const FBXMeshMaterial*)";
+
+bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynamicArray<FBXMaterial>& materialTable){
+    static const char __name_of_this_func[] = "SHRStoreMaterials(FbxManager*, FbxScene*, const FBXDynamicArray<FBXMaterial>&)";
 
 
-    const std::string strName = pMaterial->Name.Values;
+    { // remove reserved materials
+        const auto oldMatCount = kScene->GetMaterialCount();
+        if(oldMatCount){
+            std::unordered_set<FbxSurfaceMaterial*, PointerHasher<FbxSurfaceMaterial*>> oldMatTable;
 
-    auto* kMaterial = FbxSurfacePhong::Create(kSDKManager, strName.c_str());
-    if(!kMaterial){
-        std::string msg = "failed to create FbxSurfacePhong";
-        msg += "(errored in \"";
-        msg += strName;
-        msg += "\")";
-        SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-        return nullptr;
+            for(auto i = decltype(oldMatCount){ 0 }; i < oldMatCount; ++i){
+                auto* kMaterial = kScene->GetMaterial(i);
+
+                if(kMaterial)
+                    oldMatTable.emplace(kMaterial);
+            }
+
+            for(auto* kMaterial : oldMatTable){
+                const std::string strName = kMaterial->GetName();
+
+                if(!kScene->RemoveMaterial(kMaterial)){
+                    std::string msg = "failed to remove material from scene";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                    return false;
+                }
+            }
+        }
     }
 
-    {
-        kMaterial->Emissive.Set(FbxDouble3(0., 0., 0.));
-        kMaterial->Ambient.Set(FbxDouble3(1., 1., 1.));
-        kMaterial->Diffuse.Set(FbxDouble3(1., 1., 1.));
-    }
+    for(size_t idxMaterial = 0; idxMaterial < materialTable.Length; ++idxMaterial){
+        const auto& iMaterial = materialTable.Values[idxMaterial];
 
-    if(pMaterial->DiffuseTexturePath.Length){
-        auto* kTexture = FbxFileTexture::Create(kScene, FbxSurfaceMaterial::sDiffuse);
-        if(!kTexture){
-            std::string msg = "failed to create FbxFileTexture";
+        const std::string strName = iMaterial.Name.Values;
+
+        auto* kMaterial = FbxSurfacePhong::Create(kSDKManager, strName.c_str());
+        if(!kMaterial){
+            std::string msg = "failed to create FbxSurfacePhong";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return nullptr;
+            return false;
         }
 
-        if(!kTexture->SetFileName(pMaterial->DiffuseTexturePath.Values)){
-            std::string msg = "set valid filename: \"";
-            msg += pMaterial->DiffuseTexturePath.Values;
-            msg += "\"";
+        {
+            kMaterial->Emissive.Set(FbxDouble3(0., 0., 0.));
+            kMaterial->Ambient.Set(FbxDouble3(1., 1., 1.));
+            kMaterial->Diffuse.Set(FbxDouble3(1., 1., 1.));
+        }
+
+        if(iMaterial.DiffuseTexturePath.Length){
+            auto* kTexture = FbxFileTexture::Create(kScene, FbxSurfaceMaterial::sDiffuse);
+            if(!kTexture){
+                std::string msg = "failed to create FbxFileTexture";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+
+            if(!kTexture->SetFileName(iMaterial.DiffuseTexturePath.Values)){
+                std::string msg = "set valid filename: \"";
+                msg += iMaterial.DiffuseTexturePath.Values;
+                msg += "\"";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+
+            if(!kMaterial->Diffuse.ConnectSrcObject(kTexture)){
+                std::string msg = "failed to connect diffuse texture object";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+        }
+
+        if(!kScene->AddMaterial(kMaterial)){
+            std::string msg = "failed to add material to scene";
             msg += "(errored in \"";
             msg += strName;
             msg += "\")";
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return nullptr;
-        }
-
-        if(!kMaterial->Diffuse.ConnectSrcObject(kTexture)){
-            std::string msg = "failed to connect diffuse texture object";
-            msg += "(errored in \"";
-            msg += strName;
-            msg += "\")";
-            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return nullptr;
+            return false;
         }
     }
 
-    return kMaterial;
+    return true;
 }

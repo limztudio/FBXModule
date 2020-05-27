@@ -53,14 +53,20 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
     }
 
     {
+        shr_materialTable.clear();
         shr_fbxNodeToExportNode.clear();
 
-        if(!SHRGenerateNodeTree(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode)){
+        if(!SHRGenerateNodeTree(shr_SDKManager, shr_scene, shr_materialTable, shr_fbxNodeToExportNode, &shr_root->Nodes)){
             SHRPushErrorMessage("an error occurred while generating object nodes", __name_of_this_func);
             return false;
         }
 
-        if(!SHRLoadAnimations(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode)){
+        if(!SHRLoadMaterials(shr_materialTable, &shr_root->Materials)){
+            SHRPushErrorMessage("an error occurred while loading material data", __name_of_this_func);
+            return false;
+        }
+
+        if(!SHRLoadAnimations(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode, &shr_root->Animations)){
             SHRPushErrorMessage("an error occurred while loading animation data", __name_of_this_func);
             return false;
         }
@@ -95,6 +101,11 @@ __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
 
     if(!shr_scene){
         SHRPushErrorMessage("scene must be created before write", __name_of_this_func);
+        return false;
+    }
+
+    if(!SHRStoreMaterials(shr_SDKManager, shr_scene, ext_root->Materials)){
+        SHRPushErrorMessage("an error occurred while storing materials", __name_of_this_func);
         return false;
     }
 

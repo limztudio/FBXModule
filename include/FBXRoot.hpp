@@ -11,6 +11,7 @@
 #include "FBXBase.hpp"
 
 #include "FBXNode.hpp"
+#include "FBXMaterial.hpp"
 #include "FBXAnimation.hpp"
 
 
@@ -34,5 +35,6 @@ public:
     FBXNode* Nodes;
 
 public:
+    FBXDynamicArray<FBXMaterial> Materials;
     FBXDynamicArray<FBXAnimation> Animations;
 };

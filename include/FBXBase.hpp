@@ -11,25 +11,27 @@
 #include "FBXType.hpp"
 
 
-// abde f000 0000 0000 0000 0000 c000 0000
+// abef g000 0000 c000 d000 0000 0000 0000
 // a: root identifier
 // b: node identifier
-// b d: bone identifier
-// b e: mesh identifier
-// b e f: skinned mesh identifier
+// b e: bone identifier
+// b f: mesh identifier
+// b f g: skinned mesh identifier
 // c: animation identifier
+// d: material identifier
 
 
 enum class FBXType : unsigned long{
     FBXType_Root = 1u << 31,
 
     FBXType_Node = 1u << 30,
-
     FBXType_Bone = FBXType_Node | (1u << 29),
     FBXType_Mesh = FBXType_Node | (1u << 28),
     FBXType_SkinnedMesh = FBXType_Mesh | (1u << 27),
 
-    FBXType_Animation = 1u << 7,
+    FBXType_Animation = 1u << 19,
+
+    FBXType_Material = 1u << 15,
 };
 
 

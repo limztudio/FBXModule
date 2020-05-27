@@ -55,9 +55,11 @@ void SHRCopyRoot(FBXRoot* dest, const FBXRoot* src){
 
     SHRCopyNode(dest->Nodes, src->Nodes);
 
+    dest->Materials = src->Materials;
+
     dest->Animations = src->Animations;
-    for(size_t idxAnim = 0; idxAnim < dest->Animations.Length; ++idxAnim)
-        SHRCopyAnimation(dest->Animations.Values[idxAnim], src->Animations.Values[idxAnim]);
+    for(size_t idxAnimation = 0; idxAnimation < dest->Animations.Length; ++idxAnimation)
+        SHRCopyAnimation(dest->Animations.Values[idxAnimation], src->Animations.Values[idxAnimation]);
 }
 void SHRCopyNode(FBXNode* dest, const FBXNode* src){
     static const char __name_of_this_func[] = "SHRCopyNode(FBXNode*, const FBXNode*)";

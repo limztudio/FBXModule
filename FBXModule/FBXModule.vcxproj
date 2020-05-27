@@ -52,6 +52,7 @@
     <ClInclude Include="..\include\FBXAssign.hpp" />
     <ClInclude Include="..\include\FBXBase.hpp" />
     <ClInclude Include="..\include\FBXBone.hpp" />
+    <ClInclude Include="..\include\FBXMaterial.hpp" />
     <ClInclude Include="..\include\FBXMesh.hpp" />
     <ClInclude Include="..\include\FBXModule.hpp" />
     <ClInclude Include="..\include\FBXNode.hpp" />

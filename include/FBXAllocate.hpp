@@ -95,6 +95,8 @@ void FBXAllocateRoot(void** pDest, const void* pSrc){
     auto* dest = FBXNew<FBXRoot>();
 
     __hidden_FBXModule::allocateNode(dest->Nodes, src->Nodes);
+
+    dest->Materials = src->Materials;
     dest->Animations = src->Animations;
 
     (*pDest) = dest;

@@ -57,6 +57,7 @@ static inline bool ins_addBoneNode(
 }
 static inline bool ins_addMeshNode(
     FbxManager* kSDKManager,
+    MaterialTable& materialTable,
     FbxNode* kNode,
     NodeData* pNodeData,
     FBXNode*& pNode
@@ -71,7 +72,7 @@ static inline bool ins_addMeshNode(
 
     {
         ControlPointRemap controlPointRemap;
-        if(!SHRLoadMeshFromNode(controlPointRemap, kNode, pNodeData))
+        if(!SHRLoadMeshFromNode(materialTable, controlPointRemap, kNode, pNodeData))
             throw _ERROR_INSIDE_ADD_MESH;
 
         if(!SHRLoadSkinFromNode(controlPointRemap, kNode, pNodeData))
@@ -189,9 +190,7 @@ static inline bool ins_addMeshNode(
             auto& iMaterial = pMesh->Materials.Values[idxMaterial];
             const auto& nodeMaterial = pNodeData->bufMaterials[idxMaterial];
 
-            CopyString(iMaterial.Name, nodeMaterial.name);
-
-            CopyString(iMaterial.DiffuseTexturePath, nodeMaterial.diffusePath);
+            iMaterial = nodeMaterial;
         }
     }
 
@@ -250,6 +249,7 @@ static inline bool ins_addMeshNode(
 
 static void ins_addNodeRecursive(
     FbxManager* kSDKManager,
+    MaterialTable& materialTable,
     FbxNodeToExportNode& fbxNodeToExportNode,
     FbxPose* kPose,
     FbxNode* kNode,
@@ -296,6 +296,7 @@ static void ins_addNodeRecursive(
             {
                 if(!ins_addMeshNode(
                     kSDKManager,
+                    materialTable,
                     kNode,
                     &genNodeData,
                     pNode
@@ -337,6 +338,7 @@ static void ins_addNodeRecursive(
             {
                 ins_addNodeRecursive(
                     kSDKManager,
+                    materialTable,
                     fbxNodeToExportNode,
                     kPose,
                     kNode->GetChild(0),
@@ -349,6 +351,7 @@ static void ins_addNodeRecursive(
             for(auto i = decltype(e){ 1 }; i < e; ++i, pCurChildNode = &(*pCurChildNode)->Sibling){
                 ins_addNodeRecursive(
                     kSDKManager,
+                    materialTable,
                     fbxNodeToExportNode,
                     kPose,
                     kNode->GetChild(i),
@@ -409,11 +412,11 @@ static void ins_bindSkinningInfoRecursive(const FbxNodeToExportNode& fbxNodeToEx
 }
 
 
-bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, FbxNodeToExportNode& fbxNodeToExportNode){
-    static const char __name_of_this_func[] = "SHRGenerateNodeTree(FbxManager*, FbxScene*, FbxNodeToExportNode&)";
+bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTable& materialTable, FbxNodeToExportNode& fbxNodeToExportNode, FBXNode** pRootNode){
+    static const char __name_of_this_func[] = "SHRGenerateNodeTree(FbxManager*, FbxScene*, MaterialTable&, FbxNodeToExportNode&, FBXNode**)";
 
 
-    if(shr_root->Nodes){
+    if(*pRootNode){
         SHRPushErrorMessage("scene must be destroyed before create", __name_of_this_func);
         return false;
     }
@@ -430,13 +433,14 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, FbxNodeToExp
         try{
             ins_addNodeRecursive(
                 kSDKManager,
+                materialTable,
                 fbxNodeToExportNode,
                 kPose,
                 kRootNode,
-                shr_root->Nodes
+                *pRootNode
             );
 
-            ins_bindSkinningInfoRecursive(fbxNodeToExportNode, shr_root->Nodes);
+            ins_bindSkinningInfoRecursive(fbxNodeToExportNode, *pRootNode);
         }
         catch(int ret){
             switch(ret){

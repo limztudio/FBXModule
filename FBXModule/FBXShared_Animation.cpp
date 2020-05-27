@@ -269,8 +269,8 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
     return true;
 }
-bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode){
-    static const char __name_of_this_func[] = "SHRLoadAnimations(FbxManager*, FbxScene*, const FbxNodeToExportNode&)";
+bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode, FBXDynamicArray<FBXAnimation>* pAnimations){
+    static const char __name_of_this_func[] = "SHRLoadAnimations(FbxManager*, FbxScene*, const FbxNodeToExportNode&, FBXDynamicArray<FBXAnimation>*)";
 
 
     AnimationNodes kNodeTable;
@@ -281,8 +281,6 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
 
     ins_animationStacks.clear();
     SHRLoadAnimation(kSDKManager, kScene, kNodeTable);
-
-    auto* pAnimations = &shr_root->Animations;
 
     pAnimations->Assign(ins_animationStacks.size());
     for(size_t idxAnimation = 0; idxAnimation < pAnimations->Length; ++idxAnimation){

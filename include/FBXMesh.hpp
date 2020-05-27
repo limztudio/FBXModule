@@ -13,14 +13,6 @@
 #include "FBXNode.hpp"
 
 
-class FBXMeshMaterial{
-public:
-    FBXDynamicArray<char> Name;
-
-public:
-    FBXDynamicArray<char> DiffuseTexturePath;
-};
-
 class FBXMeshAttribute{
 public:
     unsigned long VertexStart;
@@ -32,7 +24,7 @@ public:
 
 class FBXMeshLayerElement{
 public:
-    FBXDynamicArray<long> Material; // must have same count with Attributes
+    FBXDynamicArray<long> Material; // must have same count with Attributes; the index points 'Materials' from FBXMesh
 
 public:
     FBXDynamicArray<FBXStaticArray<float, 4>> Color; // must have same count with Vertices; RGBA format
@@ -58,7 +50,7 @@ public:
 
 
 public:
-    FBXDynamicArray<FBXMeshMaterial> Materials;
+    FBXDynamicArray<long> Materials; // the index points 'Materials' from FBXRoot
 
 public:
     FBXDynamicArray<FBXMeshAttribute> Attributes;

@@ -99,20 +99,14 @@ static inline bool operator==(const _PositionSkin& lhs, const _PositionSkin& rhs
 }
 
 
-static std::unordered_map<FbxSurfaceMaterial*, int, PointerHasher<FbxSurfaceMaterial*>> ins_materialFinder;
-static inline bool ins_addMaterial(std::vector<MaterialElement>& matTable, FbxSurfaceMaterial* kSurfMaterial, int* iPoly){
-    auto f = ins_materialFinder.find(kSurfMaterial);
+static std::unordered_map<int, int> ins_materialFinder;
+static inline bool ins_addMaterial(IntContainer& matTable, int sceneMaterialIndex, int* iPoly){
+    auto f = ins_materialFinder.find(sceneMaterialIndex);
     if(f == ins_materialFinder.end()){
         (*iPoly) = int(matTable.size());
+        matTable.emplace_back(sceneMaterialIndex);
 
-        matTable.emplace_back(MaterialElement());
-        auto& iMaterial = *matTable.rbegin();
-        if(kSurfMaterial){
-            if(!SHRLoadMaterial(iMaterial, kSurfMaterial))
-                return false;
-        }
-
-        ins_materialFinder.emplace(kSurfMaterial, (*iPoly));
+        ins_materialFinder.emplace(sceneMaterialIndex, (*iPoly));
     }
     else
         (*iPoly) = f->second;
@@ -121,8 +115,8 @@ static inline bool ins_addMaterial(std::vector<MaterialElement>& matTable, FbxSu
 }
 
 
-bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
-    static const char __name_of_this_func[] = "SHRLoadMeshFromNode(ControlPointRemap&, FbxNode*, NodeData*)";
+bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
+    static const char __name_of_this_func[] = "SHRLoadMeshFromNode(MaterialTable&, ControlPointRemap&, FbxNode*, NodeData*)";
 
 
     const std::string strName = kNode->GetName();
@@ -281,7 +275,9 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
 
                         auto kIdxMaterial = kObject->GetIndexArray().GetAt(iPoly);
                         auto* kSurfMaterial = kNode->GetMaterial(kIdxMaterial);
-                        if(!ins_addMaterial(materials, kSurfMaterial, &poly)){
+                        auto kIdxSceneMaterial = materialTable.emplace(kSurfMaterial);
+
+                        if(!ins_addMaterial(materials, kIdxSceneMaterial, &poly)){
                             std::string msg = "cannot load material \"";
                             msg += kSurfMaterial->GetName();
                             msg += "\" while reading material by FbxLayerElement::eByPolygon";
@@ -300,8 +296,9 @@ bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, FbxNode* kNode, N
                     {
                         auto kIdxMaterial = kObject->GetIndexArray().GetAt(0);
                         auto* kSurfMaterial = kNode->GetMaterial(kIdxMaterial);
+                        auto kIdxSceneMaterial = materialTable.emplace(kSurfMaterial);
 
-                        if(!ins_addMaterial(materials, kSurfMaterial, &matIndex)){
+                        if(!ins_addMaterial(materials, kIdxSceneMaterial, &matIndex)){
                             std::string msg = "cannot load material \"";
                             msg += kSurfMaterial->GetName();
                             msg += "\" while reading material by FbxLayerElement::eAllSame";
@@ -669,31 +666,31 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
     if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_SkinnedMesh))
         pSkinnedNode = static_cast<decltype(pSkinnedNode)>(pNode);
 
-    const std::string strName = pNode->Name.Values;
+    const std::string strMeshName = pNode->Name.Values;
     auto* kMesh = kNode->GetMesh();
 
     {
         for(auto* pMaterial = pNode->Materials.Values; FBX_PTRDIFFU(pMaterial - pNode->Materials.Values) < pNode->Materials.Length; ++pMaterial){
-            const std::string strMaterialName = pMaterial->Name.Values;
-
-            auto* kMaterial = SHRCreateMaterial(kSDKManager, kScene, pMaterial);
+            auto* kMaterial = kScene->GetMaterial(*pMaterial);
             if(!kMaterial){
-                std::string msg = "failed to create material \"";
-                msg += strMaterialName;
-                msg += "\"";
+                std::string msg = "cannot find material index ";
+                msg += std::to_string(*pMaterial);
+                msg += " on scene materials";
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
+
+            const std::string strMaterialName = kMaterial->GetName();
 
             if(kNode->AddMaterial(kMaterial) < 0){
                 std::string msg = "failed to add material \"";
                 msg += strMaterialName;
                 msg += "\"";
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -752,7 +749,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             if(idxNewLayer < 0){
                 std::string msg = "failed to create layer";
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -760,7 +757,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             else if(idxLayer != idxNewLayer){
                 std::string msg = "the created layer has unexpected index number";
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -779,7 +776,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             if(!kMaterial){
                 std::string msg = "failed to create element material in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -825,7 +822,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             if(!kColor){
                 std::string msg = "failed to create element vertex color in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -865,7 +862,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             if(!kNormal){
                 std::string msg = "failed to create element normal in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -906,7 +903,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             if(!kBinormal){
                 std::string msg = "failed to create element binormal in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -947,7 +944,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             if(!kTangent){
                 std::string msg = "failed to create element tangent in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
@@ -988,7 +985,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             if(!kUV){
                 std::string msg = "failed to create element UV in the layer " + std::to_string(idxLayer);
                 msg += "(errored in \"";
-                msg += strName;
+                msg += strMeshName;
                 msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;

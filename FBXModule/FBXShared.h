@@ -40,10 +40,36 @@ using Unit3Container = std::vector<fbxsdk::FbxDouble3>;
 
 // FBXShared_Material ////////////////////////////////////////////////////////////////////////////////
 
-struct MaterialElement{
-    std::string name;
+class MaterialTable{
+public:
+    inline void clear(){
+        matTable.clear();
+        matFinder.clear();
+    }
 
-    std::string diffusePath;
+    inline int emplace(fbxsdk::FbxSurfaceMaterial* kMaterial){
+        int ret;
+
+        auto f = matFinder.find(kMaterial);
+        if(f == matFinder.end()){
+            ret = decltype(ret)(matTable.size());
+
+            matTable.emplace_back(kMaterial);
+            matFinder.emplace(kMaterial, ret);
+        }
+        else
+            ret = f->second;
+        
+        return ret;
+    }
+
+public:
+    inline const std::vector<fbxsdk::FbxSurfaceMaterial*>& getTable()const{ return matTable; }
+
+
+private:
+    std::vector<fbxsdk::FbxSurfaceMaterial*> matTable;
+    std::unordered_map<fbxsdk::FbxSurfaceMaterial*, int, PointerHasher<fbxsdk::FbxSurfaceMaterial*>> matFinder;
 };
 
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +128,7 @@ struct NodeData{
 
     FbxAMatrix kTransformMatrix;
 
-    std::vector<MaterialElement> bufMaterials;
+    IntContainer bufMaterials;
 
     MeshAttribute bufMeshAttribute;
     std::vector<BoneCombination> bufBoneCombination;
@@ -189,6 +215,8 @@ extern fbxsdk::FbxScene* shr_scene;
 
 // FBXShared_Material ////////////////////////////////////////////////////////////////////////////////
 
+extern MaterialTable shr_materialTable;
+
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
@@ -243,12 +271,12 @@ extern bool SHRInitBoneNode(fbxsdk::FbxManager* kSDKManager, const FBXBone* pNod
 
 // FBXShared_Material ////////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRLoadMaterial(MaterialElement& iMaterial, fbxsdk::FbxSurfaceMaterial* kMaterial);
-extern fbxsdk::FbxSurfaceMaterial* SHRCreateMaterial(FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXMeshMaterial* pMaterial);
+extern bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMaterial>* pMaterials);
+extern bool SHRStoreMaterials(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FBXDynamicArray<FBXMaterial>& materialTable);
 
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRLoadMeshFromNode(ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
+extern bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& controlPointRemap, fbxsdk::FbxNode* kNode, NodeData* pNodeData);
 
 extern bool SHRInitMeshNode(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, fbxsdk::FbxNode* kNode);
 
@@ -266,7 +294,7 @@ extern void SHRGenerateMeshAttribute(NodeData* pNodeData);
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRGenerateNodeTree(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, FbxNodeToExportNode& fbxNodeToExportNode);
+extern bool SHRGenerateNodeTree(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, MaterialTable& materialTable, FbxNodeToExportNode& fbxNodeToExportNode, FBXNode** pRootNode);
 
 extern fbxsdk::FbxNode* SHRStoreNode(fbxsdk::FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeToFbxNode, fbxsdk::FbxNode* kParentNode, const FBXNode* pNode);
 extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, ImportNodeToFbxNode& importNodeToFbxNode, PoseNodeList& poseNodeList, const FBXNode* pRootNode);
@@ -276,7 +304,7 @@ extern bool SHRCreateBindPose(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene*
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
 extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const AnimationNodes& kNodeTable);
-extern bool SHRLoadAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode);
+extern bool SHRLoadAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode, FBXDynamicArray<FBXAnimation>* pAnimations);
 
 extern bool SHRStoreAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pAnimStack);
 extern bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXDynamicArray<FBXAnimation>& animStacks);
