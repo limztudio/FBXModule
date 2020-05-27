@@ -12,7 +12,7 @@
 
 
 template<typename T>
-static FBX_SIZE FBXGetMemorylength(const T* p){
+static FBX_SIZE FBXGetMemoryLength(const T* p){
     FBX_SIZE i = 0;
     for(; (*p); ++p, ++i);
     return i;

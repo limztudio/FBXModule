@@ -400,7 +400,7 @@ static inline void CopyString(LHS<LHS_T>& lhs, const std::basic_string<RHS_T>& r
 }
 template<template<typename> typename LHS, typename LHS_T, typename RHS>
 static inline void CopyString(LHS<LHS_T>& lhs, const RHS* rhs){
-    const auto lenStr = FBXGetMemorylength<RHS>(rhs);
+    const auto lenStr = FBXGetMemoryLength<RHS>(rhs);
     lhs.Assign(lenStr + 1);
     CopyArrayData(lhs.Values, rhs, lenStr);
     lhs.Values[lenStr] = 0;
