@@ -35,7 +35,7 @@ public:
     FBXDynamicArray<long> Material; // must have same count with Attributes
 
 public:
-    FBXDynamicArray<FBXStaticArray<float, 4>> Color; // must have same count with Vertices
+    FBXDynamicArray<FBXStaticArray<float, 4>> Color; // must have same count with Vertices; RGBA format
 
 public:
     FBXDynamicArray<FBXStaticArray<float, 3>> Normal; // must have same count with Vertices
