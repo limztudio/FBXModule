@@ -54,7 +54,10 @@ void SHRCopyRoot(FBXRoot* dest, const FBXRoot* src){
     SHRNodeBinder(dest->Nodes, src->Nodes);
 
     SHRCopyNode(dest->Nodes, src->Nodes);
-    SHRCopyAnimation(dest->Animations, src->Animations);
+
+    dest->Animations = src->Animations;
+    for(size_t idxAnim = 0; idxAnim < dest->Animations.Length; ++idxAnim)
+        SHRCopyAnimation(dest->Animations.Values[idxAnim], src->Animations.Values[idxAnim]);
 }
 void SHRCopyNode(FBXNode* dest, const FBXNode* src){
     static const char __name_of_this_func[] = "SHRCopyNode(FBXNode*, const FBXNode*)";
@@ -136,28 +139,16 @@ void SHRCopyNode(FBXNode* dest, const FBXNode* src){
     else if((!dest) && src)
         SHRPushErrorMessage("destination and source must have value. but destination is null", __name_of_this_func);
 }
-void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src){
-    static const char __name_of_this_func[] = "SHRCopyAnimation(FBXNode*, const FBXNode*)";
+void SHRCopyAnimation(FBXAnimation& dest, const FBXAnimation& src){
+    static const char __name_of_this_func[] = "SHRCopyAnimation(FBXAnimation&, const FBXAnimation&)";
 
 
-    if(dest && src){
-        dest->Name = src->Name;
-        dest->EndTime = src->EndTime;
-        dest->AnimationNodes = src->AnimationNodes;
+    for(auto* p = dest.AnimationNodes.Values; FBX_PTRDIFFU(p - dest.AnimationNodes.Values) < dest.AnimationNodes.Length; ++p){
+        auto f = ins_nodeBinder.find(p->BindNode);
 
-        for(auto* p = dest->AnimationNodes.Values; FBX_PTRDIFFU(p - dest->AnimationNodes.Values) < dest->AnimationNodes.Length; ++p){
-            auto f = ins_nodeBinder.find(p->BindNode);
-
-            if(f != ins_nodeBinder.cend())
-                p->BindNode = f->second;
-            else
-                SHRPushErrorMessage("an error occurred while binding node pointer on Animation", __name_of_this_func);
-        }
-
-        SHRCopyAnimation(dest->Next, src->Next);
+        if(f != ins_nodeBinder.cend())
+            p->BindNode = f->second;
+        else
+            SHRPushErrorMessage("an error occurred while binding node pointer on Animation", __name_of_this_func);
     }
-    else if(dest && (!src))
-        SHRPushErrorMessage("destination and source must have value. but source is null", __name_of_this_func);
-    else if((!dest) && src)
-        SHRPushErrorMessage("destination and source must have value. but destination is null", __name_of_this_func);
 }

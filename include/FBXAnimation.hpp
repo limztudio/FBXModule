@@ -47,20 +47,6 @@ public:
 
 
 public:
-    FBXAnimation()
-        :
-        Next(nullptr)
-    {}
-    virtual ~FBXAnimation(){
-        if(Next)
-            FBXDelete(Next);
-    }
-
-
-public:
-    FBXAnimation* Next;
-
-public:
     float EndTime;
     FBXDynamicArray<FBXAnimationNode> AnimationNodes;
 };

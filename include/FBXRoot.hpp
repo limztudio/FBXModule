@@ -22,18 +22,17 @@ public:
 public:
     FBXRoot()
         :
-        Nodes(nullptr),
-        Animations(nullptr)
+        Nodes(nullptr)
     {}
     virtual ~FBXRoot(){
         if(Nodes)
             FBXDelete(Nodes);
-        if(Animations)
-            FBXDelete(Animations);
     }
 
 
 public:
     FBXNode* Nodes;
-    FBXAnimation* Animations;
+
+public:
+    FBXDynamicArray<FBXAnimation> Animations;
 };

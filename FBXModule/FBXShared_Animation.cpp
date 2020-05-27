@@ -282,10 +282,12 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
     ins_animationStacks.clear();
     SHRLoadAnimation(kSDKManager, kScene, kNodeTable);
 
-    auto** pNewAnimation = &shr_root->Animations;
-    for(auto& iAnimation : ins_animationStacks){
-        (*pNewAnimation) = FBXNew<FBXAnimation>();
-        auto* pAnimation = (*pNewAnimation);
+    auto* pAnimations = &shr_root->Animations;
+
+    pAnimations->Assign(ins_animationStacks.size());
+    for(size_t idxAnimation = 0; idxAnimation < pAnimations->Length; ++idxAnimation){
+        auto& iAnimation = ins_animationStacks[idxAnimation];
+        auto* pAnimation = &pAnimations->Values[idxAnimation];
 
         const std::string strStackName = iAnimation.animStack->GetName();
 
@@ -338,8 +340,6 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
                 ins_convAnimationKey(*pKey, iKey);
             }
         }
-
-        pNewAnimation = &((*pNewAnimation)->Next);
     }
 
     return true;
@@ -656,19 +656,20 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                 return false;
             }
         }
-
-        if(!SHRStoreAnimation(kSDKManager, kScene, importNodeToFbxNode, pAnimStack->Next))
-            return false;
     }
 
     return true;
 }
-bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pRootAnimStack){
-    static const char __name_of_this_func[] = "SHRStoreAnimations(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXAnimation*)";
+bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXDynamicArray<FBXAnimation>& animStacks){
+    static const char __name_of_this_func[] = "SHRStoreAnimations(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXDynamicArray<FBXAnimation>&)";
 
 
-    if(!SHRStoreAnimation(kSDKManager, kScene, importNodeToFbxNode, pRootAnimStack))
-        return false;
+    for(size_t idxAnimation = 0; idxAnimation < animStacks.Length; ++idxAnimation){
+        const auto* pAnimStack = &animStacks.Values[idxAnimation];
+
+        if(!SHRStoreAnimation(kSDKManager, kScene, importNodeToFbxNode, pAnimStack))
+            return false;
+    }
 
     return true;
 }

@@ -84,17 +84,6 @@ namespace __hidden_FBXModule{
             allocateNode(dest->Sibling, src->Sibling, dest);
         }
     }
-
-    void allocateAnimation(FBXAnimation*& dest, const FBXAnimation* src){
-        if(src){
-            dest = FBXNew<FBXAnimation>();
-
-            dest->Name = src->Name;
-            dest->AnimationNodes = src->AnimationNodes;
-
-            allocateAnimation(dest->Next, src->Next);
-        }
-    }
 };
 
 
@@ -106,7 +95,7 @@ void FBXAllocateRoot(void** pDest, const void* pSrc){
     auto* dest = FBXNew<FBXRoot>();
 
     __hidden_FBXModule::allocateNode(dest->Nodes, src->Nodes);
-    __hidden_FBXModule::allocateAnimation(dest->Animations, src->Animations);
+    dest->Animations = src->Animations;
 
     (*pDest) = dest;
 }

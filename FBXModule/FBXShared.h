@@ -218,7 +218,7 @@ extern void SHRNodeBinder(FBXNode* dest, const FBXNode* src);
 
 extern void SHRCopyRoot(FBXRoot* dest, const FBXRoot* src);
 extern void SHRCopyNode(FBXNode* dest, const FBXNode* src);
-extern void SHRCopyAnimation(FBXAnimation* dest, const FBXAnimation* src);
+extern void SHRCopyAnimation(FBXAnimation& dest, const FBXAnimation& src);
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
@@ -279,7 +279,7 @@ extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* 
 extern bool SHRLoadAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode);
 
 extern bool SHRStoreAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pAnimStack);
-extern bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pRootAnimStack);
+extern bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXDynamicArray<FBXAnimation>& animStacks);
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
