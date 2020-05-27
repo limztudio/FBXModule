@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <FBXModule.hpp>
+#include <FBXModuleDef.hpp>
 
 
 static HMODULE library = nullptr;

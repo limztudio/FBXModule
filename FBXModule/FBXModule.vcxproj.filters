@@ -68,6 +68,15 @@
     <ClInclude Include="..\include\FBXMaterial.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\FBXModuleDef.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\FBXModuleDecl.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\FBXModulePreDef.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

@@ -27,7 +27,7 @@
 #include "FBXAnimation.hpp"
 
 
-#define __FBXM_CALL_TYPE __cdecl
+#include "FBXModulePreDef.hpp"
 
 
 #ifdef __FBXM_DLL_EXPORT
@@ -36,26 +36,18 @@
 
 #else
 
-#define __FBXM_MAKE_FUNC(type, name, ...) type (__FBXM_CALL_TYPE *name) (__VA_ARGS__) = nullptr;
+#define __FBXM_MAKE_FUNC(type, name, ...) extern type (__FBXM_CALL_TYPE *name) (__VA_ARGS__);
 
 #define __FBXM_BIND_FUNC(lib, name) name = reinterpret_cast<decltype(name)>(GetProcAddress(lib, #name));
 
 #endif
 
 
-__FBXM_MAKE_FUNC(bool, FBXCheckCompatibility, void);
-__FBXM_MAKE_FUNC(unsigned long, FBXGetErrorCount, void);
-__FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage);
+#include "FBXModuleDecl.hpp"
 
-__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, unsigned long ioFlag, const void* ioSetting);
-__FBXM_MAKE_FUNC(bool, FBXCloseFile, void);
 
-__FBXM_MAKE_FUNC(bool, FBXReadScene, void);
-__FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot);
+#ifndef __FBXM_DLL_EXPORT
 
-__FBXM_MAKE_FUNC(const void*, FBXGetRoot, void);
-__FBXM_MAKE_FUNC(void, FBXCopyRoot, void* pDest, const void* pSrc);
+#undef __FBXM_MAKE_FUNC
 
-__FBXM_MAKE_FUNC(void, FBXGetWorldMatrix, void* pOutMatrix, const void* pNode);
-__FBXM_MAKE_FUNC(void, FBXTransformCoord, void* pOutVec3, const void* pVec3, const void* pMatrix);
-__FBXM_MAKE_FUNC(void, FBXTransformNormal, void* pOutVec3, const void* pVec3, const void* pMatrix);
+#endif
