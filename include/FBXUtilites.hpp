@@ -20,22 +20,6 @@ namespace FBXUtilites{
     }
 
     template<typename NODE, typename FUNC>
-    static void IterateAnimation(NODE* p, FUNC func){
-        if(p){
-            IterateAnimation(p->Next, func);
-            func(p);
-        }
-    }
-    template<typename NODE, typename FUNC>
-    static void BreakableIterateAnimation(NODE* p, FUNC func){
-        if(p){
-            BreakableIterateAnimation(p->Next, func);
-            if(!func(p))
-                return;
-        }
-    }
-
-    template<typename NODE, typename FUNC>
     static void IterateNode(NODE* p, FUNC func){
         if(p){
             IterateNode(p->Child, func);
