@@ -18,7 +18,7 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
 <Type Name="FBXDynamicArray&lt;*&gt;">
-	<DisplayString Condition="Length == 0">[{Length}] {{}}</DisplayString>
+  <DisplayString Condition="Length == 0">[{Length}] {{}}</DisplayString>
 	<DisplayString Condition="Length == 1">[{Length}] {{ {*Values} }}</DisplayString>
 	<DisplayString Condition="Length == 2">[{Length}] {{ {*Values}, {*(Values+1)} }}</DisplayString>
 	<DisplayString Condition="Length == 3">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)} }}</DisplayString>
@@ -26,31 +26,31 @@
 	<DisplayString Condition="Length == 5">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)} }}</DisplayString>
 	<DisplayString Condition="Length == 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)} }}</DisplayString>
 	<DisplayString Condition="Length &gt; 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)}, ... }}</DisplayString>
-    <Expand>
-        <Item Name="[size]">Length</Item>
-        <ArrayItems>
-            <Size>Length</Size>
-            <ValuePointer>Values</ValuePointer>
-        </ArrayItems>
-    </Expand>
+  <Expand>
+    <Item Name="[size]">Length</Item>
+    <ArrayItems>
+      <Size>Length</Size>
+      <ValuePointer>Values</ValuePointer>
+    </ArrayItems>
+  </Expand>
 </Type>
 
-  <Type Name="FBXStaticArray&lt;*&gt;">
-    <DisplayString Condition="Length == 0">[{Length}] {{}}</DisplayString>
-    <DisplayString Condition="Length == 1">[{Length}] {{ {*Values} }}</DisplayString>
-    <DisplayString Condition="Length == 2">[{Length}] {{ {*Values}, {*(Values+1)} }}</DisplayString>
-    <DisplayString Condition="Length == 3">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)} }}</DisplayString>
-    <DisplayString Condition="Length == 4">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)} }}</DisplayString>
-    <DisplayString Condition="Length == 5">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)} }}</DisplayString>
-    <DisplayString Condition="Length == 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)} }}</DisplayString>
-    <DisplayString Condition="Length &gt; 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)}, ... }}</DisplayString>
-    <Expand>
-      <Item Name="[size]">Length</Item>
-      <ArrayItems>
-        <Size>Length</Size>
-        <ValuePointer>Values</ValuePointer>
-      </ArrayItems>
-    </Expand>
-  </Type>
+<Type Name="FBXStaticArray&lt;*&gt;">
+  <DisplayString Condition="Length == 0">[{Length}] {{}}</DisplayString>
+  <DisplayString Condition="Length == 1">[{Length}] {{ {*Values} }}</DisplayString>
+  <DisplayString Condition="Length == 2">[{Length}] {{ {*Values}, {*(Values+1)} }}</DisplayString>
+  <DisplayString Condition="Length == 3">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)} }}</DisplayString>
+  <DisplayString Condition="Length == 4">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)} }}</DisplayString>
+  <DisplayString Condition="Length == 5">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)} }}</DisplayString>
+  <DisplayString Condition="Length == 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)} }}</DisplayString>
+  <DisplayString Condition="Length &gt; 6">[{Length}] {{ {*Values}, {*(Values+1)}, {*(Values+2)}, {*(Values+3)}, {*(Values+4)}, {*(Values+5)}, ... }}</DisplayString>
+  <Expand>
+    <Item Name="[size]">Length</Item>
+    <ArrayItems>
+      <Size>Length</Size>
+      <ValuePointer>Values</ValuePointer>
+    </ArrayItems>
+  </Expand>
+</Type>
 
 </AutoVisualizer>
