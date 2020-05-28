@@ -11,11 +11,6 @@
 #include "FBXAssign.hpp"
 
 
-enum class FBXIOType : unsigned long{
-    FBXIOType_None = 0,
-
-    FBXIOType_BinaryExport = 1,
-};
 enum class FBXAxisSystem : unsigned long{
     FBXAxisSystem_UpVector_XAxis = 1 << 0,
     FBXAxisSystem_UpVector_NegXAxis = 1 << 1,
@@ -69,6 +64,8 @@ class FBXIOSetting{
 public:
     FBXIOSetting()
         :
+        ExportAsASCII(true),
+
         MaxParticipateClusterPerVertex(4),
         MaxBoneCountPerMesh(20),
 
@@ -77,6 +74,9 @@ public:
         UnitMultiplier(1.)
     {}
 
+
+public:
+    bool ExportAsASCII;
 
 public:
     unsigned long MaxParticipateClusterPerVertex;

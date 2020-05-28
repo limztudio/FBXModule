@@ -23,14 +23,10 @@ static FbxIOSettings* ins_IOSettings = nullptr;
 static std::string ins_fileName;
 static unsigned char ins_fileMode = 0;
 
-static FBXIOType ins_ioFlag = FBXIOType::FBXIOType_None;
 
-
-__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, unsigned long ioFlag, const void* ioSetting){
+__FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, const void* ioSetting){
     static const char __name_of_this_func[] = "FBXOpenFile(const char*, const char*, unsigned long, const void*)";
 
-
-    ins_ioFlag = (FBXIOType)ioFlag;
 
     if(ioSetting)
         shr_ioSetting = (*reinterpret_cast<const FBXIOSetting*>(ioSetting));
@@ -204,7 +200,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             return false;
         }
 
-        const int writeFormat = FBXTypeHasMember(ins_ioFlag, FBXIOType::FBXIOType_BinaryExport) ? shr_SDKManager->GetIOPluginRegistry()->GetNativeWriterFormat() : -1;
+        const int writeFormat = shr_ioSetting.ExportAsASCII ? (-1) : shr_SDKManager->GetIOPluginRegistry()->GetNativeWriterFormat();
         {
             //ins_IOSettings->SetBoolProp(EXP_FBX_CONSTRAINT, true);
             ins_IOSettings->SetBoolProp(EXP_FBX_MATERIAL, true);
@@ -222,7 +218,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             return false;
         }
 
-        CustomStream stream(shr_SDKManager, ins_fileName.c_str(), "wb", writeFormat == -1);
+        CustomStream stream(shr_SDKManager, ins_fileName.c_str(), "wb", shr_ioSetting.ExportAsASCII);
 
         void* streamData = nullptr;
         if(!kExporter->Initialize(&stream, streamData, writeFormat, ins_IOSettings)){
@@ -240,7 +236,6 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
     SHRDestroyFbxSdkObjects();
 
     ins_IOSettings = nullptr;
-    ins_ioFlag = FBXIOType::FBXIOType_None;
 
     return true;
 }
