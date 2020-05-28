@@ -35,3 +35,19 @@ static void FBXBreakableIterateNode(NODE* p, FUNC func){
             return;
     }
 }
+
+template<typename NODE, typename FUNC>
+static void FBXIterateBackwardNode(NODE* p, FUNC func){
+    if(p){
+        func(p);
+        FBXIterateBackwardNode(p->Parent, func);
+    }
+}
+template<typename NODE, typename FUNC>
+static void FBXBreakableIterateBackwardNode(NODE* p, FUNC func){
+    if(p){
+        if(!func(p))
+            return;
+        FBXBreakableIterateBackwardNode(p->Parent, func);
+    }
+}
