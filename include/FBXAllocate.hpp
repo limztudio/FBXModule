@@ -27,7 +27,7 @@
 
 namespace __hidden_FBXModule{
     template<typename T>
-    static void allocateNode(T*& dest, const T* src, T* pDestarent = nullptr){
+    static void allocateNode(T*& dest, const T* src, T* pDestParent = nullptr){
         if(src){
             const auto srcID = src->getID();
             switch(srcID){
@@ -80,9 +80,9 @@ namespace __hidden_FBXModule{
                 dest_c->SkinDeforms = src_c->SkinDeforms;
             }
 
-            dest->Parent = pDestarent;
+            dest->Parent = pDestParent;
             allocateNode<T>(dest->Child, src->Child, dest);
-            allocateNode<T>(dest->Sibling, src->Sibling, dest);
+            allocateNode<T>(dest->Sibling, src->Sibling, pDestParent);
         }
     }
 };
