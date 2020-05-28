@@ -55,6 +55,7 @@
     <ClInclude Include="..\include\FBXMaterial.hpp" />
     <ClInclude Include="..\include\FBXMesh.hpp" />
     <ClInclude Include="..\include\FBXModule.hpp" />
+    <ClInclude Include="..\include\FBXModuleBind.hpp" />
     <ClInclude Include="..\include\FBXModuleDecl.hpp" />
     <ClInclude Include="..\include\FBXModuleDef.hpp" />
     <ClInclude Include="..\include\FBXModulePreDef.hpp" />

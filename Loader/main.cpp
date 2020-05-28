@@ -6,6 +6,7 @@
 
 #include <FBXModule.hpp>
 #include <FBXModuleDef.hpp>
+#include <FBXModuleBind.hpp>
 
 
 static HMODULE library = nullptr;
@@ -29,19 +30,7 @@ static inline std::string getLastError(){
 static inline void loadLib(){
     library = LoadLibrary(TEXT("FBXModule.dll"));
 
-    __FBXM_BIND_FUNC(library, FBXCheckCompatibility);
-
-    __FBXM_BIND_FUNC(library, FBXGetErrorCount);
-    __FBXM_BIND_FUNC(library, FBXGetLastError);
-
-    __FBXM_BIND_FUNC(library, FBXOpenFile);
-    __FBXM_BIND_FUNC(library, FBXCloseFile);
-
-    __FBXM_BIND_FUNC(library, FBXReadScene);
-    __FBXM_BIND_FUNC(library, FBXWriteScene);
-
-    __FBXM_BIND_FUNC(library, FBXGetRoot);
-    __FBXM_BIND_FUNC(library, FBXCopyRoot);
+    FBXBindFunction(library);
 }
 static inline void closeLib(){
     FreeLibrary(library);

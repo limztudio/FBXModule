@@ -38,8 +38,6 @@
 
 #define __FBXM_MAKE_FUNC(type, name, ...) extern type (__FBXM_CALL_TYPE *name) (__VA_ARGS__)
 
-#define __FBXM_BIND_FUNC(lib, name) name = reinterpret_cast<decltype(name)>(GetProcAddress(lib, #name));
-
 #endif
 
 
