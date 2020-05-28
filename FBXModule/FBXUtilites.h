@@ -197,7 +197,7 @@ using Float4 = Container4<float>;
 
 class CustomStream : public FbxStream{
 public:
-    CustomStream(FbxManager* kSDKManager, const char* fileName, const char* mode);
+    CustomStream(FbxManager* kSDKManager, const char* fileName, const char* mode, bool ascii = false);
     virtual ~CustomStream();
 
 

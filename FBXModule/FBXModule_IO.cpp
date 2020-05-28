@@ -222,7 +222,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             return false;
         }
 
-        CustomStream stream(shr_SDKManager, ins_fileName.c_str(), "wb");
+        CustomStream stream(shr_SDKManager, ins_fileName.c_str(), "wb", writeFormat == -1);
 
         void* streamData = nullptr;
         if(!kExporter->Initialize(&stream, streamData, writeFormat, ins_IOSettings)){

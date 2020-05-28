@@ -15,7 +15,7 @@
 using namespace fbxsdk;
 
 
-CustomStream::CustomStream(FbxManager* kSDKManager, const char* fileName, const char* mode)
+CustomStream::CustomStream(FbxManager* kSDKManager, const char* fileName, const char* mode, bool ascii)
     :
     m_fileName(fileName),
     m_fileMode(mode),
@@ -36,8 +36,14 @@ CustomStream::CustomStream(FbxManager* kSDKManager, const char* fileName, const 
         m_writerID = -1;
     }
     else if(*m_fileMode.cbegin() == 'w'){
-        static const char format[] = "FBX ascii (*.fbx)";
-        m_writerID = kSDKManager->GetIOPluginRegistry()->FindWriterIDByDescription(format);
+        if(ascii){
+            static const char format[] = "FBX ascii (*.fbx)";
+            m_writerID = kSDKManager->GetIOPluginRegistry()->FindWriterIDByDescription(format);
+        }
+        else{
+            static const char format[] = "FBX (*.fbx)";
+            m_writerID = kSDKManager->GetIOPluginRegistry()->FindWriterIDByDescription(format);
+        }
         m_readerID = -1;
     }
 }
