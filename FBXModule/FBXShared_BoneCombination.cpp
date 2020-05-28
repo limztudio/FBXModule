@@ -208,10 +208,13 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
 
             if(!iAttr.first.layers.empty()){
                 for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
-                    const auto& idxOldMaterial = iAttr.first.layers[idxLayer];
-                    auto& iNewMaterial = ins_bufLayers[idxLayer].materials;
+                    const auto& iOldMaterial = pNodeData->bufLayers[idxLayer].materials;
+                    if(!iOldMaterial.empty()){
+                        const auto& idxOldMaterial = iAttr.first.layers[idxLayer];
+                        auto& iNewMaterial = ins_bufLayers[idxLayer].materials;
 
-                    iNewMaterial.emplace_back(idxOldMaterial);
+                        iNewMaterial.emplace_back(idxOldMaterial);
+                    }
                 }
             }
         }
