@@ -1,4 +1,4 @@
-/**
+﻿/**
 * @file FBXModule_Error.cpp
 * @date 2018/06/15
 * @author Lim Taewoo (limztudio@gmail.com)
@@ -15,7 +15,7 @@
 __FBXM_MAKE_FUNC(unsigned long, FBXGetErrorCount, void){
     auto count = shr_errorStack.size();
 
-    return unsigned long(count);
+    return (unsigned long)(count);
 }
 
 __FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage){

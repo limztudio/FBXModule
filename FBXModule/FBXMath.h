@@ -1,4 +1,4 @@
-/**
+﻿/**
 * @file FBXMath.h
 * @date 2020/05/21
 * @author Lim Taewoo (limztudio@gmail.com)
@@ -11,7 +11,7 @@
 #define _XM_SSE4_INTRINSICS_
 
 #ifdef _SIMD_AVX
-#define _XM_AVX_INTRINSICS_
+#define _XM_AVX2_INTRINSICS_
 #endif
 
 #ifdef _SIMD_FMA
@@ -23,7 +23,7 @@
 #include "DirectXMath/Extensions/DirectXMathSSE4.h"
 
 #ifdef _SIMD_AVX
-#include "DirectXMath/Extensions/DirectXMathAVX.h"
+#include "DirectXMath/Extensions/DirectXMathAVX2.h"
 #endif
 
 #ifdef _SIMD_FMA
