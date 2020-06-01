@@ -1,0 +1,18 @@
+LIBRARY FBXModule
+EXPORTS
+ FBXCheckCompatibility
+ FBXGetErrorCount
+ FBXGetLastError
+
+ FBXOpenFile
+ FBXCloseFile
+
+ FBXReadScene
+ FBXWriteScene
+
+ FBXGetRoot
+ FBXCopyRoot
+
+ FBXGetWorldMatrix
+ FBXTransformCoord
+ FBXTransformNormal
