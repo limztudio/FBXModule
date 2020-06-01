@@ -147,7 +147,6 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
     for(int idxBone = 0, edxBone = (decltype(edxBone))boneMapList.size(); idxBone < edxBone; ++idxBone){
         for(const auto& iBone : boneMapList[idxBone]){
             const auto& vertID = iBone.first;
-            const auto& vertWeight = iBone.second;
 
             bool found = false;
             for(const auto& iVert : vertexBoneList[vertID]){
@@ -158,7 +157,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
             }
 
             if(!found){
-                SHRPushErrorMessage("validation check failed. bone indices are not matched", __name_of_this_func);
+                SHRPushErrorMessage("validation check failed. bone index is not match", __name_of_this_func);
                 return false;
             }
         }
@@ -168,27 +167,15 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         auto& weightBoneMap = vertexBoneList[idxVert];
 
         // remove too many participated clusters
-        if(weightBoneMap.size() > shr_ioSetting.MaxParticipateClusterPerVertex){
-            size_t counter = 0;
-            for(auto itrBone = weightBoneMap.rbegin(); itrBone != weightBoneMap.rend(); ++itrBone){
-                auto& vertexBoneWeightMap = boneMapList[itrBone->second];
-
-                auto itrVertBone = vertexBoneWeightMap.find(idxVert);
-                if(itrVertBone != vertexBoneWeightMap.end()){
-                    if(counter >= shr_ioSetting.MaxParticipateClusterPerVertex)
-                        vertexBoneWeightMap.erase(itrVertBone);
-                }
-
-                ++counter;
-            }
-
+        while(weightBoneMap.size() > shr_ioSetting.MaxParticipateClusterPerVertex){
             auto itrBone = weightBoneMap.begin();
-            for(size_t i = 0, e = weightBoneMap.size() - shr_ioSetting.MaxParticipateClusterPerVertex; i < e; ++i){
-                auto itrDel = itrBone;
-                ++itrBone;
+            auto& vertexBoneWeightMap = boneMapList[itrBone->second];
+            auto itrVertBone = vertexBoneWeightMap.find(idxVert);
 
-                weightBoneMap.erase(itrBone);
-            }
+            weightBoneMap.erase(itrBone);
+
+            if(itrVertBone != vertexBoneWeightMap.end())
+                vertexBoneWeightMap.erase(itrVertBone);
         }
 
         double totalWeight = 0;

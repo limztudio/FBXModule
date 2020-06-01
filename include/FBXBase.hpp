@@ -41,5 +41,9 @@ public:
 
 
 public:
+    virtual ~FBXBase(){}
+
+
+public:
     FBXDynamicArray<char> Name;
 };

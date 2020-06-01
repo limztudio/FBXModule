@@ -42,7 +42,7 @@ public:
         }
 
         for(const auto& i : data.layeredColor){
-            c = MakeHash(data.position.mData);
+            c = MakeHash(i.mData);
             __CAL_RESULT;
         }
 

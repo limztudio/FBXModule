@@ -123,7 +123,6 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();
 
-    auto edgeCount = kMesh->GetMeshEdgeCount();
     auto polyCount = kMesh->GetPolygonCount();
 
     auto ctrlPointsCount = kMesh->GetControlPointsCount();
