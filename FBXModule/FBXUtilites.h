@@ -406,6 +406,13 @@ static inline void CopyString(LHS<LHS_T>& lhs, const RHS* rhs){
     lhs.Values[lenStr] = 0;
 }
 
+template<template<typename> typename TABLE, typename TYPE>
+static inline std::basic_string<TYPE> ToString(const TABLE<TYPE>& str){
+    if(str.Length)
+        return std::basic_string<TYPE>(str.Values);
+    return std::basic_string<TYPE>();
+}
+
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode){
     return kNode->GetScene()->GetAnimationEvaluator()->GetNodeLocalTransform(kNode);
 }

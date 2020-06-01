@@ -82,7 +82,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
     for(size_t idxMaterial = 0; idxMaterial < materialTable.Length; ++idxMaterial){
         const auto& iMaterial = materialTable.Values[idxMaterial];
 
-        const std::string strName = iMaterial.Name.Values;
+        const auto strName = ToString(iMaterial.Name);
 
         auto* kMaterial = FbxSurfacePhong::Create(kSDKManager, strName.c_str());
         if(!kMaterial){

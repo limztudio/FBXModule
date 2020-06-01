@@ -665,7 +665,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
     if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_SkinnedMesh))
         pSkinnedNode = static_cast<decltype(pSkinnedNode)>(pNode);
 
-    const std::string strMeshName = pNode->Name.Values;
+    const auto strMeshName = ToString(pNode->Name);
     auto* kMesh = kNode->GetMesh();
 
     {

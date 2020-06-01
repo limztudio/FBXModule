@@ -229,7 +229,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     static const char __name_of_this_func[] = "SHRInitSkinData(FbxManager*, PoseNodeList&, const FBXNodeToFbxNode&, const ControlPointMergeMap&, const FBXSkinnedMesh*, FbxNode*)";
 
 
-    const std::string strName = pNode->Name.Values;
+    const auto strName = ToString(pNode->Name);
 
     std::unordered_map<const FBXNode*, FbxCluster*, PointerHasher<const FBXNode*>> clusterFinder;
     std::unordered_map<const FBXNode*, float, PointerHasher<const FBXNode*>> tmpSkinTable;
@@ -280,7 +280,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             auto f = nodeBinder.find(pDeform->TargetNode);
             if(f == nodeBinder.cend()){
                 std::string msg = "failed to find bind node of ";
-                msg += pDeform->TargetNode->Name.Values;
+                msg += ToString(pDeform->TargetNode->Name);
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }

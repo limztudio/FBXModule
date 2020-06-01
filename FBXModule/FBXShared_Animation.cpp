@@ -353,7 +353,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
     }
 
     if(pAnimStack){
-        const std::string strStackName = pAnimStack->Name.Values;
+        const auto strStackName = ToString(pAnimStack->Name);
 
         auto* kAnimStack = FbxAnimStack::Create(kScene, strStackName.c_str());
         if(!kAnimStack){
@@ -394,7 +394,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
             }
 
             for(auto* pAnimNode = pAnimStack->AnimationNodes.Values; FBX_PTRDIFFU(pAnimNode - pAnimStack->AnimationNodes.Values) < pAnimStack->AnimationNodes.Length; ++pAnimNode){
-                const std::string strNodeName = pAnimNode->BindNode->Name.Values;
+                const auto strNodeName = ToString(pAnimNode->BindNode->Name);
 
                 FbxNode* kNode = nullptr;
                 {

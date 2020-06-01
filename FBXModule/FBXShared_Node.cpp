@@ -463,7 +463,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
 
 
     if(pNode){
-        const std::string strName = pNode->Name.Values;
+        const auto strName = ToString(pNode->Name);
 
         auto* kNode = FbxNode::Create(kSDKManager, strName.c_str());
         if(!kNode){
@@ -575,7 +575,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
     importNodeToFbxNode.clear();
 
     if(pRootNode){
-        const std::string strName = pRootNode->Name.Values;
+        const auto strName = ToString(pRootNode->Name);
 
         if(pRootNode->Child){
             auto* kRootNode = kScene->GetRootNode();
@@ -623,7 +623,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
     for(auto& i : importNodeToFbxNode){
         const auto curID = i.first->getID();
 
-        const std::string strName = i.first->Name.Values;
+        const auto strName = ToString(i.first->Name);
 
         auto* kNode = i.second;
 
