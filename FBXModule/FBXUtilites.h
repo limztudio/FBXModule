@@ -414,16 +414,48 @@ static inline std::basic_string<TYPE> ToString(const TABLE<TYPE>& str){
 }
 
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode){
-    return kNode->GetScene()->GetAnimationEvaluator()->GetNodeLocalTransform(kNode);
+    auto* kScene = kNode->GetScene();
+    if(!kScene)
+        return fbxsdk::FbxAMatrix();
+
+    auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+    if(!kAnimEvaluator)
+        return fbxsdk::FbxAMatrix();
+
+    return kAnimEvaluator->GetNodeLocalTransform(kNode);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    return kNode->GetScene()->GetAnimationEvaluator()->GetNodeLocalTransform(kNode, kTime);
+    auto* kScene = kNode->GetScene();
+    if(!kScene)
+        return fbxsdk::FbxAMatrix();
+
+    auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+    if(!kAnimEvaluator)
+        return fbxsdk::FbxAMatrix();
+
+    return kAnimEvaluator->GetNodeLocalTransform(kNode, kTime);
 }
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxNode* kNode){
-    return kNode->GetScene()->GetAnimationEvaluator()->GetNodeGlobalTransform(kNode);
+    auto* kScene = kNode->GetScene();
+    if(!kScene)
+        return fbxsdk::FbxAMatrix();
+
+    auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+    if(!kAnimEvaluator)
+        return fbxsdk::FbxAMatrix();
+
+    return kAnimEvaluator->GetNodeGlobalTransform(kNode);
 }
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    return kNode->GetScene()->GetAnimationEvaluator()->GetNodeGlobalTransform(kNode, kTime);
+    auto* kScene = kNode->GetScene();
+    if(!kScene)
+        return fbxsdk::FbxAMatrix();
+
+    auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+    if(!kAnimEvaluator)
+        return fbxsdk::FbxAMatrix();
+
+    return kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime);
 }
 
 static inline fbxsdk::FbxAMatrix GetGeometry(fbxsdk::FbxNode* kNode){
