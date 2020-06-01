@@ -575,25 +575,34 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
     importNodeToFbxNode.clear();
 
     if(pRootNode){
-        const auto strName = ToString(pRootNode->Name);
+        // if the first node has no sibling, treat it as root node
+        if(!pRootNode->Sibling){
+            const auto strName = ToString(pRootNode->Name);
 
-        if(pRootNode->Child){
+            if(pRootNode->Child){
+                auto* kRootNode = kScene->GetRootNode();
+
+                auto* kNewNode = SHRStoreNode(kSDKManager, importNodeToFbxNode, kRootNode, pRootNode->Child);
+                if(!kNewNode)
+                    return false;
+
+                if(!kRootNode->AddChild(kNewNode)){
+                    std::string msg = "an error occurred while adding child node";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                    return false;
+                }
+
+                importNodeToFbxNode.emplace(pRootNode, kRootNode);
+            }
+        }
+        else{
             auto* kRootNode = kScene->GetRootNode();
 
-            auto* kNewNode = SHRStoreNode(kSDKManager, importNodeToFbxNode, kRootNode, pRootNode->Child);
-            if(!kNewNode)
+            if(!SHRStoreNode(kSDKManager, importNodeToFbxNode, kRootNode, pRootNode))
                 return false;
-
-            if(!kRootNode->AddChild(kNewNode)){
-                std::string msg = "an error occurred while adding child node";
-                msg += "(errored in \"";
-                msg += strName;
-                msg += "\")";
-                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-                return false;
-            }
-
-            importNodeToFbxNode.emplace(pRootNode, kRootNode);
         }
     }
 
