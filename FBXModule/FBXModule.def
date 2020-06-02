@@ -1,8 +1,12 @@
 LIBRARY FBXModule
 EXPORTS
  FBXCheckCompatibility
+
  FBXGetErrorCount
  FBXGetLastError
+
+ FBXGetWarningCount
+ FBXGetLastWarning
 
  FBXOpenFile
  FBXCloseFile

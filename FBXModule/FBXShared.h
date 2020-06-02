@@ -199,6 +199,7 @@ extern FBXRoot* shr_root;
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
 extern std::stack<std::string> shr_errorStack;
+extern std::stack<std::string> shr_warningStack;
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
@@ -253,6 +254,10 @@ extern void SHRCopyAnimation(FBXAnimation& dest, const FBXAnimation& src);
 extern void SHRPushErrorMessage(const char* strMessage, const char* strCallPos);
 extern void SHRPushErrorMessage(const std::string& strMessage, const char* strCallPos);
 extern void SHRPushErrorMessage(std::string&& strMessage, const char* strCallPos);
+
+extern void SHRPushWarningMessage(const char* strMessage, const char* strCallPos);
+extern void SHRPushWarningMessage(const std::string& strMessage, const char* strCallPos);
+extern void SHRPushWarningMessage(std::string&& strMessage, const char* strCallPos);
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 

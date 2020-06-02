@@ -565,8 +565,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                             msg += "\" of stack \"";
                             msg += strStackName;
                             msg += "\")";
-                            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-                            return false;
+                            SHRPushWarningMessage(std::move(msg), __name_of_this_func);
                         }
                     }
                 }

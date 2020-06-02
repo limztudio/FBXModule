@@ -39,3 +39,31 @@ __FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage){
 
     return messageLenth + 1;
 }
+
+__FBXM_MAKE_FUNC(unsigned long, FBXGetWarningCount, void){
+    auto count = shr_warningStack.size();
+
+    return (unsigned long)(count);
+}
+
+__FBXM_MAKE_FUNC(int, FBXGetLastWarning, char* szMessage){
+    if(shr_warningStack.empty())
+        return -1;
+
+    const auto& lastMessage = shr_warningStack.top();
+    auto messageLenth = (int)lastMessage.length();
+
+    if(!messageLenth){
+        shr_warningStack.pop();
+        return 0;
+    }
+
+    if(szMessage){
+        CopyMemory(szMessage, lastMessage.c_str(), messageLenth);
+        szMessage[messageLenth] = 0;
+
+        shr_warningStack.pop();
+    }
+
+    return messageLenth + 1;
+}

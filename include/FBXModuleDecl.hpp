@@ -6,8 +6,12 @@
 
 
 __FBXM_MAKE_FUNC(bool, FBXCheckCompatibility, void);
+
 __FBXM_MAKE_FUNC(unsigned long, FBXGetErrorCount, void);
 __FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage);
+
+__FBXM_MAKE_FUNC(unsigned long, FBXGetWarningCount, void);
+__FBXM_MAKE_FUNC(int, FBXGetLastWarning, char* szMessage);
 
 __FBXM_MAKE_FUNC(bool, FBXOpenFile, const char* szfilePath, const char* mode, const void* ioSetting);
 __FBXM_MAKE_FUNC(bool, FBXCloseFile, void);
