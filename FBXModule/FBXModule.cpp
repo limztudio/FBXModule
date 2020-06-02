@@ -39,8 +39,17 @@ __FBXM_MAKE_FUNC(void, FBXCopyRoot, void* pDest, const void* pSrc){
 __FBXM_MAKE_FUNC(void, FBXGetWorldMatrix, void* pOutMatrix, const void* pNode){
     const auto* pConvNode = reinterpret_cast<const FBXNode*>(pNode);
 
-    auto xmm4_ret = ins_getWorldMatrix(pConvNode);
-    DirectX::XMStoreFloat4x4((DirectX::XMFLOAT4X4*)pOutMatrix, xmm4_ret);
+    FbxAMatrix kMatRes;
+    CopyArrayData<16>((double*)kMatRes, pConvNode->TransformMatrix.Values);
+    for(pConvNode = pConvNode->Parent; pConvNode; pConvNode = pConvNode->Parent){
+        FbxAMatrix kMatTmp;
+        CopyArrayData<16>((double*)kMatTmp, pConvNode->TransformMatrix.Values);
+        kMatRes = kMatTmp * kMatRes;
+    }
+    CopyArrayData<16>((float*)pOutMatrix, (double*)kMatRes);
+
+    //auto xmm4_ret = ins_getWorldMatrix(pConvNode);
+    //DirectX::XMStoreFloat4x4((DirectX::XMFLOAT4X4*)pOutMatrix, xmm4_ret);
 }
 __FBXM_MAKE_FUNC(void, FBXTransformCoord, void* pOutVec3, const void* pVec3, const void* pMatrix){
     auto xmm4_srt = DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)pMatrix);
