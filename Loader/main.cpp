@@ -28,7 +28,11 @@ static inline std::string getLastError(){
 
 
 static inline void loadLib(){
+#ifdef _DEBUG
+    library = LoadLibrary(TEXT("FBXModuleD.dll"));
+#else
     library = LoadLibrary(TEXT("FBXModule.dll"));
+#endif
 
     FBXBindFunction(library);
 }

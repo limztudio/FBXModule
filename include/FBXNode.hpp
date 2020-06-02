@@ -24,7 +24,9 @@ public:
         :
         Parent(nullptr),
         Child(nullptr),
-        Sibling(nullptr)
+        Sibling(nullptr),
+
+        TransformMatrix({ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 })
     {}
     virtual ~FBXNode(){
         if(Child)
