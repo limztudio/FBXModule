@@ -410,7 +410,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                     kNode = f->second;
                 }
 
-                { // translation
+                if(pAnimNode->TranslationKeys.Length){ // translation
                     auto* kCurveX = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
                     if(!kCurveX){
                         std::string msg = "failed to get curve of X translation component";
@@ -481,7 +481,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                     }
                 }
 
-                { // rotation
+                if(pAnimNode->RotationKeys.Length){ // rotation
                     auto* kCurveX = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
                     if(!kCurveX){
                         std::string msg = "failed to get curve of X rotation component";
@@ -570,7 +570,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                     }
                 }
 
-                { // scaling
+                if(pAnimNode->ScalingKeys.Length){ // scaling
                     auto* kCurveX = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
                     if(!kCurveX){
                         std::string msg = "failed to get curve of X scaling component";
