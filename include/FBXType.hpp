@@ -235,7 +235,7 @@ public:
             (*d) = (*s);
     }
     FBXStaticArray(std::initializer_list<T> table){
-        assert(table.size() > Length);
+        assert(table.size() <= Length);
 
         auto* p = Values;
         for(auto& i : table)
