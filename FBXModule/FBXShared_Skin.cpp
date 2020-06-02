@@ -265,65 +265,142 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
         }
     }
 
-    for(const auto* pDeform = pNode->SkinDeforms.Values; FBX_PTRDIFFU(pDeform - pNode->SkinDeforms.Values) < pNode->SkinDeforms.Length; ++pDeform){
-        if(!pDeform->TargetNode){
-            std::string msg = "skin deformer must have value not null";
-            msg += "(errored in \"";
-            msg += strName;
-            msg += "\")";
-            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return false;
+    if(!pNode->SkinDeforms.Length){
+        std::unordered_map<FbxNode*, const FBXNode*, PointerHasher<FbxNode*>> bindedNodes;
+
+        for(const auto* pSkinInfos = pNode->SkinInfos.Values; FBX_PTRDIFFU(pSkinInfos - pNode->SkinInfos.Values) < pNode->SkinInfos.Length; ++pSkinInfos){
+            for(const auto* pSkinInfo = pSkinInfos->Values; FBX_PTRDIFFU(pSkinInfo - pSkinInfos->Values) < pSkinInfos->Length; ++pSkinInfo){
+                const auto* pBindNode = pSkinInfo->BindNode;
+
+                if(!pBindNode){
+                    std::string msg = "skin info must have value not null";
+                    msg += "(errored in \"";
+                    msg += strName;
+                    msg += "\")";
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                    return false;
+                }
+
+                FbxNode* kBindNode = nullptr;
+                {
+                    auto f = nodeBinder.find(pBindNode);
+                    if(f == nodeBinder.cend()){
+                        std::string msg = "failed to find bind node of ";
+                        msg += ToString(pBindNode->Name);
+                        SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                        return false;
+                    }
+
+                    kBindNode = f->second;
+                }
+
+                if(kBindNode)
+                    bindedNodes.emplace(kBindNode, pBindNode);
+            }
         }
 
-        FbxNode* kTargetNode = nullptr;
-        {
-            auto f = nodeBinder.find(pDeform->TargetNode);
-            if(f == nodeBinder.cend()){
-                std::string msg = "failed to find bind node of ";
-                msg += ToString(pDeform->TargetNode->Name);
+        for(const auto& iBindNode : bindedNodes){
+            const auto* pBindNode = iBindNode.second;
+            auto* kBindNode = iBindNode.first;
+
+            auto* kCluster = FbxCluster::Create(kSDKManager, "");
+            if(!kCluster){
+                std::string msg = "failed to create FbxCluster";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
-            kTargetNode = f->second;
+            kCluster->SetLink(kBindNode);
+            kCluster->SetLinkMode(FbxCluster::eTotalOne);
+
+            auto kMatTransform = GetGlobalTransform(kNode);
+            kCluster->SetTransformMatrix(kMatTransform);
+
+            auto kMatLink = GetGlobalTransform(kBindNode);
+            kCluster->SetTransformLinkMatrix(kMatLink);
+
+            if(!kSkin->AddCluster(kCluster)){
+                std::string msg = "failed to add cluster";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+
+            clusterFinder.emplace(pBindNode, kCluster);
+
+            for(auto* kParentNode = kBindNode->GetParent(); (kParentNode && kParentNode->GetParent()); kParentNode = kParentNode->GetParent())
+                poseNodeList.emplace(kParentNode);
+            poseNodeList.emplace(kBindNode);
         }
+    }
+    else{
+        for(const auto* pDeform = pNode->SkinDeforms.Values; FBX_PTRDIFFU(pDeform - pNode->SkinDeforms.Values) < pNode->SkinDeforms.Length; ++pDeform){
+            const auto* pTargetNode = pDeform->TargetNode;
 
-        auto* kCluster = FbxCluster::Create(kSDKManager, "");
-        if(!kCluster){
-            std::string msg = "failed to create FbxCluster";
-            msg += "(errored in \"";
-            msg += strName;
-            msg += "\")";
-            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return false;
+            if(!pTargetNode){
+                std::string msg = "skin deformer must have value not null";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+
+            FbxNode* kTargetNode = nullptr;
+            {
+                auto f = nodeBinder.find(pTargetNode);
+                if(f == nodeBinder.cend()){
+                    std::string msg = "failed to find target node of ";
+                    msg += ToString(pTargetNode->Name);
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                    return false;
+                }
+
+                kTargetNode = f->second;
+            }
+
+            auto* kCluster = FbxCluster::Create(kSDKManager, "");
+            if(!kCluster){
+                std::string msg = "failed to create FbxCluster";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+
+            kCluster->SetLink(kTargetNode);
+            kCluster->SetLinkMode(FbxCluster::eTotalOne);
+
+            auto kMatTransform = GetGlobalTransform(kTargetNode);
+            kCluster->SetTransformMatrix(kMatTransform);
+
+            FbxAMatrix kMatDeform;
+            CopyArrayData<pDeform->DeformMatrix.Length>((double*)kMatDeform, pDeform->DeformMatrix.Values);
+
+            auto kMatLink = kMatTransform * kMatDeform.Inverse();
+            kCluster->SetTransformLinkMatrix(kMatLink);
+
+            if(!kSkin->AddCluster(kCluster)){
+                std::string msg = "failed to add cluster";
+                msg += "(errored in \"";
+                msg += strName;
+                msg += "\")";
+                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                return false;
+            }
+
+            clusterFinder.emplace(pTargetNode, kCluster);
+
+            for(auto* kParentNode = kTargetNode->GetParent(); (kParentNode && kParentNode->GetParent()); kParentNode = kParentNode->GetParent())
+                poseNodeList.emplace(kParentNode);
+            poseNodeList.emplace(kTargetNode);
         }
-
-        kCluster->SetLink(kTargetNode);
-        kCluster->SetLinkMode(FbxCluster::eTotalOne);
-
-        auto kMatTransform = GetGlobalTransform(kTargetNode);
-        kCluster->SetTransformMatrix(kMatTransform);
-
-        FbxAMatrix kMatDeform;
-        CopyArrayData<pDeform->DeformMatrix.Length>((double*)kMatDeform, pDeform->DeformMatrix.Values);
-
-        auto kMatLink = kMatTransform * kMatDeform.Inverse();
-        kCluster->SetTransformLinkMatrix(kMatLink);
-
-        if(!kSkin->AddCluster(kCluster)){
-            std::string msg = "failed to add cluster";
-            msg += "(errored in \"";
-            msg += strName;
-            msg += "\")";
-            SHRPushErrorMessage(std::move(msg), __name_of_this_func);
-            return false;
-        }
-
-        clusterFinder.emplace(pDeform->TargetNode, kCluster);
-
-        for(auto* kParentNode = kTargetNode->GetParent(); (kParentNode && kParentNode->GetParent()); kParentNode = kParentNode->GetParent())
-            poseNodeList.emplace(kParentNode);
-        poseNodeList.emplace(kTargetNode);
     }
 
     for(int idxVert = 0, edxVert = (int)ins_newToOldIndexer.size(); idxVert < edxVert; ++idxVert){
