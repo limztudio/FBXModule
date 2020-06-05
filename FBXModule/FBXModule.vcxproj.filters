@@ -22,6 +22,7 @@
     <ClCompile Include="FBXMath.cpp" />
     <ClCompile Include="FBXShared_Converter.cpp" />
     <ClCompile Include="FBXShared_Material.cpp" />
+    <ClCompile Include="FBXModule_Utilites.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

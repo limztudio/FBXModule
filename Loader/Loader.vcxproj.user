@@ -13,11 +13,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)exec\$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>b:\testskeletonset.fbx b:\test.fbx</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>b:\an_villager_npc_2b.fbx b:\test.fbx</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)exec\$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>b:\testskeletonset.fbx b:\test.fbx</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>b:\an_villager_npc_2b.fbx b:\test.fbx</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

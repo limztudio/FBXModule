@@ -20,3 +20,5 @@ EXPORTS
  FBXGetWorldMatrix
  FBXTransformCoord
  FBXTransformNormal
+
+ FBXComputeAnimationTransform
