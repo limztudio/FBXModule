@@ -44,13 +44,14 @@ static inline bool operator<(const _OrderedKey& lhs, const _OrderedKey& rhs){
 class _OrderdKeyWithIndex : public _OrderedKey{
 public:
     inline operator size_t()const{
-        size_t key[] = { (size_t)(*static_cast<const _OrderedKey*>(this)), (size_t)index };
+        size_t key[] = { (size_t)(*static_cast<const _OrderedKey*>(this)), (size_t)index, attribute };
         return MakeHash(key);
     }
 
 
 public:
     int index;
+    size_t attribute;
 };
 
 struct _MeshPolyValue{
@@ -78,7 +79,7 @@ static std::vector<LayerElement> ins_bufLayers;
 static SkinInfoContainer ins_bufSkinData;
 
 
-static void ins_genTempMeshAttribute(NodeData* pNodeData){
+static void ins_genTempMeshAttribute(const NodeData* pNodeData){
     ins_tmpMeshPolys.clear();
 
     const auto edxLayer = pNodeData->bufLayers.size();
@@ -177,13 +178,16 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
     pNodeData->bufBoneCombination.clear();
     pNodeData->bufBoneCombination.reserve(ins_meshPolys.size());
 
-    for(const auto& iAttr : ins_meshPolys){
+    size_t idxAttr = 0;
+    for(auto itAttr = ins_meshPolys.begin(), etAttr = ins_meshPolys.end(); itAttr != etAttr; ++itAttr, ++idxAttr){
+        const auto& iAttr = *itAttr;
         MeshAttributeElement meshAttribute;
         meshAttribute.PolygonFirst = decltype(meshAttribute.PolygonFirst)(ins_bufIndices.size());
         meshAttribute.VertexFirst = decltype(meshAttribute.VertexFirst)(ins_vertNewToOld.size());
 
         _OrderdKeyWithIndex newOrderKey;
         newOrderKey.layers = iAttr.first.layers;
+        newOrderKey.attribute = idxAttr;
 
         for(const auto& idxOldPoly : iAttr.second.polyIndices){
             const auto& iOldPoly = pNodeData->bufIndices[idxOldPoly];
