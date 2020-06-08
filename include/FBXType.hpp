@@ -74,7 +74,9 @@ public:
 
         AxisSystem(FBXAxisSystem::FBXAxisSystem_Preset_DirectX),
         UnitScale(2.54),
-        UnitMultiplier(1.)
+        UnitMultiplier(1.),
+
+        AnimationKeyCompareDifference(0.0001)
     {}
 
 
@@ -89,6 +91,7 @@ public:
     FBXAxisSystem AxisSystem;
     double UnitScale;
     double UnitMultiplier;
+    double AnimationKeyCompareDifference;
 };
 
 

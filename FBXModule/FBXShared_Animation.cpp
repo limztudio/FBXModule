@@ -36,8 +36,16 @@ static inline void ins_keyTypeOptimze(KEY_TABLE& keyTable, const VALUE& kVal){
     }
 }
 
-template<typename KEY_TABLE>
-static inline void ins_keyReduce(KEY_TABLE& keyTable){
+template<typename KEY, typename DIFF, size_t KEY_COUNT = _countof(KEY::mData)>
+static inline bool ins_keyCompare(const KEY& lhs, const KEY& rhs, DIFF valDiff){
+    for(size_t i = 0; i < KEY_COUNT; ++i){
+        if(std::abs((DIFF)lhs.mData[i] - (DIFF)rhs.mData[i]) > valDiff)
+            return false;
+    }
+    return true;
+}
+template<typename KEY, typename DIFF, size_t KEY_COUNT = _countof(KEY::mData)>
+static inline void ins_keyReduce(AnimationKeyFrames<KEY>& keyTable, DIFF valDiff){
     if(keyTable.size() > 2){
         size_t idxPivot = 1;
         while((keyTable.size() > 2) && ((idxPivot + 1) < keyTable.size())){
@@ -45,7 +53,12 @@ static inline void ins_keyReduce(KEY_TABLE& keyTable){
             const auto& iCur = keyTable[idxPivot];
             const auto& iRhs = keyTable[idxPivot + 1];
 
-            if((iLhs.value == iRhs.value) && (iLhs.value == iCur.value)){
+            if(
+                ins_keyCompare(iCur.value, iLhs.value, valDiff) &&
+                ins_keyCompare(iCur.value, iRhs.value, valDiff) &&
+                ins_keyCompare(iLhs.value, iRhs.value, valDiff)
+                )
+            {
                 auto itr = keyTable.begin();
                 std::advance(itr, idxPivot);
 
@@ -61,7 +74,7 @@ static inline void ins_keyReduce(KEY_TABLE& keyTable){
         const auto& iLhs = keyTable[0];
         const auto& iRhs = keyTable[1];
 
-        if(iLhs.value == iRhs.value)
+        if(ins_keyCompare(iLhs.value, iRhs.value, valDiff))
             keyTable.pop_back();
     }
 }
@@ -211,7 +224,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     ins_keyTypeOptimze(newNodes.translationKeys, kVal);
                 }
 
-                ins_keyReduce(newNodes.translationKeys);
+                ins_keyReduce(newNodes.translationKeys, shr_ioSetting.AnimationKeyCompareDifference);
 
                 if(newNodes.translationKeys.empty()){
                     newNodes.translationKeys.reserve(1);
@@ -229,7 +242,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     ins_keyTypeOptimze(newNodes.rotationKeys, kVal);
                 }
 
-                ins_keyReduce(newNodes.rotationKeys);
+                ins_keyReduce(newNodes.rotationKeys, shr_ioSetting.AnimationKeyCompareDifference);
 
                 if(newNodes.rotationKeys.empty()){
                     newNodes.rotationKeys.reserve(1);
@@ -247,7 +260,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     ins_keyTypeOptimze(newNodes.scalingKeys, kVal);
                 }
 
-                ins_keyReduce(newNodes.scalingKeys);
+                ins_keyReduce(newNodes.scalingKeys, shr_ioSetting.AnimationKeyCompareDifference);
 
                 if(newNodes.scalingKeys.empty()){
                     newNodes.scalingKeys.reserve(1);
