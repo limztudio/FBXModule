@@ -212,13 +212,15 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         if(!iCluster)
             continue;
 
-        FbxAMatrix kTransformMatrix, kTransformLinkMatrix;
-        iCluster->GetTransformMatrix(kTransformMatrix);
-        iCluster->GetTransformLinkMatrix(kTransformLinkMatrix);
+        auto kMatGeometry = GetGeometry(iCluster->GetLink());
 
-        auto kVertexTransformMatrix = kTransformLinkMatrix.Inverse() * kTransformMatrix;
+        FbxAMatrix kMatTM, kMatLink;
+        iCluster->GetTransformMatrix(kMatTM);
+        iCluster->GetTransformLinkMatrix(kMatLink);
 
-        boneOffsetMatrixMap.emplace(iCluster, std::move(kVertexTransformMatrix));
+        auto kMatBoneOffset = kMatLink.Inverse() * kMatTM * kMatGeometry;
+
+        boneOffsetMatrixMap.emplace(iCluster, std::move(kMatBoneOffset));
     }
 
     return true;

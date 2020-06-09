@@ -228,8 +228,6 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
             }
         }
 
-        auto kRefGeometry = GetGeometry(kNode);
-
         for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
             for(int iVert = 0; iVert < 3; ++iVert){
                 auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
@@ -240,8 +238,6 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                     auto& pos = ctrlPoints[ctrlPointIndex];
 
                     CopyArrayData(vert.mData, pos.mData);
-
-                    vert = Transform44(kRefGeometry, vert);
                 }
             }
         }
@@ -530,7 +526,6 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                             }
                             }
 
-                            vert = Transform33(kRefGeometry, vert);
                             vert = Normalize3(vert);
                         }
                     }
@@ -582,7 +577,6 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                             }
                             }
 
-                            vert = Transform33(kRefGeometry, vert);
                             vert = Normalize3(vert);
                         }
                     }
@@ -634,7 +628,6 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                             }
                             }
 
-                            vert = Transform33(kRefGeometry, vert);
                             vert = Normalize3(vert);
                         }
                     }
