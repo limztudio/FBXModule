@@ -237,8 +237,8 @@ static inline bool ins_addMeshNode(
 
             iDeform->TargetNode = reinterpret_cast<decltype(iDeform->TargetNode)>(kBindNode);
 
-            const auto& matrix = nodeDeform.second;
-            CopyArrayData(iDeform->DeformMatrix.Values, (const double*)matrix);
+            CopyArrayData(iDeform->TransformMatrix.Values, (const double*)nodeDeform.second.first);
+            CopyArrayData(iDeform->LinkMatrix.Values, (const double*)nodeDeform.second.second);
 
             ++iDeform;
         }

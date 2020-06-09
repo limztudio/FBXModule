@@ -218,9 +218,10 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         iCluster->GetTransformMatrix(kMatTM);
         iCluster->GetTransformLinkMatrix(kMatLink);
 
-        auto kMatBoneOffset = kMatLink.Inverse() * kMatTM * kMatGeometry;
+        kMatTM *= kMatGeometry;
+        kMatLink *= kMatGeometry;
 
-        boneOffsetMatrixMap.emplace(iCluster, std::move(kMatBoneOffset));
+        boneOffsetMatrixMap.emplace(iCluster, std::make_pair(std::move(kMatTM), std::move(kMatLink)));
     }
 
     return true;
@@ -379,14 +380,14 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             kCluster->SetLink(kTargetNode);
             kCluster->SetLinkMode(FbxCluster::eTotalOne);
 
-            auto kMatTransform = GetGlobalTransform(kTargetNode);
-            kCluster->SetTransformMatrix(kMatTransform);
+            FbxAMatrix kMatDeformTrans;
+            CopyArrayData<pDeform->TransformMatrix.Length>((double*)kMatDeformTrans, pDeform->TransformMatrix.Values);
 
-            FbxAMatrix kMatDeform;
-            CopyArrayData<pDeform->DeformMatrix.Length>((double*)kMatDeform, pDeform->DeformMatrix.Values);
+            FbxAMatrix kMatDeformLink;
+            CopyArrayData<pDeform->LinkMatrix.Length>((double*)kMatDeformLink, pDeform->LinkMatrix.Values);
 
-            auto kMatLink = kMatTransform * kMatDeform.Inverse();
-            kCluster->SetTransformLinkMatrix(kMatLink);
+            kCluster->SetTransformMatrix(kMatDeformTrans);
+            kCluster->SetTransformLinkMatrix(kMatDeformLink);
 
             if(!kSkin->AddCluster(kCluster)){
                 std::string msg = "failed to add cluster";

@@ -24,7 +24,8 @@ public:
     FBXNode* TargetNode;
 
 public:
-    FBXStaticArray<float, 16> DeformMatrix;
+    FBXStaticArray<float, 16> TransformMatrix;
+    FBXStaticArray<float, 16> LinkMatrix;
 };
 
 

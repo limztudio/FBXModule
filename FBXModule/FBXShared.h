@@ -106,7 +106,7 @@ struct SkinData{
 
 using SkinInfoContainer = std::vector<std::vector<SkinInfo>>;
 
-using BoneOffsetMatrixMap = std::unordered_map<fbxsdk::FbxCluster*, fbxsdk::FbxAMatrix, PointerHasher<fbxsdk::FbxCluster*>>;
+using BoneOffsetMatrixMap = std::unordered_map<fbxsdk::FbxCluster*, std::pair<fbxsdk::FbxAMatrix, fbxsdk::FbxAMatrix>, PointerHasher<fbxsdk::FbxCluster*>>;
 
 // FBXShared_BoneCombination /////////////////////////////////////////////////////////////////////////
 
