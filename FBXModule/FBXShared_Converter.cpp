@@ -108,11 +108,63 @@ bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
 
     return true;
 }
+bool SHRPreparePointCaches(FbxScene* kScene){
+    static const char __name_of_this_func[] = "SHRPreparePointCaches(FbxScene*)";
+
+
+    for(auto edxNode = kScene->GetNodeCount(), idxNode = 0; idxNode < edxNode; ++idxNode){
+        auto* kNode = kScene->GetSrcObject<FbxNode>(idxNode);
+        if(!kNode)
+            continue;
+
+        auto* kGeometry = kNode->GetGeometry();
+        if(!kGeometry)
+            continue;
+
+        for(auto edxDeform = kGeometry->GetDeformerCount(FbxDeformer::eVertexCache), idxDeform = 0; idxDeform < edxDeform; ++idxDeform){
+            auto* kDeform = static_cast<FbxVertexCacheDeformer*>(kGeometry->GetDeformer(idxDeform, FbxDeformer::eVertexCache));
+            if(!kDeform)
+                continue;
+
+            auto* kCache = kDeform->GetCache();
+            if(!kCache)
+                continue;
+
+            if(!kDeform->Active.Get())
+                continue;
+
+            if(kCache->GetCacheFileFormat() == FbxCache::eMaxPointCacheV2){
+                // This code show how to convert from PC2 to MC point cache format
+                // turn it on if you need it.
+            }
+            else if(kCache->GetCacheFileFormat() == FbxCache::eMayaCache){
+                // This code show how to convert from MC to PC2 point cache format
+                // turn it on if you need it.
+                //
+                if(!kCache->ConvertFromMCToPC2(FbxTime::GetFrameRate(kScene->GetGlobalSettings().GetTimeMode()), 0)){
+                    SHRPushErrorMessage("failed to ConvertFromMCToPC2", __name_of_this_func);
+                    return false;
+
+                    // Conversion failed, retrieve the error here
+                    //FbxString kTheErrorIs = kCache->GetError().GetLastErrorString();
+                }
+            }
+
+            if(kCache->OpenFileForRead()){
+                kDeform->Active.Set(false);
+            }
+        }
+    }
+
+    return true;
+}
 
 bool SHRConvertOjbects(FbxManager* kSDKManager, FbxScene* kScene){
     if(!SHRConvertNodes(kSDKManager, kScene->GetRootNode()))
         return false;
     if(!SHRConvertAnimations(kSDKManager, kScene))
+        return false;
+    if(!SHRPreparePointCaches(kScene))
         return false;
 
     return true;

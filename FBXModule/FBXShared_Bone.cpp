@@ -29,6 +29,7 @@ bool SHRLoadBoneNode(FbxManager* kSDKManager, const FbxNode* kNode, FBXBone* pNo
 bool SHRInitBoneNode(FbxManager* kSDKManager, const FBXBone* pNode, FbxNode* kNode){
     auto* kBone = (FbxSkeleton*)kNode->GetNodeAttribute();
     if(kBone){
+        kBone->SetSkeletonType(FbxSkeleton::eLimbNode);
         kBone->Size = pNode->Size;
         kBone->LimbLength = pNode->Length;
     }

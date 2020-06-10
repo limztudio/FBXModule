@@ -267,6 +267,7 @@ extern void SHRDestroyFbxSdkObjects();
 
 extern bool SHRConvertNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxNode* kNode);
 extern bool SHRConvertAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
+extern bool SHRPreparePointCaches(fbxsdk::FbxScene* kScene);
 extern bool SHRConvertOjbects(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene);
 
 // FBXShared_Bone ////////////////////////////////////////////////////////////////////////////////////

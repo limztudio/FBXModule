@@ -440,26 +440,12 @@ static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxAnimEvaluator* kA
     return (kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime) * kMatGeometry);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode){
-    auto kMatTM = GetGlobalTransform(kAnimEvaluator, kNode);
-
-    auto* kParent = kNode->GetParent();
-    if(kParent){
-        auto kMatParentTM = GetGlobalTransform(kAnimEvaluator, kParent);
-        return (kMatParentTM.Inverse() * kMatTM);
-    }
-
-    return kMatTM;
+    auto kMatGeometry = GetGeometry(kNode);
+    return (kAnimEvaluator->GetNodeLocalTransform(kNode) * kMatGeometry);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    auto kMatTM = GetGlobalTransform(kAnimEvaluator, kNode, kTime);
-
-    auto* kParent = kNode->GetParent();
-    if(kParent){
-        auto kMatParentTM = GetGlobalTransform(kAnimEvaluator, kParent, kTime);
-        return (kMatParentTM.Inverse() * kMatTM);
-    }
-
-    return kMatTM;
+    auto kMatGeometry = GetGeometry(kNode);
+    return (kAnimEvaluator->GetNodeLocalTransform(kNode, kTime) * kMatGeometry);
 }
 
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxNode* kNode){
@@ -489,24 +475,28 @@ static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxNode* kNode, cons
     return (kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime) * kMatGeometry);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode){
-    auto kMatTM = GetGlobalTransform(kNode);
+    auto kMatGeometry = GetGeometry(kNode);
 
-    auto* kParent = kNode->GetParent();
-    if(kParent){
-        auto kMatParentTM = GetGlobalTransform(kParent);
-        return (kMatParentTM.Inverse() * kMatTM);
-    }
+    auto* kScene = kNode->GetScene();
+    if(!kScene)
+        return kMatGeometry;
 
-    return kMatTM;
+    auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+    if(!kAnimEvaluator)
+        return kMatGeometry;
+
+    return (kAnimEvaluator->GetNodeLocalTransform(kNode) * kMatGeometry);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    auto kMatTM = GetGlobalTransform(kNode, kTime);
+    auto kMatGeometry = GetGeometry(kNode);
 
-    auto* kParent = kNode->GetParent();
-    if(kParent){
-        auto kMatParentTM = GetGlobalTransform(kParent, kTime);
-        return (kMatParentTM.Inverse() * kMatTM);
-    }
+    auto* kScene = kNode->GetScene();
+    if(!kScene)
+        return kMatGeometry;
 
-    return kMatTM;
+    auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+    if(!kAnimEvaluator)
+        return kMatGeometry;
+
+    return (kAnimEvaluator->GetNodeLocalTransform(kNode, kTime) * kMatGeometry);
 }
