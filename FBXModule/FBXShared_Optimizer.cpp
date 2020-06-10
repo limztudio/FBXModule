@@ -264,10 +264,7 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
         for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
             const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
-            if(!iLayer.materials.empty())
-                iPolyInfo.layeredMaterial[idxLayer] = iLayer.materials[idxPoly];
-            else
-                iPolyInfo.layeredMaterial.clear();
+            iPolyInfo.layeredMaterial[idxLayer] = (!iLayer.materials.empty()) ? iLayer.materials[idxPoly] : (-1);
         }
 
         for(size_t idxLocalVert = 0; idxLocalVert < 3; ++idxLocalVert){
@@ -382,8 +379,11 @@ static inline void ins_genOptimizeMesh(NodeData* pNodeData){
 
         if(!iLayer.materials.empty()){
             iLayer.materials.clear();
-            for(const auto& iPolyInfo : ins_aosPolygons)
-                iLayer.materials.emplace_back(iPolyInfo.layeredMaterial[idxLayer]);
+            for(const auto& iPolyInfo : ins_aosPolygons){
+                const auto& curMat = iPolyInfo.layeredMaterial[idxLayer];
+                if(curMat >= 0)
+                    iLayer.materials.emplace_back(curMat);
+            }
         }
 
         if(!iLayer.colors.empty()){
