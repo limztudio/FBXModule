@@ -162,8 +162,12 @@ bool SHRPreparePointCaches(FbxScene* kScene){
 bool SHRConvertOjbects(FbxManager* kSDKManager, FbxScene* kScene){
     if(!SHRConvertNodes(kSDKManager, kScene->GetRootNode()))
         return false;
-    if(!SHRConvertAnimations(kSDKManager, kScene))
-        return false;
+
+    if(!shr_ioSetting.IgnoreAnimationIO){
+        if(!SHRConvertAnimations(kSDKManager, kScene))
+            return false;
+    }
+
     if(!SHRPreparePointCaches(kScene))
         return false;
 

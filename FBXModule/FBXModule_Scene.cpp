@@ -66,9 +66,11 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
             return false;
         }
 
-        if(!SHRLoadAnimations(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode, &shr_root->Animations)){
-            SHRPushErrorMessage("an error occurred while loading animation data", __name_of_this_func);
-            return false;
+        if(!shr_ioSetting.IgnoreAnimationIO){
+            if(!SHRLoadAnimations(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode, &shr_root->Animations)){
+                SHRPushErrorMessage("an error occurred while loading animation data", __name_of_this_func);
+                return false;
+            }
         }
     }
 
@@ -119,9 +121,11 @@ __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
         return false;
     }
 
-    if(!SHRStoreAnimations(shr_SDKManager, shr_scene, shr_importNodeToFbxNode, ext_root->Animations)){
-        SHRPushErrorMessage("an error occurred while storing animations", __name_of_this_func);
-        return false;
+    if(!shr_ioSetting.IgnoreAnimationIO){
+        if(!SHRStoreAnimations(shr_SDKManager, shr_scene, shr_importNodeToFbxNode, ext_root->Animations)){
+            SHRPushErrorMessage("an error occurred while storing animations", __name_of_this_func);
+            return false;
+        }
     }
 
     return true;

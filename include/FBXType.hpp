@@ -68,6 +68,7 @@ public:
     FBXIOSetting()
         :
         ExportAsASCII(true),
+        IgnoreAnimationIO(false),
 
         MaxParticipateClusterPerVertex(4),
         MaxBoneCountPerMesh(20),
@@ -82,6 +83,7 @@ public:
 
 public:
     bool ExportAsASCII;
+    bool IgnoreAnimationIO;
 
 public:
     unsigned long MaxParticipateClusterPerVertex;
