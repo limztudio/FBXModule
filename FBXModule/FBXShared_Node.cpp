@@ -45,11 +45,12 @@ static inline void ins_collectUnlinkedNode(FbxNode* kNewNode, FBXNode* pRootNode
     if(fbxNodeToExportNode.find(kNewNode) != fbxNodeToExportNode.cend())
         return;
 
-    ins_collectUnlinkedNode(kNewNode->GetParent(), pRootNode, fbxNodeToExportNode);
+    auto* kParentNode = kNewNode->GetParent();
+    ins_collectUnlinkedNode(kParentNode, pRootNode, fbxNodeToExportNode);
 
     auto* pParentNode = pRootNode;
     {
-        auto f = fbxNodeToExportNode.find(kNewNode->GetParent());
+        auto f = fbxNodeToExportNode.find(kParentNode);
         if(f != fbxNodeToExportNode.cend())
             pParentNode = f->second;
     }
@@ -62,7 +63,10 @@ static inline void ins_collectUnlinkedNode(FbxNode* kNewNode, FBXNode* pRootNode
     auto* pNewNode = FBXNew<FBXNode>();
     {
         CopyString(pNewNode->Name, kNewNode->GetName());
-        CopyArrayData(pNewNode->TransformMatrix.Values, (const double*)GetLocalTransform(kNewNode));
+        if(kParentNode)
+            CopyArrayData(pNewNode->TransformMatrix.Values, (const double*)GetLocalTransform(kNewNode));
+        else
+            CopyArrayData(pNewNode->TransformMatrix.Values, (const double*)GetGlobalTransform(kNewNode));
     }
 
     pNewNode->Parent = pParentNode;
