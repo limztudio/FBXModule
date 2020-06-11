@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 
+#include <unordered_set>
 #include <unordered_map>
 
 #include <FBXAssign.hpp>
@@ -29,12 +30,50 @@ struct _NodeData_wrapper{
 
 
 static ControlPointMergeMap ins_controlPointMergeMap;
+static std::unordered_set<FbxNode*, PointerHasher<FbxNode*>> ins_linkedNodes;
 
 
 FbxNodeToExportNode shr_fbxNodeToExportNode;
 ImportNodeToFbxNode shr_importNodeToFbxNode;
 PoseNodeList shr_poseNodeList;
 
+
+static inline void ins_collectUnlinkedNode(FbxNode* kNewNode, FBXNode* pRootNode, FbxNodeToExportNode& fbxNodeToExportNode){
+    if(!kNewNode)
+        return;
+
+    if(fbxNodeToExportNode.find(kNewNode) != fbxNodeToExportNode.cend())
+        return;
+
+    ins_collectUnlinkedNode(kNewNode->GetParent(), pRootNode, fbxNodeToExportNode);
+
+    auto* pParentNode = pRootNode;
+    {
+        auto f = fbxNodeToExportNode.find(kNewNode->GetParent());
+        if(f != fbxNodeToExportNode.cend())
+            pParentNode = f->second;
+    }
+
+    auto** pSiblingPos = &pParentNode->Child;
+    {
+        for(; (*pSiblingPos); pSiblingPos = &(*pSiblingPos)->Sibling);
+    }
+
+    auto* pNewNode = FBXNew<FBXNode>();
+    {
+        CopyString(pNewNode->Name, kNewNode->GetName());
+        CopyArrayData(pNewNode->TransformMatrix.Values, (const double*)GetLocalTransform(kNewNode));
+    }
+
+    pNewNode->Parent = pParentNode;
+    (*pSiblingPos) = pNewNode;
+
+    fbxNodeToExportNode.emplace(kNewNode, pNewNode);
+}
+static inline void ins_collectUnlinkedNodes(FBXNode* pRootNode, FbxNodeToExportNode& fbxNodeToExportNode){
+    for(auto* kNode : ins_linkedNodes)
+        ins_collectUnlinkedNode(kNode, pRootNode, fbxNodeToExportNode);
+}
 
 static inline bool ins_addBoneNode(
     FbxManager* kSDKManager,
@@ -208,6 +247,7 @@ static inline bool ins_addMeshNode(
                 auto* nodeCluster = nodeAttr[idxBC];
 
                 auto* kBindNode = nodeCluster->GetLink();
+                ins_linkedNodes.emplace(kBindNode);
 
                 iCluster = reinterpret_cast<decltype(iCluster)>(kBindNode);
             }
@@ -224,6 +264,7 @@ static inline bool ins_addMeshNode(
                 const auto& nodeCluster = nodeSkin[idxCluster];
 
                 auto* kBindNode = nodeCluster.cluster->GetLink();
+                ins_linkedNodes.emplace(kBindNode);
 
                 iCluster.BindNode = reinterpret_cast<decltype(iCluster.BindNode)>(kBindNode);
                 iCluster.Weight = static_cast<decltype(iCluster.Weight)>(nodeCluster.weight);
@@ -234,6 +275,7 @@ static inline bool ins_addMeshNode(
         auto* iDeform = pMesh->SkinDeforms.Values;
         for(const auto& nodeDeform : pNodeData->mapBoneDeformMatrices){
             auto* kBindNode = nodeDeform.first->GetLink();
+            ins_linkedNodes.emplace(kBindNode);
 
             iDeform->TargetNode = reinterpret_cast<decltype(iDeform->TargetNode)>(kBindNode);
 
@@ -430,6 +472,8 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTabl
         if(poseIndex >= 0)
             kPose = kScene->GetPose(poseIndex);
 
+        ins_linkedNodes.clear();
+
         try{
             ins_addNodeRecursive(
                 kSDKManager,
@@ -439,6 +483,13 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTabl
                 kRootNode,
                 *pRootNode
             );
+
+            const auto nodeCount = fbxNodeToExportNode.size();
+            ins_collectUnlinkedNodes(*pRootNode, fbxNodeToExportNode);
+            const auto unlinkedNodeCount = fbxNodeToExportNode.size() - nodeCount;
+
+            if(unlinkedNodeCount > 0)
+                SHRPushWarningMessage(std::to_string(unlinkedNodeCount) + " of unlinked(from root node) node(s) found.\n those nodes won't be loaded properly.", __name_of_this_func);
 
             ins_bindSkinningInfoRecursive(fbxNodeToExportNode, *pRootNode);
         }
