@@ -14,18 +14,6 @@
 #include "FBXShared.h"
 
 
-static inline DirectX::XMMATRIX __vectorcall ins_getLocalMatrix(const FBXNode* pNode){
-    return DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)pNode->TransformMatrix.Values);
-}
-static inline DirectX::XMMATRIX __vectorcall ins_getWorldMatrix(const FBXNode* pTargetNode){
-    auto xmm4_ret = ins_getLocalMatrix(pTargetNode);
-
-    for(const auto* pNode = pTargetNode->Parent; pNode; pNode = pNode->Parent)
-        xmm4_ret = DirectX::XMMatrixMultiply(xmm4_ret, ins_getWorldMatrix(pNode));
-
-    return xmm4_ret;
-}
-
 template<typename T, unsigned long N>
 static inline void ins_interpolateValue(FBXStaticArray<T, N>* pOut, const FBXStaticArray<T, N>* pV0, const FBXStaticArray<T, N>* pV1, float t){}
 template<>
@@ -42,6 +30,7 @@ static inline void ins_interpolateValue(FBXStaticArray<float, 4>* pOut, const FB
     auto xmm_v1 = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)pV1->Values);
 
     auto xmm_v = DirectX::XMQuaternionSlerp(xmm_v0, xmm_v1, t);
+    xmm_v = DirectX::XMQuaternionNormalize(xmm_v);
     DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)pOut->Values, xmm_v);
 }
 
@@ -73,17 +62,22 @@ static inline void ins_computeValueByTyime(FBXStaticArray<T, N>* pOut, float tim
 __FBXM_MAKE_FUNC(void, FBXGetWorldMatrix, void* pOutMatrix, const void* pNode){
     const auto* pConvNode = reinterpret_cast<const FBXNode*>(pNode);
 
-    FbxAMatrix kMatRes;
-    CopyArrayData<16>((double*)kMatRes, pConvNode->TransformMatrix.Values);
-    for(pConvNode = pConvNode->Parent; pConvNode; pConvNode = pConvNode->Parent){
-        FbxAMatrix kMatTmp;
-        CopyArrayData<16>((double*)kMatTmp, pConvNode->TransformMatrix.Values);
-        kMatRes = kMatTmp * kMatRes;
-    }
-    CopyArrayData<16>((float*)pOutMatrix, (double*)kMatRes);
+    //FbxAMatrix kMatRes;
+    //CopyArrayData<16>((double*)kMatRes, pConvNode->TransformMatrix.Values);
+    //for(pConvNode = pConvNode->Parent; pConvNode; pConvNode = pConvNode->Parent){
+    //    FbxAMatrix kMatTmp;
+    //    CopyArrayData<16>((double*)kMatTmp, pConvNode->TransformMatrix.Values);
+    //    kMatRes = kMatTmp * kMatRes;
+    //}
+    //CopyArrayData<16>((float*)pOutMatrix, (double*)kMatRes);
 
-    //auto xmm4_ret = ins_getWorldMatrix(pConvNode);
-    //DirectX::XMStoreFloat4x4((DirectX::XMFLOAT4X4*)pOutMatrix, xmm4_ret);
+
+    auto xmm4_ret = DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)pConvNode->TransformMatrix.Values);
+    for(pConvNode = pConvNode->Parent; pConvNode; pConvNode = pConvNode->Parent){
+        auto xmm4_tmp = DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)pConvNode->TransformMatrix.Values);
+        xmm4_ret = DirectX::XMMatrixMultiply(xmm4_ret, xmm4_tmp);
+    }
+    DirectX::XMStoreFloat4x4((DirectX::XMFLOAT4X4*)pOutMatrix, xmm4_ret);
 }
 __FBXM_MAKE_FUNC(void, FBXTransformCoord, void* pOutVec3, const void* pVec3, const void* pMatrix){
     auto xmm4_srt = DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)pMatrix);
