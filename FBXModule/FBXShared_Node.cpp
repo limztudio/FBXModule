@@ -55,11 +55,6 @@ static inline void ins_collectUnlinkedNode(FbxNode* kNewNode, FBXNode* pRootNode
             pParentNode = f->second;
     }
 
-    auto** pSiblingPos = &pParentNode->Child;
-    {
-        for(; (*pSiblingPos); pSiblingPos = &(*pSiblingPos)->Sibling);
-    }
-
     auto* pNewNode = FBXNew<FBXNode>();
     {
         CopyString(pNewNode->Name, kNewNode->GetName());
@@ -70,7 +65,7 @@ static inline void ins_collectUnlinkedNode(FbxNode* kNewNode, FBXNode* pRootNode
     }
 
     pNewNode->Parent = pParentNode;
-    (*pSiblingPos) = pNewNode;
+    FBXFindLastAddible(pParentNode->Child) = pNewNode;
 
     fbxNodeToExportNode.emplace(kNewNode, pNewNode);
 }

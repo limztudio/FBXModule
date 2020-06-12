@@ -28,37 +28,48 @@ static FBX_SIZE FBXGetMemoryLength(const T* p){
 }
 
 template<typename NODE, typename FUNC>
-static void FBXIterateNode(NODE* p, FUNC func){
-    if(p){
-        FBXIterateNode(p->Child, func);
-        FBXIterateNode(p->Sibling, func);
-        func(p);
+static void FBXIterateNode(NODE* pNode, FUNC func){
+    if(pNode){
+        FBXIterateNode(pNode->Child, func);
+        FBXIterateNode(pNode->Sibling, func);
+        func(pNode);
     }
 }
 template<typename NODE, typename FUNC>
-static void FBXBreakableIterateNode(NODE* p, FUNC func){
-    if(p){
-        FBXBreakableIterateNode(p->Child, func);
-        FBXBreakableIterateNode(p->Sibling, func);
-        if(!func(p))
+static void FBXBreakableIterateNode(NODE* pNode, FUNC func){
+    if(pNode){
+        FBXBreakableIterateNode(pNode->Child, func);
+        FBXBreakableIterateNode(pNode->Sibling, func);
+        if(!func(pNode))
             return;
     }
 }
 
 template<typename NODE, typename FUNC>
-static void FBXIterateBackwardNode(NODE* p, FUNC func){
-    if(p){
-        func(p);
-        FBXIterateBackwardNode(p->Parent, func);
+static void FBXIterateBackwardNode(NODE* pNode, FUNC func){
+    if(pNode){
+        func(pNode);
+        FBXIterateBackwardNode(pNode->Parent, func);
     }
 }
 template<typename NODE, typename FUNC>
-static void FBXBreakableIterateBackwardNode(NODE* p, FUNC func){
-    if(p){
-        if(!func(p))
+static void FBXBreakableIterateBackwardNode(NODE* pNode, FUNC func){
+    if(pNode){
+        if(!func(pNode))
             return;
-        FBXBreakableIterateBackwardNode(p->Parent, func);
+        FBXBreakableIterateBackwardNode(pNode->Parent, func);
     }
+}
+
+template<typename NODE>
+static inline NODE*& FBXFindLastAddible(NODE*& pNode){
+    if(!pNode)
+        return pNode;
+
+    auto** pTarget = &pNode->Sibling;
+    for(; (*pTarget); pTarget = &(*pTarget)->Sibling);
+
+    return *pTarget;
 }
 
 
