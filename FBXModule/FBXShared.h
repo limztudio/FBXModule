@@ -24,7 +24,9 @@
 // structures
 // Common ////////////////////////////////////////////////////////////////////////////////////////////
 
+using UintContainer = std::vector<unsigned int>;
 using IntContainer = std::vector<int>;
+using Uint3Container = std::vector<Uint3>;
 using Int3Container = std::vector<Int3>;
 using Vector3Container = std::vector<fbxsdk::FbxDouble3>;
 using Vector4Container = std::vector<fbxsdk::FbxDouble4>;
@@ -69,7 +71,7 @@ public:
 
 private:
     std::vector<fbxsdk::FbxSurfaceMaterial*> matTable;
-    std::unordered_map<fbxsdk::FbxSurfaceMaterial*, int, PointerHasher<fbxsdk::FbxSurfaceMaterial*>> matFinder;
+    std::unordered_map<fbxsdk::FbxSurfaceMaterial*, unsigned int, PointerHasher<fbxsdk::FbxSurfaceMaterial*>> matFinder;
 };
 
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
@@ -79,10 +81,10 @@ struct TexcoordTable{
     std::vector<fbxsdk::FbxDouble2> table;
 };
 
-using ControlPointRemap = std::vector<std::unordered_set<int>>;
+using ControlPointRemap = std::vector<std::unordered_set<unsigned int>>;
 
 struct LayerElement{
-    IntContainer materials;
+    UintContainer materials;
 
     Vector4Container colors;
     Unit3Container normals;
@@ -91,7 +93,7 @@ struct LayerElement{
     TexcoordTable texcoords;
 };
 
-using ControlPointMergeMap = std::vector<size_t>;
+using ControlPointMergeMap = UintContainer;
 
 // FBXShared_Skin ////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,13 +130,13 @@ struct NodeData{
 
     FbxAMatrix kTransformMatrix;
 
-    IntContainer bufMaterials;
+    UintContainer bufMaterials;
 
     MeshAttribute bufMeshAttribute;
     std::vector<BoneCombination> bufBoneCombination;
 
     Vector3Container bufPositions;
-    Int3Container bufIndices;
+    Uint3Container bufIndices;
 
     std::vector<LayerElement> bufLayers;
 

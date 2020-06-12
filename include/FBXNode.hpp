@@ -17,16 +17,17 @@
 class FBXNode : public FBXBase{
 public:
     virtual FBXType getID()const{ return FBXType::FBXType_Node; }
+    virtual const char* getName()const{ return Name.Values; }
 
 
 public:
     FBXNode()
         :
+        TransformMatrix({ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }),
+
         Parent(nullptr),
         Child(nullptr),
-        Sibling(nullptr),
-
-        TransformMatrix({ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 })
+        Sibling(nullptr)
     {}
     virtual ~FBXNode(){
         if(Child)
@@ -37,10 +38,13 @@ public:
 
 
 public:
+    FBXStaticArray<float, 16> TransformMatrix;
+
+public:
     FBXNode* Parent;
     FBXNode* Child;
     FBXNode* Sibling;
 
 public:
-    FBXStaticArray<float, 16> TransformMatrix;
+    FBXDynamicArray<char> Name;
 };

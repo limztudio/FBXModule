@@ -103,7 +103,7 @@ static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
 
     if(lhs.skinData.size() != rhs.skinData.size())
         return false;
-    for(size_t idx = 0, edx = lhs.skinData.size(); idx < edx; ++idx){
+    for(auto edx = (unsigned int)lhs.skinData.size(), idx = 0u; idx < edx; ++idx){
         const auto& lhsSkin = lhs.skinData[idx];
         const auto& rhsSkin = rhs.skinData[idx];
         if(lhsSkin.weight != rhsSkin.weight)
@@ -114,7 +114,7 @@ static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
 
     if(lhs.layeredColor.size() != rhs.layeredColor.size())
         return false;
-    for(size_t idx = 0, edx = lhs.layeredColor.size(); idx < edx; ++idx){
+    for(auto edx = (unsigned int)lhs.layeredColor.size(), idx = 0u; idx < edx; ++idx){
         const auto& lhsVal = lhs.layeredColor[idx];
         const auto& rhsVal = rhs.layeredColor[idx];
 
@@ -130,7 +130,7 @@ static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
 
     if(lhs.layeredNormal.size() != rhs.layeredNormal.size())
         return false;
-    for(size_t idx = 0, edx = lhs.layeredNormal.size(); idx < edx; ++idx){
+    for(auto edx = (unsigned int)lhs.layeredNormal.size(), idx = 0u; idx < edx; ++idx){
         const auto& lhsVal = lhs.layeredNormal[idx];
         const auto& rhsVal = rhs.layeredNormal[idx];
 
@@ -144,7 +144,7 @@ static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
 
     if(lhs.layeredBinormal.size() != rhs.layeredBinormal.size())
         return false;
-    for(size_t idx = 0, edx = lhs.layeredBinormal.size(); idx < edx; ++idx){
+    for(auto edx = (unsigned int)lhs.layeredBinormal.size(), idx = 0u; idx < edx; ++idx){
         const auto& lhsVal = lhs.layeredBinormal[idx];
         const auto& rhsVal = rhs.layeredBinormal[idx];
 
@@ -158,7 +158,7 @@ static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
 
     if(lhs.layeredTangent.size() != rhs.layeredTangent.size())
         return false;
-    for(size_t idx = 0, edx = lhs.layeredTangent.size(); idx < edx; ++idx){
+    for(auto edx = (unsigned int)lhs.layeredTangent.size(), idx = 0u; idx < edx; ++idx){
         const auto& lhsVal = lhs.layeredTangent[idx];
         const auto& rhsVal = rhs.layeredTangent[idx];
 
@@ -172,7 +172,7 @@ static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
 
     if(lhs.layeredUV.size() != rhs.layeredUV.size())
         return false;
-    for(size_t idx = 0, edx = lhs.layeredUV.size(); idx < edx; ++idx){
+    for(auto edx = (unsigned int)lhs.layeredUV.size(), idx = 0u; idx < edx; ++idx){
         const auto& lhsVal = lhs.layeredUV[idx];
         const auto& rhsVal = rhs.layeredUV[idx];
 
@@ -193,7 +193,7 @@ public:
     inline bool useSameMaterial(const _PolygonInfo& rhs)const{
         if(layeredMaterial.size() != rhs.layeredMaterial.size())
             return false;
-        for(size_t idx = 0, edx = layeredMaterial.size(); idx < edx; ++idx){
+        for(auto edx = (unsigned int)layeredMaterial.size(), idx = 0u; idx < edx; ++idx){
             if(layeredMaterial[idx] != rhs.layeredMaterial[idx])
                 return false;
         }
@@ -203,8 +203,8 @@ public:
 
 
 public:
-    Int3 indices;
-    IntContainer layeredMaterial;
+    Uint3 indices;
+    UintContainer layeredMaterial;
 };
 
 class _VertexInfoKey{
@@ -232,8 +232,8 @@ static inline bool operator==(const _VertexInfoKey& lhs, const _VertexInfoKey& r
 static std::vector<_VertexInfo> ins_aosVertices;
 static std::vector<_PolygonInfo> ins_aosPolygons;
 
-static std::unordered_map<_VertexInfoKey, int, CustomHasher<_VertexInfoKey>> ins_aosVertexFinder;
-static std::vector<int> ins_flatVertexBinder;
+static std::unordered_map<_VertexInfoKey, unsigned int, CustomHasher<_VertexInfoKey>> ins_aosVertexFinder;
+static std::vector<unsigned int> ins_flatVertexBinder;
 
 
 static inline void ins_fillAOSContainers(const NodeData* pNodeData){
@@ -256,21 +256,21 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
         }
     }
 
-    for(size_t idxPoly = 0, edxPoly = pNodeData->bufIndices.size(); idxPoly < edxPoly; ++idxPoly){
+    for(auto edxPoly = (unsigned int)pNodeData->bufIndices.size(), idxPoly = 0u; idxPoly < edxPoly; ++idxPoly){
         const auto& iPoly = pNodeData->bufIndices[idxPoly];
 
         auto& iPolyInfo = ins_aosPolygons[idxPoly];
 
-        for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
+        for(auto edxLayer = (unsigned int)pNodeData->bufLayers.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
             const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
             iPolyInfo.layeredMaterial[idxLayer] = (!iLayer.materials.empty()) ? iLayer.materials[idxPoly] : (-1);
         }
 
-        for(size_t idxLocalVert = 0; idxLocalVert < 3; ++idxLocalVert){
+        for(size_t idxLocalVert = 0u; idxLocalVert < 3u; ++idxLocalVert){
             const auto idxVert = iPoly.raw[idxLocalVert];
 
-            int idxVertInfo;
+            unsigned int idxVertInfo;
             {
                 _VertexInfo iVertInfo;
                 {
@@ -279,13 +279,13 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
                     if(!pNodeData->bufSkinData.empty())
                         iVertInfo.skinData = pNodeData->bufSkinData[idxVert];
 
-                    size_t colorCount = 0;
-                    size_t normalCount = 0;
-                    size_t binormalCount = 0;
-                    size_t tangentCount = 0;
-                    size_t uvCount = 0;
+                    size_t colorCount = 0u;
+                    size_t normalCount = 0u;
+                    size_t binormalCount = 0u;
+                    size_t tangentCount = 0u;
+                    size_t uvCount = 0u;
 
-                    for(size_t idxLayer = 0; idxLayer < layerCount; ++idxLayer){
+                    for(size_t idxLayer = 0u; idxLayer < layerCount; ++idxLayer){
                         const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
                         if(!iLayer.colors.empty())
@@ -306,27 +306,27 @@ static inline void ins_fillAOSContainers(const NodeData* pNodeData){
                     iVertInfo.layeredTangent.resize(tangentCount);
                     iVertInfo.layeredUV.resize(uvCount);
 
-                    for(size_t idxLayer = 0, edxLayer = iVertInfo.layeredColor.size(); idxLayer < edxLayer; ++idxLayer){
+                    for(auto edxLayer = (unsigned int)iVertInfo.layeredColor.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
                         const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
                         iVertInfo.layeredColor[idxLayer] = iLayer.colors[idxVert];
                     }
-                    for(size_t idxLayer = 0, edxLayer = iVertInfo.layeredNormal.size(); idxLayer < edxLayer; ++idxLayer){
+                    for(auto edxLayer = (unsigned int)iVertInfo.layeredNormal.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
                         const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
                         iVertInfo.layeredNormal[idxLayer] = iLayer.normals[idxVert];
                     }
-                    for(size_t idxLayer = 0, edxLayer = iVertInfo.layeredBinormal.size(); idxLayer < edxLayer; ++idxLayer){
+                    for(auto edxLayer = (unsigned int)iVertInfo.layeredBinormal.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
                         const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
                         iVertInfo.layeredBinormal[idxLayer] = iLayer.binormals[idxVert];
                     }
-                    for(size_t idxLayer = 0, edxLayer = iVertInfo.layeredTangent.size(); idxLayer < edxLayer; ++idxLayer){
+                    for(auto edxLayer = (unsigned int)iVertInfo.layeredTangent.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
                         const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
                         iVertInfo.layeredTangent[idxLayer] = iLayer.tangents[idxVert];
                     }
-                    for(size_t idxLayer = 0, edxLayer = iVertInfo.layeredUV.size(); idxLayer < edxLayer; ++idxLayer){
+                    for(auto edxLayer = (unsigned int)iVertInfo.layeredUV.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
                         const auto& iLayer = pNodeData->bufLayers[idxLayer];
 
                         auto& v = iVertInfo.layeredUV[idxLayer];
@@ -374,15 +374,15 @@ static inline void ins_genOptimizeMesh(NodeData* pNodeData){
             pNodeData->bufSkinData.emplace_back(std::move(iVertInfo.skinData));
     }
 
-    for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
+    for(auto edxLayer = (unsigned int)pNodeData->bufLayers.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
         auto& iLayer = pNodeData->bufLayers[idxLayer];
 
         if(!iLayer.materials.empty()){
             iLayer.materials.clear();
             for(const auto& iPolyInfo : ins_aosPolygons){
                 const auto& curMat = iPolyInfo.layeredMaterial[idxLayer];
-                if(curMat >= 0)
-                    iLayer.materials.emplace_back(curMat);
+                if(curMat >= 0u)
+                    iLayer.materials.emplace_back((unsigned int)curMat);
             }
         }
 

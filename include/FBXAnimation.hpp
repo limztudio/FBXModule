@@ -24,29 +24,33 @@ enum class FBXAnimationInterpolationType : unsigned char{
 template<typename T>
 class FBXAnimationKeyFrame{
 public:
+    T Value;
+
+public:
     float Time;
     FBXAnimationInterpolationType InterpolationType;
-
-public:
-    T Value;
 };
 class FBXAnimationNode{
-public:
-    FBXNode* BindNode;
-
 public:
     FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 3>>> ScalingKeys;
     FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 4>>> RotationKeys;
     FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<float, 3>>> TranslationKeys;
+
+public:
+    FBXNode* BindNode;
 };
 
 
 class FBXAnimation : public FBXBase{
 public:
     virtual FBXType getID()const{ return FBXType::FBXType_Animation; }
+    virtual const char* getName()const{ return Name.Values; }
 
 
 public:
-    float EndTime;
     FBXDynamicArray<FBXAnimationNode> AnimationNodes;
+    float EndTime;
+
+public:
+    FBXDynamicArray<char> Name;
 };

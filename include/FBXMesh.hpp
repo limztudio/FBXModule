@@ -24,7 +24,7 @@ public:
 
 class FBXMeshLayerElement{
 public:
-    FBXDynamicArray<long> Material; // must have same count with Attributes; the index points 'Materials' from FBXMesh
+    FBXDynamicArray<unsigned long> Material; // must have same count with Attributes; the index points 'Materials' from FBXMesh
 
 public:
     FBXDynamicArray<FBXStaticArray<float, 4>> Color; // must have same count with Vertices; RGBA format
@@ -50,13 +50,13 @@ public:
 
 
 public:
-    FBXDynamicArray<long> Materials; // the index points 'Materials' from FBXRoot
+    FBXDynamicArray<unsigned long> Materials; // the index points 'Materials' from FBXRoot
 
 public:
     FBXDynamicArray<FBXMeshAttribute> Attributes;
 
 public:
-    FBXDynamicArray<FBXStaticArray<long, 3>> Indices;
+    FBXDynamicArray<FBXStaticArray<unsigned long, 3>> Indices;
     FBXDynamicArray<FBXStaticArray<float, 3>> Vertices;
 
 public:

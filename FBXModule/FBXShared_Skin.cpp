@@ -15,7 +15,7 @@
 #include "FBXShared.h"
 
 
-static std::vector<std::vector<int>> ins_newToOldIndexer;
+static std::vector<std::vector<unsigned int>> ins_newToOldIndexer;
 
 
 FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count){
@@ -45,7 +45,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
     if(!kSkin)
         return true;
 
-    auto clusterCount = kSkin->GetClusterCount();
+    auto clusterCount = (unsigned int)kSkin->GetClusterCount();
     if(!clusterCount)
         return true;
 
@@ -56,10 +56,10 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
     }
 
     std::vector<FbxCluster*> clusterFinder(clusterCount, nullptr);
-    std::vector<std::unordered_map<int, FbxDouble>> boneMapList(clusterCount);
-    std::vector<std::multimap<double, int>> vertexBoneList(pNodeData->bufPositions.size());
+    std::vector<std::unordered_map<unsigned int, FbxDouble>> boneMapList(clusterCount);
+    std::vector<std::multimap<double, unsigned int>> vertexBoneList(pNodeData->bufPositions.size());
 
-    auto ctrlPointCount = kMesh->GetControlPointsCount();
+    const auto ctrlPointCount = (unsigned int)kMesh->GetControlPointsCount();
 
     auto kLinkMode = kSkin->GetCluster(0)->GetLinkMode();
     switch(kLinkMode){
@@ -72,7 +72,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         return false;
     }
 
-    for(auto iCluster = decltype(clusterCount){ 0 }; iCluster < clusterCount; ++iCluster){
+    for(auto iCluster = decltype(clusterCount){ 0u }; iCluster < clusterCount; ++iCluster){
         auto* kCluster = kSkin->GetCluster(iCluster);
 
         if(kLinkMode != kCluster->GetLinkMode()){
@@ -88,13 +88,13 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
 
         auto& vertexBoneWeightMap = boneMapList[iCluster];
 
-        auto indexCount = kCluster->GetControlPointIndicesCount();
+        auto indexCount = (unsigned int)kCluster->GetControlPointIndicesCount();
 
         auto* indices = kCluster->GetControlPointIndices();
         auto* weights = kCluster->GetControlPointWeights();
 
-        for(auto iIndex = decltype(indexCount){ 0 }; iIndex < indexCount; ++iIndex){
-            auto ctrlPointIndex = indices[iIndex];
+        for(auto iIndex = decltype(indexCount){ 0u }; iIndex < indexCount; ++iIndex){
+            auto ctrlPointIndex = (unsigned int)indices[iIndex];
 
             if(ctrlPointIndex >= ctrlPointCount){
                 SHRPushErrorMessage("unexpected control point index", __name_of_this_func);
@@ -105,22 +105,22 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
                 for(const auto& iRemap : controlPointRemap[ctrlPointIndex]){
                     auto vid = iRemap;
 
-                    vertexBoneWeightMap[vid] = 0;
+                    vertexBoneWeightMap[vid] = 0.;
                 }
             }
             else{
                 auto vid = ctrlPointIndex;
 
-                vertexBoneWeightMap[vid] = 0;
+                vertexBoneWeightMap[vid] = 0.;
             }
         }
 
-        for(auto iIndex = decltype(indexCount){ 0 }; iIndex < indexCount; ++iIndex){
+        for(auto iIndex = decltype(indexCount){ 0u }; iIndex < indexCount; ++iIndex){
             const auto& weight = weights[iIndex];
             if(!weight)
                 continue;
 
-            auto ctrlPointIndex = indices[iIndex];
+            auto ctrlPointIndex = (unsigned int)indices[iIndex];
 
             if(!controlPointRemap.empty()){
                 for(const auto& iRemap : controlPointRemap[ctrlPointIndex]){
@@ -144,7 +144,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         }
     }
 
-    for(int idxBone = 0, edxBone = (decltype(edxBone))boneMapList.size(); idxBone < edxBone; ++idxBone){
+    for(auto edxBone = (unsigned int)boneMapList.size(), idxBone = 0u; idxBone < edxBone; ++idxBone){
         for(const auto& iBone : boneMapList[idxBone]){
             const auto& vertID = iBone.first;
 
@@ -163,7 +163,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         }
     }
 
-    for(int idxVert = 0, edxVert = (decltype(edxVert))vertexBoneList.size(); idxVert < edxVert; ++idxVert){
+    for(auto edxVert = (unsigned int)vertexBoneList.size(), idxVert = 0u; idxVert < edxVert; ++idxVert){
         auto& weightBoneMap = vertexBoneList[idxVert];
 
         // remove too many participated clusters
@@ -178,7 +178,7 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
                 vertexBoneWeightMap.erase(itrVertBone);
         }
 
-        double totalWeight = 0;
+        double totalWeight = 0.;
         { // normalize
             for(const auto& i : weightBoneMap)
                 totalWeight += i.first;
@@ -253,8 +253,8 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
 
     ins_newToOldIndexer.clear();
     ins_newToOldIndexer.resize((size_t)kMesh->GetControlPointsCount());
-    for(int idxOld = 0, edxOld = (int)ctrlPointMergeMap.size(); idxOld < edxOld; ++idxOld){
-        const auto idxNew = (int)ctrlPointMergeMap[idxOld];
+    for(auto edxOld = (unsigned int)ctrlPointMergeMap.size(), idxOld = 0u; idxOld < edxOld; ++idxOld){
+        const auto idxNew = ctrlPointMergeMap[idxOld];
 
         auto& iTable = ins_newToOldIndexer[idxNew];
         iTable.emplace_back(idxOld);
@@ -408,7 +408,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
         }
     }
 
-    for(int idxVert = 0, edxVert = (int)ins_newToOldIndexer.size(); idxVert < edxVert; ++idxVert){
+    for(auto edxVert = (unsigned int)ins_newToOldIndexer.size(), idxVert = 0u; idxVert < edxVert; ++idxVert){
         tmpSkinTable.clear();
 
         for(const auto idxOld : ins_newToOldIndexer[idxVert]){

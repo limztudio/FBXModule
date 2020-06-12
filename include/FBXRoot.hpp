@@ -18,6 +18,7 @@
 class FBXRoot : public FBXBase{
 public:
     virtual FBXType getID()const{ return FBXType::FBXType_Root; }
+    virtual const char* getName()const{ return nullptr; }
 
 
 public:
@@ -32,9 +33,9 @@ public:
 
 
 public:
-    FBXNode* Nodes;
+    FBXDynamicArray<FBXAnimation> Animations;
+    FBXDynamicArray<FBXMaterial> Materials;
 
 public:
-    FBXDynamicArray<FBXMaterial> Materials;
-    FBXDynamicArray<FBXAnimation> Animations;
+    FBXNode* Nodes;
 };

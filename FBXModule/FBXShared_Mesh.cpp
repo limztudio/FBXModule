@@ -99,11 +99,11 @@ static inline bool operator==(const _PositionSkin& lhs, const _PositionSkin& rhs
 }
 
 
-static std::unordered_map<int, int> ins_materialFinder;
-static inline bool ins_addMaterial(IntContainer& matTable, int sceneMaterialIndex, int* iPoly){
+static std::unordered_map<unsigned int, unsigned int> ins_materialFinder;
+static inline bool ins_addMaterial(UintContainer& matTable, unsigned int sceneMaterialIndex, unsigned int* iPoly){
     auto f = ins_materialFinder.find(sceneMaterialIndex);
     if(f == ins_materialFinder.end()){
-        (*iPoly) = int(matTable.size());
+        (*iPoly) = (unsigned int)matTable.size();
         matTable.emplace_back(sceneMaterialIndex);
 
         ins_materialFinder.emplace(sceneMaterialIndex, (*iPoly));
@@ -123,12 +123,12 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();
 
-    auto polyCount = kMesh->GetPolygonCount();
+    const auto polyCount = kMesh->GetPolygonCount();
 
-    auto ctrlPointsCount = kMesh->GetControlPointsCount();
+    const auto ctrlPointsCount = kMesh->GetControlPointsCount();
     auto* ctrlPoints = kMesh->GetControlPoints();
 
-    auto layerCount = kMesh->GetLayerCount();
+    const auto layerCount = kMesh->GetLayerCount();
 
     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
         auto beginIndex = kMesh->GetPolygonVertexIndex(iPoly);
@@ -154,9 +154,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
     }
 
     controlPointRemap.clear();
-    controlPointRemap.resize(ctrlPointsCount);
-
-    std::vector<int> flatIndexToCtrlPoint(polyCount * 3);
+    controlPointRemap.resize((size_t)ctrlPointsCount);
 
     int t = 0;
     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
@@ -193,8 +191,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                 return false;
             }
 
-            controlPointRemap[ctrlPointIndex].emplace(flatIndex);
-            flatIndexToCtrlPoint[flatIndex] = ctrlPointIndex;
+            controlPointRemap[ctrlPointIndex].emplace((unsigned int)flatIndex);
 
             ++t;
         }
@@ -212,16 +209,16 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
         { // reserve
             materials.clear();
-            materials.reserve(kNode->GetMaterialCount());
+            materials.reserve((size_t)kNode->GetMaterialCount());
 
-            positions.resize(polyCount * 3);
-            indices.resize(polyCount);
+            positions.resize(size_t(polyCount * 3));
+            indices.resize((size_t)polyCount);
 
             layers.resize((size_t)layerCount);
         }
 
         {
-            int cnt = 0;
+            unsigned int cnt = 0u;
             for(auto& i : indices){
                 for(auto& k : i.raw)
                     k = cnt++;
@@ -261,7 +258,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                 auto& pObject = pLayer.materials;
                 auto* kObject = kMaterials;
 
-                pObject.resize(polyCount, -1);
+                pObject.resize((size_t)polyCount, (unsigned int)(-1));
 
                 switch(kObject->GetMappingMode()){
                 case FbxLayerElement::eByPolygon:
@@ -287,7 +284,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 case FbxLayerElement::eAllSame:
                 {
-                    int matIndex = -1;
+                    unsigned int matIndex = (unsigned int)(-1);
                     {
                         auto kIdxMaterial = kObject->GetIndexArray().GetAt(0);
                         auto* kSurfMaterial = kNode->GetMaterial(kIdxMaterial);
@@ -663,7 +660,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
 
     {
         for(auto* pMaterial = pNode->Materials.Values; FBX_PTRDIFFU(pMaterial - pNode->Materials.Values) < pNode->Materials.Length; ++pMaterial){
-            auto* kMaterial = kScene->GetMaterial(*pMaterial);
+            auto* kMaterial = kScene->GetMaterial((int)*pMaterial);
             if(!kMaterial){
                 std::string msg = "cannot find material index ";
                 msg += std::to_string(*pMaterial);
@@ -734,7 +731,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
     }
 
     // reserve layer
-    for(size_t idxLayer = 0; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
+    for(size_t idxLayer = 0u; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
         auto* kLayer = kMesh->GetLayer((int)idxLayer);
         if(!kLayer){
             const auto idxNewLayer = kMesh->CreateLayer();
@@ -759,7 +756,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         }
     }
 
-    for(size_t idxLayer = 0; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
+    for(size_t idxLayer = 0u; idxLayer < pNode->LayeredElements.Length; ++idxLayer){
         const auto& iLayer = pNode->LayeredElements.Values[idxLayer];
         auto* kLayer = kMesh->GetLayer((int)idxLayer);
 
@@ -776,7 +773,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
 
             bool hasSameValue = true;
             const auto matValue = iLayer.Material.Values[0];
-            if(iLayer.Material.Length > 1){
+            if(iLayer.Material.Length > 1u){
                 for(auto* pMat = iLayer.Material.Values + 1; FBX_PTRDIFFU(pMat - iLayer.Material.Values) < iLayer.Material.Length; ++pMat){
                     if(matValue != (*pMat)){
                         hasSameValue = false;
@@ -797,7 +794,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
                 kMaterial->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
                 auto& kIndices = kMaterial->GetIndexArray();
-                for(size_t idxAttribute = 0; idxAttribute < pNode->Attributes.Length; ++idxAttribute){
+                for(size_t idxAttribute = 0u; idxAttribute < pNode->Attributes.Length; ++idxAttribute){
                     const auto& iAttribute = pNode->Attributes.Values[idxAttribute];
                     const auto iMaterial = iLayer.Material.Values[idxAttribute];
 

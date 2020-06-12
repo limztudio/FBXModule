@@ -186,6 +186,10 @@ static inline bool operator!=(const Container4<T>& lhs, const Container4<T>& rhs
     return true;
 }
 
+using Uint2 = Container2<unsigned int>;
+using Uint3 = Container3<unsigned int>;
+using Uint4 = Container4<unsigned int>;
+
 using Int2 = Container2<int>;
 using Int3 = Container3<int>;
 using Int4 = Container4<int>;
@@ -274,9 +278,9 @@ class OverlapReducer{
 public:
     OverlapReducer(){}
     template<typename FILL_FUNC>
-    OverlapReducer(size_t len, FILL_FUNC func){
+    OverlapReducer(unsigned int len, FILL_FUNC func){
         m_oldData.resize(len);
-        for(size_t i = 0; i < len; ++i)
+        for(unsigned int i = 0u; i < len; ++i)
             m_oldData[i] = func(i);
     }
     OverlapReducer(const std::vector<T>& data) : m_oldData(data){}
@@ -308,7 +312,7 @@ public:
         m_comparer.clear();
         m_comparer.rehash(oldSize << 2);
 
-        for(size_t idxOld = 0; idxOld < oldSize; ++idxOld){
+        for(unsigned int idxOld = 0u; idxOld < oldSize; ++idxOld){
             const auto& iOld = m_oldData[idxOld];
 
             T iNew(iOld);
@@ -316,7 +320,7 @@ public:
 
             auto f = m_comparer.find(__hidden_FBXModule::_OverlapReducer_Compare_Key<T>(iNew, iNewHash));
             if(f == m_comparer.cend()){
-                const size_t idxNew = m_convData.size();
+                const auto idxNew = (unsigned int)m_convData.size();
 
                 m_convData.emplace_back(std::move(iNew));
                 m_oldToConvIndexer.emplace_back(idxNew);
@@ -332,15 +336,15 @@ public:
     inline const std::vector<T>& getConvertedTable()const{ return m_convData; }
     inline std::vector<T>& getConvertedTable(){ return m_convData; }
 
-    inline const std::vector<size_t>& getOldToConvertIndexer()const{ return m_oldToConvIndexer; }
-    inline std::vector<size_t>& getOldToConvertIndexer(){ return m_oldToConvIndexer; }
+    inline const std::vector<unsigned int>& getOldToConvertIndexer()const{ return m_oldToConvIndexer; }
+    inline std::vector<unsigned int>& getOldToConvertIndexer(){ return m_oldToConvIndexer; }
 
 
 private:
     std::vector<T> m_oldData;
     std::vector<T> m_convData;
 
-    std::vector<size_t> m_oldToConvIndexer;
+    std::vector<unsigned int> m_oldToConvIndexer;
     std::unordered_map<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>, size_t, CustomHasher<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>>> m_comparer;
 };
 

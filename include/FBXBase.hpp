@@ -38,12 +38,9 @@ enum class FBXType : unsigned long{
 class FBXBase{
 public:
     virtual FBXType getID()const = 0;
+    virtual const char* getName()const = 0;
 
 
 public:
     virtual ~FBXBase(){}
-
-
-public:
-    FBXDynamicArray<char> Name;
 };

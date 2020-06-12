@@ -71,7 +71,6 @@ __FBXM_MAKE_FUNC(void, FBXGetWorldMatrix, void* pOutMatrix, const void* pNode){
     //}
     //CopyArrayData<16>((float*)pOutMatrix, (double*)kMatRes);
 
-
     auto xmm4_ret = DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)pConvNode->TransformMatrix.Values);
     for(pConvNode = pConvNode->Parent; pConvNode; pConvNode = pConvNode->Parent){
         auto xmm4_tmp = DirectX::XMLoadFloat4x4((const DirectX::XMFLOAT4X4*)pConvNode->TransformMatrix.Values);

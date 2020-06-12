@@ -23,7 +23,7 @@ public:
 
 
 public:
-    IntContainer layers;
+    UintContainer layers;
 };
 static inline bool operator<(const _OrderedKey& lhs, const _OrderedKey& rhs){
     const auto cntLhs = lhs.layers.size();
@@ -50,16 +50,16 @@ public:
 
 
 public:
-    int index;
+    unsigned int index;
     size_t attribute;
 };
 
 struct _MeshPolyValue{
     _ClusterCountChecker participatedClusters;
-    IntContainer polyIndices;
+    UintContainer polyIndices;
 };
 
-using _TempMeshPolys = std::map<_OrderedKey, IntContainer>;
+using _TempMeshPolys = std::map<_OrderedKey, UintContainer>;
 using _MeshPolys = std::multimap<_OrderedKey, _MeshPolyValue>;
 
 
@@ -68,11 +68,11 @@ static _MeshPolys ins_meshPolys;
 
 static _ClusterCountChecker ins_localClusterCounterChecker[2];
 
-static std::unordered_map<_OrderdKeyWithIndex, int, CustomHasher<_OrderdKeyWithIndex>> ins_vertOldToNew;
-static std::vector<int> ins_vertNewToOld;
+static std::unordered_map<_OrderdKeyWithIndex, unsigned int, CustomHasher<_OrderdKeyWithIndex>> ins_vertOldToNew;
+static std::vector<unsigned int> ins_vertNewToOld;
 
 static Vector3Container ins_bufPositions;
-static Int3Container ins_bufIndices;
+static Uint3Container ins_bufIndices;
 
 static std::vector<LayerElement> ins_bufLayers;
 
@@ -86,15 +86,15 @@ static void ins_genTempMeshAttribute(const NodeData* pNodeData){
     if(!edxLayer){
         _OrderedKey newKey;
 
-        IntContainer polyIndices;
+        UintContainer polyIndices;
         polyIndices.reserve(pNodeData->bufIndices.size());
-        for(int idxPoly = 0, edxPoly = (int)pNodeData->bufIndices.size(); idxPoly < edxPoly; ++idxPoly)
+        for(auto edxPoly = (unsigned int)pNodeData->bufIndices.size(), idxPoly = 0u; idxPoly < edxPoly; ++idxPoly)
             polyIndices.emplace_back(idxPoly);
 
         ins_tmpMeshPolys.emplace(std::move(newKey), std::move(polyIndices));
     }
     else{
-        for(size_t idxPoly = 0, edxPoly = pNodeData->bufIndices.size(); idxPoly < edxPoly; ++idxPoly){
+        for(auto edxPoly = (unsigned int)pNodeData->bufIndices.size(), idxPoly = 0u; idxPoly < edxPoly; ++idxPoly){
             _OrderedKey newKey;
             newKey.layers.resize(edxLayer);
 
@@ -107,13 +107,13 @@ static void ins_genTempMeshAttribute(const NodeData* pNodeData){
 
             auto f = ins_tmpMeshPolys.find(newKey);
             if(f == ins_tmpMeshPolys.end()){
-                IntContainer polyIndices;
+                UintContainer polyIndices;
                 polyIndices.reserve(edxPoly);
-                polyIndices.emplace_back((int)idxPoly);
+                polyIndices.emplace_back((unsigned int)idxPoly);
                 ins_tmpMeshPolys.emplace(std::move(newKey), std::move(polyIndices));
             }
             else
-                f->second.emplace_back((int)idxPoly);
+                f->second.emplace_back((unsigned int)idxPoly);
         }
     }
 }
@@ -178,7 +178,7 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
     pNodeData->bufBoneCombination.clear();
     pNodeData->bufBoneCombination.reserve(ins_meshPolys.size());
 
-    size_t idxAttr = 0;
+    size_t idxAttr = 0u;
     for(auto itAttr = ins_meshPolys.begin(), etAttr = ins_meshPolys.end(); itAttr != etAttr; ++itAttr, ++idxAttr){
         const auto& iAttr = *itAttr;
         MeshAttributeElement meshAttribute;
@@ -191,16 +191,16 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
 
         for(const auto& idxOldPoly : iAttr.second.polyIndices){
             const auto& iOldPoly = pNodeData->bufIndices[idxOldPoly];
-            Int3 iNewPoly;
+            Uint3 iNewPoly;
 
-            for(size_t idxVert = 0; idxVert < 3; ++idxVert){
+            for(size_t idxVert = 0u; idxVert < 3u; ++idxVert){
                 const auto& idxOldVert = iOldPoly.raw[idxVert];
                 auto& idxNewVert = iNewPoly.raw[idxVert];
 
                 newOrderKey.index = idxOldVert;
                 auto f = ins_vertOldToNew.find(newOrderKey);
                 if(f == ins_vertOldToNew.end()){
-                    idxNewVert = (int)ins_vertNewToOld.size();
+                    idxNewVert = (unsigned int)ins_vertNewToOld.size();
                     ins_vertNewToOld.emplace_back(idxOldVert);
                     ins_vertOldToNew.emplace(newOrderKey, idxNewVert);
                 }
@@ -211,7 +211,7 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
             ins_bufIndices.emplace_back(std::move(iNewPoly));
 
             if(!iAttr.first.layers.empty()){
-                for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
+                for(auto edxLayer = (unsigned int)pNodeData->bufLayers.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
                     const auto& iOldMaterial = pNodeData->bufLayers[idxLayer].materials;
                     if(!iOldMaterial.empty()){
                         const auto& idxOldMaterial = iAttr.first.layers[idxLayer];
@@ -232,7 +232,7 @@ static void ins_rearrangeMesh(NodeData* pNodeData){
     for(const auto& idxOldVert : ins_vertNewToOld)
         ins_bufPositions.emplace_back(pNodeData->bufPositions[idxOldVert]);
 
-    for(size_t idxLayer = 0, edxLayer = pNodeData->bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
+    for(auto edxLayer = (unsigned int)pNodeData->bufLayers.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
         const auto& iOldLayer = pNodeData->bufLayers[idxLayer];
         auto& iNewLayer = ins_bufLayers[idxLayer];
 
@@ -300,7 +300,7 @@ void SHRGenerateMeshAttribute(NodeData* pNodeData){
 
         ins_bufLayers.clear();
         ins_bufLayers.resize(pNodeData->bufLayers.size());
-        for(size_t idxLayer = 0, edxLayer = ins_bufLayers.size(); idxLayer < edxLayer; ++idxLayer){
+        for(auto edxLayer = (unsigned int)ins_bufLayers.size(), idxLayer = 0u; idxLayer < edxLayer; ++idxLayer){
             auto& lhsLayer = ins_bufLayers[idxLayer];
             const auto& rhsLayer = pNodeData->bufLayers[idxLayer];
 

@@ -30,7 +30,7 @@ bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMat
 
     iMaterialTable.Assign(kMaterialTable.size());
 
-    for(size_t idxMaterial = 0; idxMaterial < iMaterialTable.Length; ++idxMaterial){
+    for(size_t idxMaterial = 0u; idxMaterial < iMaterialTable.Length; ++idxMaterial){
         auto* kMaterial = kMaterialTable[idxMaterial];
         auto& iMaterial = iMaterialTable.Values[idxMaterial];
 
@@ -79,7 +79,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
         }
     }
 
-    for(size_t idxMaterial = 0; idxMaterial < materialTable.Length; ++idxMaterial){
+    for(size_t idxMaterial = 0u; idxMaterial < materialTable.Length; ++idxMaterial){
         const auto& iMaterial = materialTable.Values[idxMaterial];
 
         const auto strName = ToString(iMaterial.Name);

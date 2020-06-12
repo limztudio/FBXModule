@@ -413,8 +413,8 @@ static void ins_bindSkinningInfoRecursive(const FbxNodeToExportNode& fbxNodeToEx
     if(pNode->getID() == FBXType::FBXType_SkinnedMesh){
         auto* pMesh = static_cast<FBXSkinnedMesh*>(pNode);
 
-        for(auto* iAttr = pMesh->BoneCombinations.Values; size_t(iAttr - pMesh->BoneCombinations.Values) < pMesh->BoneCombinations.Length; ++iAttr){
-            for(auto** iCluster = iAttr->Values; size_t(iCluster - iAttr->Values) < iAttr->Length; ++iCluster){
+        for(auto* iAttr = pMesh->BoneCombinations.Values; FBX_PTRDIFFU(iAttr - pMesh->BoneCombinations.Values) < pMesh->BoneCombinations.Length; ++iAttr){
+            for(auto** iCluster = iAttr->Values; FBX_PTRDIFFU(iCluster - iAttr->Values) < iAttr->Length; ++iCluster){
                 auto* kBindNode = reinterpret_cast<FbxNode*>(*iCluster);
 
                 auto f = fbxNodeToExportNode.find(kBindNode);
@@ -425,8 +425,8 @@ static void ins_bindSkinningInfoRecursive(const FbxNodeToExportNode& fbxNodeToEx
             }
         }
 
-        for(auto* iVert = pMesh->SkinInfos.Values; size_t(iVert - pMesh->SkinInfos.Values) < pMesh->SkinInfos.Length; ++iVert){
-            for(auto* iWeight = iVert->Values; size_t(iWeight - iVert->Values) < iVert->Length; ++iWeight){
+        for(auto* iVert = pMesh->SkinInfos.Values; FBX_PTRDIFFU(iVert - pMesh->SkinInfos.Values) < pMesh->SkinInfos.Length; ++iVert){
+            for(auto* iWeight = iVert->Values; FBX_PTRDIFFU(iWeight - iVert->Values) < iVert->Length; ++iWeight){
                 auto* kBindNode = reinterpret_cast<FbxNode*>(iWeight->BindNode);
 
                 auto f = fbxNodeToExportNode.find(kBindNode);
@@ -437,7 +437,7 @@ static void ins_bindSkinningInfoRecursive(const FbxNodeToExportNode& fbxNodeToEx
             }
         }
 
-        for(auto* iDeform = pMesh->SkinDeforms.Values; size_t(iDeform - pMesh->SkinDeforms.Values) < pMesh->SkinDeforms.Length; ++iDeform){
+        for(auto* iDeform = pMesh->SkinDeforms.Values; FBX_PTRDIFFU(iDeform - pMesh->SkinDeforms.Values) < pMesh->SkinDeforms.Length; ++iDeform){
             auto* kBindNode = reinterpret_cast<FbxNode*>(iDeform->TargetNode);
 
             auto f = fbxNodeToExportNode.find(kBindNode);
