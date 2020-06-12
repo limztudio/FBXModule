@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXALLOCATE_HPP_
+#define _FBXALLOCATE_HPP_
 
 
 #include "FBXAssign.hpp"
@@ -103,3 +104,6 @@ static void FBXAllocateRoot(T** pDest, const T* pSrc){
 
     (*pDest) = dest;
 }
+
+
+#endif // _FBXALLOCATE_HPP_

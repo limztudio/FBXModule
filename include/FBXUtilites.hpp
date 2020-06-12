@@ -5,11 +5,20 @@
 */
 
 
-#pragma once
+#ifndef _FBXUTILITES_HPP_
+#define _FBXUTILITES_HPP_
 
 
 #include "FBXType.hpp"
 
+
+template<typename T>
+static inline bool FBXTypeHasMember(T target, T find){
+    const auto t = (unsigned long)target;
+    const auto f = (unsigned long)find;
+
+    return (t & f) == f;
+}
 
 template<typename T>
 static FBX_SIZE FBXGetMemoryLength(const T* p){
@@ -51,3 +60,6 @@ static void FBXBreakableIterateBackwardNode(NODE* p, FUNC func){
         FBXBreakableIterateBackwardNode(p->Parent, func);
     }
 }
+
+
+#endif // _FBXUTILITES_HPP_

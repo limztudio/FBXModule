@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXBASE_HPP_
+#define _FBXBASE_HPP_
 
 
 #include "FBXType.hpp"
@@ -43,3 +44,6 @@ public:
 public:
     virtual ~FBXBase(){}
 };
+
+
+#endif // _FBXBASE_HPP_

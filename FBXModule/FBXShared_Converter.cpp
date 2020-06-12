@@ -35,8 +35,9 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
                 SHRPushErrorMessage("failed to triangulate mesh object", __name_of_this_func);
                 return false;
             }
+
+            break;
         }
-        break;
 
         case FbxNodeAttribute::eNurbs:
         {
@@ -47,8 +48,9 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
                 return false;
             }
             //kConverter.TriangulateInPlace(kNode);
+
+            break;
         }
-        break;
 
         case FbxNodeAttribute::ePatch:
         {
@@ -59,8 +61,12 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
                 return false;
             }
             //kConverter.TriangulateInPlace(kNode);
+
+            break;
         }
-        break;
+
+        default:
+            break;
         }
     }
 
@@ -72,7 +78,7 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
     return true;
 }
 bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
-    static const char __name_of_this_func[] = "SHRConvertAnimations(FbxManager*, FbxScene*)";
+    //static const char __name_of_this_func[] = "SHRConvertAnimations(FbxManager*, FbxScene*)";
 
 
     //FbxAnimCurveFilterKeyReducer kFilterReducer;
@@ -90,21 +96,21 @@ bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
     //    kFilterConstantReducer.SetKeepFirstAndLastKeys(true);
     //}
 
-    for(auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>(), idxAnimStack = 0; idxAnimStack < edxAnimStack; ++idxAnimStack){
-        auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
-        if(!kAnimStack)
-            continue;
+    //for(auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>(), idxAnimStack = 0; idxAnimStack < edxAnimStack; ++idxAnimStack){
+    //    auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
+    //    if(!kAnimStack)
+    //        continue;
 
-        //if(!kFilterReducer.Apply(kAnimStack)){
-        //    SHRPushErrorMessage("failed to apply reduction filter to animation", __name_of_this_func);
-        //    return false;
-        //}
+    //    if(!kFilterReducer.Apply(kAnimStack)){
+    //        SHRPushErrorMessage("failed to apply reduction filter to animation", __name_of_this_func);
+    //        return false;
+    //    }
 
-        //if(!kFilterConstantReducer.Apply(kAnimStack)){
-        //    SHRPushErrorMessage("failed to apply constant reduction filter to animation", __name_of_this_func);
-        //    return false;
-        //}
-    }
+    //    if(!kFilterConstantReducer.Apply(kAnimStack)){
+    //        SHRPushErrorMessage("failed to apply constant reduction filter to animation", __name_of_this_func);
+    //        return false;
+    //    }
+    //}
 
     return true;
 }

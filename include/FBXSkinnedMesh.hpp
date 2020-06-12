@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXSKINNEDMESH_HPP_
+#define _FBXSKINNEDMESH_HPP_
 
 
 #include "FBXType.hpp"
@@ -43,3 +44,6 @@ public:
     FBXDynamicArray<FBXDynamicArray<FBXSkinElement>> SkinInfos; // must have same count with Vertices
     FBXDynamicArray<FBXSkinDeformElement> SkinDeforms;
 };
+
+
+#endif // _FBXSKINNEDMESH_HPP_

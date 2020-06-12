@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXNODE_HPP_
+#define _FBXNODE_HPP_
 
 
 #include "FBXUtilites.hpp"
@@ -47,3 +48,6 @@ public:
 public:
     FBXDynamicArray<char> Name;
 };
+
+
+#endif // _FBXNODE_HPP_

@@ -17,7 +17,7 @@
 template<typename T, unsigned long N>
 static inline void ins_interpolateValue(FBXStaticArray<T, N>* pOut, const FBXStaticArray<T, N>* pV0, const FBXStaticArray<T, N>* pV1, float t){}
 template<>
-static inline void ins_interpolateValue(FBXStaticArray<float, 3>* pOut, const FBXStaticArray<float, 3>* pV0, const FBXStaticArray<float, 3>* pV1, float t){
+inline void ins_interpolateValue(FBXStaticArray<float, 3>* pOut, const FBXStaticArray<float, 3>* pV0, const FBXStaticArray<float, 3>* pV1, float t){
     auto xmm_v0 = DirectX::XMLoadFloat3((const DirectX::XMFLOAT3*)pV0->Values);
     auto xmm_v1 = DirectX::XMLoadFloat3((const DirectX::XMFLOAT3*)pV1->Values);
 
@@ -25,7 +25,7 @@ static inline void ins_interpolateValue(FBXStaticArray<float, 3>* pOut, const FB
     DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)pOut->Values, xmm_v);
 }
 template<>
-static inline void ins_interpolateValue(FBXStaticArray<float, 4>* pOut, const FBXStaticArray<float, 4>* pV0, const FBXStaticArray<float, 4>* pV1, float t){
+inline void ins_interpolateValue(FBXStaticArray<float, 4>* pOut, const FBXStaticArray<float, 4>* pV0, const FBXStaticArray<float, 4>* pV1, float t){
     auto xmm_v0 = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)pV0->Values);
     auto xmm_v1 = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)pV1->Values);
 

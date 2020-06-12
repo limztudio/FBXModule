@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXMATERIAL_HPP_
+#define _FBXMATERIAL_HPP_
 
 
 #include "FBXUtilites.hpp"
@@ -25,3 +26,6 @@ public:
 public:
     FBXDynamicArray<char> Name;
 };
+
+
+#endif // _FBXMATERIAL_HPP_

@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXBONE_HPP_
+#define _FBXBONE_HPP_
 
 
 #include "FBXNode.hpp"
@@ -29,3 +30,6 @@ public:
     float Size;
     float Length;
 };
+
+
+#endif // _FBXBONE_HPP_

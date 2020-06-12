@@ -22,7 +22,7 @@ MaterialTable shr_materialTable;
 
 
 bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMaterial>* pMaterials){
-    static const char __name_of_this_func[] = "SHRLoadMaterials(const MaterialTable&, FBXDynamicArray<FBXMaterial>*)";
+    //static const char __name_of_this_func[] = "SHRLoadMaterials(const MaterialTable&, FBXDynamicArray<FBXMaterial>*)";
 
 
     const auto& kMaterialTable = materialTable.getTable();

@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXMODULEBIND_HPP_
+#define _FBXMODULEBIND_HPP_
 
 
 template<typename LIBRARY>
@@ -18,3 +19,6 @@ static inline void FBXBindFunction(LIBRARY library){
 
 #undef __FBXM_MAKE_FUNC
 }
+
+
+#endif // _FBXMODULEBIND_HPP_

@@ -5,9 +5,13 @@
 */
 
 
-#pragma once
+#ifndef _FBXMODULEPREDEF_HPP_
+#define _FBXMODULEPREDEF_HPP_
 
 
 #ifndef __FBXM_CALL_TYPE
 #define __FBXM_CALL_TYPE __stdcall
 #endif
+
+
+#endif // _FBXMODULEPREDEF_HPP_

@@ -81,6 +81,9 @@
     <ClInclude Include="..\include\FBXModuleBind.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\FBXConfig.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

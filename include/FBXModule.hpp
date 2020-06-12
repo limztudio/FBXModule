@@ -5,8 +5,11 @@
 */
 
 
-#pragma once
+#ifndef _FBXMODULE_HPP_
+#define _FBXMODULE_HPP_
 
+
+#include "FBXConfig.hpp"
 
 #include "FBXType.hpp"
 
@@ -49,3 +52,6 @@
 #undef __FBXM_MAKE_FUNC
 
 #endif
+
+
+#endif // _FBXMODULE_HPP_

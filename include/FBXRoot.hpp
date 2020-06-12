@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXROOT_HPP_
+#define _FBXROOT_HPP_
 
 
 #include "FBXBase.hpp"
@@ -38,3 +39,6 @@ public:
 public:
     FBXNode* Nodes;
 };
+
+
+#endif // _FBXROOT_HPP_

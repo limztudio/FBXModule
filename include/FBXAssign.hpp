@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXASSIGN_HPP_
+#define _FBXASSIGN_HPP_
 
 
 #ifdef _WIN64
@@ -52,3 +53,6 @@ static inline void FBXDelete(T* obj){
     obj->~T();
     free(obj);
 }
+
+
+#endif // _FBXASSIGN_HPP_

@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXMESH_HPP_
+#define _FBXMESH_HPP_
 
 
 #include "FBXType.hpp"
@@ -62,3 +63,6 @@ public:
 public:
     FBXDynamicArray<FBXMeshLayerElement> LayeredElements;
 };
+
+
+#endif // _FBXMESH_HPP_

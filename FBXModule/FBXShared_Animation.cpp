@@ -120,7 +120,7 @@ static inline FbxAnimCurveDef::EInterpolationType ins_convInterpolationType(FBXA
 
 
 bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const AnimationNodes& kNodeTable){
-    static const char __name_of_this_func[] = "SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)";
+    //static const char __name_of_this_func[] = "SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)";
 
 
     auto* kDefaultAnimStack = kScene->GetCurrentAnimationStack();
@@ -671,7 +671,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
     return true;
 }
 bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXDynamicArray<FBXAnimation>& animStacks){
-    static const char __name_of_this_func[] = "SHRStoreAnimations(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXDynamicArray<FBXAnimation>&)";
+    //static const char __name_of_this_func[] = "SHRStoreAnimations(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXDynamicArray<FBXAnimation>&)";
 
 
     for(size_t idxAnimation = 0; idxAnimation < animStacks.Length; ++idxAnimation){

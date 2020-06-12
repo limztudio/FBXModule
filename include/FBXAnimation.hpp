@@ -5,7 +5,8 @@
 */
 
 
-#pragma once
+#ifndef _FBXANIMATION_HPP_
+#define _FBXANIMATION_HPP_
 
 
 #include "FBXUtilites.hpp"
@@ -53,3 +54,6 @@ public:
 public:
     FBXDynamicArray<char> Name;
 };
+
+
+#endif // _FBXANIMATION_HPP_
