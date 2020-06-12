@@ -44,7 +44,6 @@ public:
 class FBXAnimation : public FBXBase{
 public:
     virtual FBXType getID()const{ return FBXType::FBXType_Animation; }
-    virtual const char* getName()const{ return Name.Values; }
 
 
 public:

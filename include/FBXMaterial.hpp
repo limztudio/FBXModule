@@ -17,7 +17,6 @@
 class FBXMaterial : public FBXBase{
 public:
     virtual FBXType getID()const{ return FBXType::FBXType_Material; }
-    virtual const char* getName()const{ return Name.Values; }
 
 
 public:

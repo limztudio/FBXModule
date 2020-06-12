@@ -17,7 +17,6 @@
 class FBXNode : public FBXBase{
 public:
     virtual FBXType getID()const{ return FBXType::FBXType_Node; }
-    virtual const char* getName()const{ return Name.Values; }
 
 
 public:
