@@ -341,6 +341,10 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
                 auto* pKey = &pNode->RotationKeys.Values[idxKey];
 
                 ins_convAnimationKey(*pKey, iKey);
+
+                auto xmm_q = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)&(*pKey).Value.Values);
+                xmm_q = DirectX::XMQuaternionNormalize(xmm_q);
+                DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&(*pKey).Value.Values, xmm_q);
             }
 
             pNode->TranslationKeys.Assign(iNode.translationKeys.size());
