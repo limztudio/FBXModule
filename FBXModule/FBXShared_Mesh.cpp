@@ -496,6 +496,39 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                 pObject.resize(positions.size(), FbxDouble3(0, 0, 0));
 
                 switch(kObject->GetMappingMode()){
+                case FbxLayerElement::eByControlPoint:
+                    for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
+                        for(int iVert = 0; iVert < 3; ++iVert){
+                            auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
+                            auto flatIndex = iPoly * 3 + iVert;
+
+                            auto& vert = pObject[flatIndex];
+
+                            switch(kObject->GetReferenceMode()){
+                            case FbxLayerElement::eDirect:
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
+                                break;
+
+                            case FbxLayerElement::eIndexToDirect:
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
+                                break;
+
+                            default:
+                            {
+                                std::string msg = "vertex normal has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                                return false;
+                            }
+                            }
+
+                            vert = Normalize3(vert);
+                        }
+                    }
+                    break;
+
                 case FbxLayerElement::eByPolygonVertex:
                     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
                         for(int iVert = 0; iVert < 3; ++iVert){
@@ -547,6 +580,39 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                 pObject.resize(positions.size(), FbxDouble3(0, 0, 0));
 
                 switch(kObject->GetMappingMode()){
+                case FbxLayerElement::eByControlPoint:
+                    for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
+                        for(int iVert = 0; iVert < 3; ++iVert){
+                            auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
+                            auto flatIndex = iPoly * 3 + iVert;
+
+                            auto& vert = pObject[flatIndex];
+
+                            switch(kObject->GetReferenceMode()){
+                            case FbxLayerElement::eDirect:
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
+                                break;
+
+                            case FbxLayerElement::eIndexToDirect:
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
+                                break;
+
+                            default:
+                            {
+                                std::string msg = "vertex binormal has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                                return false;
+                            }
+                            }
+
+                            vert = Normalize3(vert);
+                        }
+                    }
+                    break;
+
                 case FbxLayerElement::eByPolygonVertex:
                     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
                         for(int iVert = 0; iVert < 3; ++iVert){
@@ -598,6 +664,39 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                 pObject.resize(positions.size(), FbxDouble3(0, 0, 0));
 
                 switch(kObject->GetMappingMode()){
+                case FbxLayerElement::eByControlPoint:
+                    for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
+                        for(int iVert = 0; iVert < 3; ++iVert){
+                            auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
+                            auto flatIndex = iPoly * 3 + iVert;
+
+                            auto& vert = pObject[flatIndex];
+
+                            switch(kObject->GetReferenceMode()){
+                            case FbxLayerElement::eDirect:
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(ctrlPointIndex));
+                                break;
+
+                            case FbxLayerElement::eIndexToDirect:
+                                CopyArrayData<_countof(vert.mData), FbxDouble, FbxVector4, int>(vert.mData, kObject->GetDirectArray().GetAt(kObject->GetIndexArray().GetAt(ctrlPointIndex)));
+                                break;
+
+                            default:
+                            {
+                                std::string msg = "vertex tangent has unsupported reference mode";
+                                msg += "(errored in \"";
+                                msg += strName;
+                                msg += "\")";
+                                SHRPushErrorMessage(std::move(msg), __name_of_this_func);
+                                return false;
+                            }
+                            }
+
+                            vert = Normalize3(vert);
+                        }
+                    }
+                    break;
+
                 case FbxLayerElement::eByPolygonVertex:
                     for(auto iPoly = decltype(polyCount){ 0 }; iPoly < polyCount; ++iPoly){
                         for(int iVert = 0; iVert < 3; ++iVert){
