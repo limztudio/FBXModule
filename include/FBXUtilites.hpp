@@ -12,6 +12,21 @@
 #include "FBXType.hpp"
 
 
+namespace __hidden_FBXModule{
+    struct _IteratorThrower{};
+
+    template<typename NODE, typename FUNC>
+    static void _breakableIterateNode(NODE* pNode, FUNC func){
+        if(pNode){
+            FBXBreakableIterateNode(pNode->Child, func);
+            FBXBreakableIterateNode(pNode->Sibling, func);
+            if(!func(pNode))
+                throw _IteratorThrower();
+        }
+    }
+};
+
+
 template<typename T>
 static inline bool FBXTypeHasMember(T target, T find){
     const auto t = (unsigned long)target;
@@ -37,27 +52,26 @@ static void FBXIterateNode(NODE* pNode, FUNC func){
 }
 template<typename NODE, typename FUNC>
 static void FBXBreakableIterateNode(NODE* pNode, FUNC func){
-    if(pNode){
-        FBXBreakableIterateNode(pNode->Child, func);
-        FBXBreakableIterateNode(pNode->Sibling, func);
-        if(!func(pNode))
-            return;
+    try{
+        __hidden_FBXModule::_breakableIterateNode(pNode, func);
     }
+    catch(__hidden_FBXModule::_IteratorThrower){}
 }
 
 template<typename NODE, typename FUNC>
 static void FBXIterateBackwardNode(NODE* pNode, FUNC func){
     if(pNode){
-        func(pNode);
-        FBXIterateBackwardNode(pNode->Parent, func);
+        for(; pNode; pNode = pNode->Parent)
+            func(pNode);
     }
 }
 template<typename NODE, typename FUNC>
 static void FBXBreakableIterateBackwardNode(NODE* pNode, FUNC func){
     if(pNode){
-        if(!func(pNode))
-            return;
-        FBXBreakableIterateBackwardNode(pNode->Parent, func);
+        for(; pNode; pNode = pNode->Parent){
+            if(!func(pNode))
+                return;
+        }
     }
 }
 
