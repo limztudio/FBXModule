@@ -21,10 +21,10 @@ public:
 
 
 public:
-    FBXDynamicArray<TCHAR> DiffuseTexturePath;
+    FBXDynamicArray<FBX_CHAR> DiffuseTexturePath;
 
 public:
-    FBXDynamicArray<TCHAR> Name;
+    FBXDynamicArray<FBX_CHAR> Name;
 };
 
 

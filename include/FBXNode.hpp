@@ -46,7 +46,7 @@ public:
     FBXNode* Sibling;
 
 public:
-    FBXDynamicArray<TCHAR> Name;
+    FBXDynamicArray<FBX_CHAR> Name;
 };
 
 

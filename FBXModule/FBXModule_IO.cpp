@@ -51,7 +51,7 @@ static std::filesystem::path ins_filePath;
 static unsigned char ins_fileMode = 0;
 
 
-__FBXM_MAKE_FUNC(bool, FBXOpenFile, const TCHAR* szfilePath, const TCHAR* mode, const void* ioSetting){
+__FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* mode, const void* ioSetting){
     static const TCHAR __name_of_this_func[] = TEXT("FBXOpenFile(const char*, const char*, unsigned long, const void*)");
 
 
@@ -129,11 +129,11 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const TCHAR* szfilePath, const TCHAR* mode, 
 
     if((*mode == L'r') || (*mode == L'R')){
         ins_fileMode = 1;
-        ins_filePath = szfilePath;
+        ins_filePath = szFilePath;
     }
     else if((*mode == L'w') || (*mode == L'W')){
         ins_fileMode = 2;
-        ins_filePath = szfilePath;
+        ins_filePath = szFilePath;
     }
     else{
         ins_fileMode = 0;
