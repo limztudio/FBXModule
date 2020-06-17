@@ -480,7 +480,7 @@ inline std::basic_string<char> ConvertString(std::basic_string<wchar_t>&& strW){
 template<>
 inline std::basic_string<wchar_t> ConvertString(const char* strA){ return ConvertString<wchar_t, char>(std::basic_string<char>(strA)); }
 template<>
-inline std::basic_string<char> ConvertString(const wchar_t* strA){ return ConvertString<char, wchar_t>(std::basic_string<wchar_t>(strA)); }
+inline std::basic_string<char> ConvertString(const wchar_t* strW){ return ConvertString<char, wchar_t>(std::basic_string<wchar_t>(strW)); }
 
 template<typename VALUE>
 static inline std::basic_string<char> ToString(VALUE v){ return std::to_string(v); }
