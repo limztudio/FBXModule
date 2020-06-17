@@ -201,7 +201,7 @@ using Float4 = Container4<float>;
 
 class CustomStream : public FbxStream{
 public:
-    CustomStream(FbxManager* kSDKManager, const char* fileName, const char* mode, bool ascii = false);
+    CustomStream(FbxManager* kSDKManager, std::basic_string<TCHAR>&& fileName, const TCHAR* mode, bool ascii = false);
     virtual ~CustomStream();
 
 
@@ -234,8 +234,8 @@ public:
 
 
 private:
-    std::string m_fileName;
-    std::string m_fileMode;
+    std::basic_string<TCHAR> m_fileName;
+    std::basic_string<TCHAR> m_fileMode;
 
     FILE* m_file;
 
@@ -395,8 +395,8 @@ static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs, INDEX_TYPE len
         lhs[i] = static_cast<LHS_T>(rhs[i]);
 }
 
-template<template<typename> typename LHS, typename LHS_T, typename RHS_T>
-static inline void CopyString(LHS<LHS_T>& lhs, const std::basic_string<RHS_T>& rhs){
+template<template<typename> typename LHS, typename TYPE>
+static inline void CopyString(LHS<TYPE>& lhs, const std::basic_string<TYPE>& rhs){
     const auto lenStr = rhs.length();
     if(lenStr){
         lhs.Assign(lenStr + 1);
@@ -406,9 +406,9 @@ static inline void CopyString(LHS<LHS_T>& lhs, const std::basic_string<RHS_T>& r
     else
         lhs.Assign(0);
 }
-template<template<typename> typename LHS, typename LHS_T, typename RHS>
-static inline void CopyString(LHS<LHS_T>& lhs, const RHS* rhs){
-    const auto lenStr = FBXGetMemoryLength<RHS>(rhs);
+template<template<typename> typename LHS, typename TYPE>
+static inline void CopyString(LHS<TYPE>& lhs, const TYPE* rhs){
+    const auto lenStr = FBXGetMemoryLength<TYPE>(rhs);
     if(lenStr){
         lhs.Assign(lenStr + 1);
         CopyArrayData(lhs.Values, rhs, lenStr);
@@ -434,6 +434,58 @@ static inline fbxsdk::FbxAMatrix GetGeometry(fbxsdk::FbxNode* kNode){
 
     return fbxsdk::FbxAMatrix(kT, kR, kS);
 }
+
+template<typename L_TYPE, typename R_TYPE>
+static inline std::basic_string<L_TYPE> ConvertString(const std::basic_string<R_TYPE>& strSrc){ return strSrc; }
+
+template<typename L_TYPE, typename R_TYPE>
+static inline std::basic_string<L_TYPE> ConvertString(std::basic_string<R_TYPE>&& strSrc){ return std::move(strSrc); }
+
+template<typename L_TYPE, typename R_TYPE>
+static inline std::basic_string<L_TYPE> ConvertString(const R_TYPE* strSrc){ return std::basic_string<L_TYPE>(strSrc); }
+
+template<typename CTYPE, typename VALUE>
+static inline std::basic_string<CTYPE> ToString(VALUE v){ return std::basic_string<CTYPE>(); }
+
+template<>
+inline std::basic_string<wchar_t> ConvertString(const std::basic_string<char>& strA){
+    std::basic_string<wchar_t> strW{};
+    if(strA.length() > 0){
+        auto len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, strA.c_str(), (int)strA.size(), nullptr, 0);
+        if(len == 0)
+            throw std::runtime_error("invalid character sequence");
+        strW.resize(len);
+        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, strA.c_str(), (int)strA.size(), strW.data(), (int)strW.size());
+    }
+    return strW;
+}
+template<>
+inline std::basic_string<char> ConvertString(const std::basic_string<wchar_t>& strW){
+    std::basic_string<char> strA{};
+    if(strW.length() > 0){
+        auto len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, strW.c_str(), (int)strW.size(), nullptr, 0, nullptr, 0);
+        if(len == 0)
+            throw std::runtime_error("invalid character sequence");
+        strA.resize(len);
+        WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, strW.c_str(), (int)strW.size(), strA.data(), (int)strA.size(), nullptr, 0);
+    }
+    return strA;
+}
+
+template<>
+inline std::basic_string<wchar_t> ConvertString(std::basic_string<char>&& strA){ return ConvertString<wchar_t, char>(strA); }
+template<>
+inline std::basic_string<char> ConvertString(std::basic_string<wchar_t>&& strW){ return ConvertString<char, wchar_t>(strW); }
+
+template<>
+inline std::basic_string<wchar_t> ConvertString(const char* strA){ return ConvertString<wchar_t, char>(std::basic_string<char>(strA)); }
+template<>
+inline std::basic_string<char> ConvertString(const wchar_t* strA){ return ConvertString<char, wchar_t>(std::basic_string<wchar_t>(strA)); }
+
+template<typename VALUE>
+static inline std::basic_string<char> ToString(VALUE v){ return std::to_string(v); }
+template<typename VALUE>
+static inline std::basic_string<wchar_t> ToString(VALUE v){ return std::to_wstring(v); }
 
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode){
     auto kMatGeometry = GetGeometry(kNode);

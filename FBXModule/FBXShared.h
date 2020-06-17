@@ -77,7 +77,7 @@ private:
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 struct TexcoordTable{
-    std::string name;
+    std::basic_string<char> name;
     std::vector<fbxsdk::FbxDouble2> table;
 };
 
@@ -126,7 +126,7 @@ using BoneCombination = std::vector<fbxsdk::FbxCluster*>;
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
 struct NodeData{
-    std::string strName;
+    std::basic_string<char> strName;
 
     FbxAMatrix kTransformMatrix;
 
@@ -200,8 +200,8 @@ extern FBXRoot* shr_root;
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
-extern std::stack<std::string> shr_errorStack;
-extern std::stack<std::string> shr_warningStack;
+extern std::stack<std::basic_string<TCHAR>> shr_errorStack;
+extern std::stack<std::basic_string<TCHAR>> shr_warningStack;
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
@@ -253,13 +253,13 @@ extern void SHRCopyAnimation(FBXAnimation& dest, const FBXAnimation& src);
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
-extern void SHRPushErrorMessage(const char* strMessage, const char* strCallPos);
-extern void SHRPushErrorMessage(const std::string& strMessage, const char* strCallPos);
-extern void SHRPushErrorMessage(std::string&& strMessage, const char* strCallPos);
+extern void SHRPushErrorMessage(const TCHAR* strMessage, const TCHAR* strCallPos);
+extern void SHRPushErrorMessage(const std::basic_string<TCHAR>& strMessage, const TCHAR* strCallPos);
+extern void SHRPushErrorMessage(std::basic_string<TCHAR>&& strMessage, const TCHAR* strCallPos);
 
-extern void SHRPushWarningMessage(const char* strMessage, const char* strCallPos);
-extern void SHRPushWarningMessage(const std::string& strMessage, const char* strCallPos);
-extern void SHRPushWarningMessage(std::string&& strMessage, const char* strCallPos);
+extern void SHRPushWarningMessage(const TCHAR* strMessage, const TCHAR* strCallPos);
+extern void SHRPushWarningMessage(const std::basic_string<TCHAR>& strMessage, const TCHAR* strCallPos);
+extern void SHRPushWarningMessage(std::basic_string<TCHAR>&& strMessage, const TCHAR* strCallPos);
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 

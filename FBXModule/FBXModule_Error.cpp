@@ -18,7 +18,7 @@ __FBXM_MAKE_FUNC(unsigned long, FBXGetErrorCount, void){
     return (unsigned long)(count);
 }
 
-__FBXM_MAKE_FUNC(int, FBXGetLastError, char* szMessage){
+__FBXM_MAKE_FUNC(int, FBXGetLastError, TCHAR* szMessage){
     if(shr_errorStack.empty())
         return -1;
 
@@ -46,7 +46,7 @@ __FBXM_MAKE_FUNC(unsigned long, FBXGetWarningCount, void){
     return (unsigned long)(count);
 }
 
-__FBXM_MAKE_FUNC(int, FBXGetLastWarning, char* szMessage){
+__FBXM_MAKE_FUNC(int, FBXGetLastWarning, TCHAR* szMessage){
     if(shr_warningStack.empty())
         return -1;
 

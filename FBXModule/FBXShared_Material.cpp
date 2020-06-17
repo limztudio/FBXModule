@@ -22,7 +22,7 @@ MaterialTable shr_materialTable;
 
 
 bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMaterial>* pMaterials){
-    //static const char __name_of_this_func[] = "SHRLoadMaterials(const MaterialTable&, FBXDynamicArray<FBXMaterial>*)";
+    //static const TCHAR __name_of_this_func[] = TEXT("SHRLoadMaterials(const MaterialTable&, FBXDynamicArray<FBXMaterial>*)");
 
 
     const auto& kMaterialTable = materialTable.getTable();
@@ -34,14 +34,13 @@ bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMat
         auto* kMaterial = kMaterialTable[idxMaterial];
         auto& iMaterial = iMaterialTable.Values[idxMaterial];
 
-        CopyString(iMaterial.Name, kMaterial->GetName());
+        CopyString(iMaterial.Name, ConvertString<TCHAR>(kMaterial->GetName()));
 
         { // diffuse
             auto kProperty = kMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
             auto* kTexture = kProperty.GetSrcObject<FbxFileTexture>();
-            if(kTexture){
-                CopyString(iMaterial.DiffuseTexturePath, kTexture->GetFileName());
-            }
+            if(kTexture)
+                CopyString(iMaterial.DiffuseTexturePath, ConvertString<TCHAR>(kTexture->GetFileName()));
         }
     }
 
@@ -49,7 +48,7 @@ bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMat
 }
 
 bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynamicArray<FBXMaterial>& materialTable){
-    static const char __name_of_this_func[] = "SHRStoreMaterials(FbxManager*, FbxScene*, const FBXDynamicArray<FBXMaterial>&)";
+    static const TCHAR __name_of_this_func[] = TEXT("SHRStoreMaterials(FbxManager*, FbxScene*, const FBXDynamicArray<FBXMaterial>&)");
 
 
     { // remove reserved materials
@@ -65,13 +64,13 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
             }
 
             for(auto* kMaterial : oldMatTable){
-                const std::string strName = kMaterial->GetName();
+                const std::basic_string<TCHAR> strName = ConvertString<TCHAR>(kMaterial->GetName());
 
                 if(!kScene->RemoveMaterial(kMaterial)){
-                    std::string msg = "failed to remove material from scene";
-                    msg += "(errored in \"";
+                    std::basic_string<TCHAR> msg = TEXT("failed to remove material from scene");
+                    msg += TEXT("(errored in \"");
                     msg += strName;
-                    msg += "\")";
+                    msg += TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -82,14 +81,14 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
     for(size_t idxMaterial = 0u; idxMaterial < materialTable.Length; ++idxMaterial){
         const auto& iMaterial = materialTable.Values[idxMaterial];
 
-        const auto strName = ToString(iMaterial.Name);
+        const std::basic_string<TCHAR> strName = iMaterial.Name.Values;
 
-        auto* kMaterial = FbxSurfacePhong::Create(kSDKManager, strName.c_str());
+        auto* kMaterial = FbxSurfacePhong::Create(kSDKManager, ConvertString<char>(strName).c_str());
         if(!kMaterial){
-            std::string msg = "failed to create FbxSurfacePhong";
-            msg += "(errored in \"";
+            std::basic_string<TCHAR> msg = TEXT("failed to create FbxSurfacePhong");
+            msg += TEXT("(errored in \"");
             msg += strName;
-            msg += "\")";
+            msg += TEXT("\")");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
@@ -103,40 +102,39 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
         if(iMaterial.DiffuseTexturePath.Length){
             auto* kTexture = FbxFileTexture::Create(kScene, FbxSurfaceMaterial::sDiffuse);
             if(!kTexture){
-                std::string msg = "failed to create FbxFileTexture";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create FbxFileTexture");
+                msg += TEXT("(errored in \"");
                 msg += strName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
-            if(!kTexture->SetFileName(iMaterial.DiffuseTexturePath.Values)){
-                std::string msg = "set valid filename: \"";
+            if(!kTexture->SetFileName(ConvertString<char>(iMaterial.DiffuseTexturePath.Values).c_str())){
+                std::basic_string<TCHAR> msg = TEXT("set valid filename: \"");
                 msg += iMaterial.DiffuseTexturePath.Values;
-                msg += "\"";
-                msg += "(errored in \"";
+                msg += TEXT("(errored in \"");
                 msg += strName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
             if(!kMaterial->Diffuse.ConnectSrcObject(kTexture)){
-                std::string msg = "failed to connect diffuse texture object";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to connect diffuse texture object");
+                msg += TEXT("(errored in \"");
                 msg += strName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
         }
 
         if(!kScene->AddMaterial(kMaterial)){
-            std::string msg = "failed to add material to scene";
-            msg += "(errored in \"";
+            std::basic_string<TCHAR> msg = TEXT("failed to add material to scene");
+            msg += TEXT("(errored in \"");
             msg += strName;
-            msg += "\")";
+            msg += TEXT("\")");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }

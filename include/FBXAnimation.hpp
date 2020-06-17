@@ -52,7 +52,7 @@ public:
     float EndTime;
 
 public:
-    FBXDynamicArray<char> Name;
+    FBXDynamicArray<TCHAR> Name;
 };
 
 

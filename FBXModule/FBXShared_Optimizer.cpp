@@ -86,7 +86,7 @@ public:
     Unit3Container layeredBinormal;
     Unit3Container layeredTangent;
 
-    std::vector<std::pair<std::string, fbxsdk::FbxDouble2>> layeredUV;
+    std::vector<std::pair<std::basic_string<char>, fbxsdk::FbxDouble2>> layeredUV;
 };
 static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
     {

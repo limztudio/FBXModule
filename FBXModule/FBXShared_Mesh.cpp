@@ -116,10 +116,10 @@ static inline bool ins_addMaterial(UintContainer& matTable, unsigned int sceneMa
 
 
 bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
-    static const char __name_of_this_func[] = "SHRLoadMeshFromNode(MaterialTable&, ControlPointRemap&, FbxNode*, NodeData*)";
+    static const TCHAR __name_of_this_func[] = TEXT("SHRLoadMeshFromNode(MaterialTable&, ControlPointRemap&, FbxNode*, NodeData*)");
 
 
-    const std::string strName = kNode->GetName();
+    const std::basic_string<TCHAR> strName = ConvertString<TCHAR>(kNode->GetName());
 
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();
 
@@ -143,10 +143,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(vertID != ctrlPointIndex){
-                std::string msg = "vertex index and control point index are not matched";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("vertex index and control point index are not matched");
+                msg += TEXT("(errored in \"");
                 msg += strName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -161,10 +161,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
         auto polySize = kMesh->GetPolygonSize(iPoly);
 
         if(polySize != 3){
-            std::string msg = "polygon size must be 3";
-            msg += "(errored in \"";
+            std::basic_string<TCHAR> msg = TEXT("polygon size must be 3");
+            msg += TEXT("(errored in \"");
             msg += strName;
-            msg += "\")";
+            msg += TEXT("\")");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
@@ -173,20 +173,20 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(ctrlPointIndex < 0){
-                std::string msg = "vertex index must be bigger than or equal to 0";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("vertex index must be bigger than or equal to 0");
+                msg += TEXT("(errored in \"");
                 msg += strName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
             auto flatIndex = iPoly * 3 + iVert;
             if(t != flatIndex){
-                std::string msg = "vertex index is invalid";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("vertex index is invalid");
+                msg += TEXT("(errored in \"");
                 msg += strName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -270,12 +270,12 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                         auto kIdxSceneMaterial = materialTable.emplace(kSurfMaterial);
 
                         if(!ins_addMaterial(materials, kIdxSceneMaterial, &poly)){
-                            std::string msg = "cannot load material \"";
-                            msg += kSurfMaterial->GetName();
-                            msg += "\" while reading material by FbxLayerElement::eByPolygon";
-                            msg += "(errored in \"";
+                            std::basic_string<TCHAR> msg = TEXT("cannot load material \"");
+                            msg += ConvertString<TCHAR>(kSurfMaterial->GetName());
+                            msg += TEXT("\" while reading material by FbxLayerElement::eByPolygon");
+                            msg += TEXT("(errored in \"");
                             msg += strName;
-                            msg += "\")";
+                            msg += TEXT("\")");
                             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                             return false;
                         }
@@ -291,12 +291,12 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                         auto kIdxSceneMaterial = materialTable.emplace(kSurfMaterial);
 
                         if(!ins_addMaterial(materials, kIdxSceneMaterial, &matIndex)){
-                            std::string msg = "cannot load material \"";
-                            msg += kSurfMaterial->GetName();
-                            msg += "\" while reading material by FbxLayerElement::eAllSame";
-                            msg += "(errored in \"";
+                            std::basic_string<TCHAR> msg = TEXT("cannot load material \"");
+                            msg += ConvertString<TCHAR>(kSurfMaterial->GetName());
+                            msg += TEXT("\" while reading material by FbxLayerElement::eAllSame");
+                            msg += TEXT("(errored in \"");
                             msg += strName;
-                            msg += "\")";
+                            msg += TEXT("\")");
                             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                             return false;
                         }
@@ -313,10 +313,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::string msg = "material has unsupported mapping mode";
-                    msg += "(errored in \"";
+                    std::basic_string<TCHAR> msg = TEXT("material has unsupported mapping mode");
+                    msg += TEXT("(errored in \"");
                     msg += strName;
-                    msg += "\")";
+                    msg += TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -349,10 +349,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex color has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -379,10 +379,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex color has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -393,10 +393,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::string msg = "vertex color has unsupported mapping mode";
-                    msg += "(errored in \"";
+                    std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported mapping mode");
+                    msg += TEXT("(errored in \"");
                     msg += strName;
-                    msg += "\")";
+                    msg += TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -432,10 +432,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex color has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -460,10 +460,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex color has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -474,10 +474,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::string msg = "texcoord has unsupported mapping mode";
-                    msg += "(errored in \"";
+                    std::basic_string<TCHAR> msg = TEXT("texcoord has unsupported mapping mode");
+                    msg += TEXT("(errored in \"");
                     msg += strName;
-                    msg += "\")";
+                    msg += TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -515,10 +515,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex normal has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex normal has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -547,10 +547,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex normal has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex normal has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -563,10 +563,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::string msg = "vertex normal has unsupported mapping mode";
-                    msg += "(errored in \"";
+                    std::basic_string<TCHAR> msg = TEXT("vertex normal has unsupported mapping mode");
+                    msg += TEXT("(errored in \"");
                     msg += strName;
-                    msg += "\")";
+                    msg += TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -599,10 +599,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex binormal has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex binormal has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -631,10 +631,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex binormal has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex binormal has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -647,10 +647,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::string msg = "vertex binormal has unsupported mapping mode";
-                    msg += "(errored in \"";
+                    std::basic_string<TCHAR> msg = TEXT("vertex binormal has unsupported mapping mode");
+                    msg += TEXT("(errored in \"");
                     msg += strName;
-                    msg += "\")";
+                    msg += TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -683,10 +683,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex tangent has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex tangent has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -715,10 +715,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::string msg = "vertex tangent has unsupported reference mode";
-                                msg += "(errored in \"";
+                                std::basic_string<TCHAR> msg = TEXT("vertex tangent has unsupported reference mode");
+                                msg += TEXT("(errored in \"");
                                 msg += strName;
-                                msg += "\")";
+                                msg += TEXT("\")");
                                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                                 return false;
                             }
@@ -731,10 +731,10 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::string msg = "vertex tangent has unsupported mapping mode";
-                    msg += "(errored in \"";
+                    std::basic_string<TCHAR> msg = TEXT("vertex tangent has unsupported mapping mode");
+                    msg += TEXT("(errored in \"");
                     msg += strName;
-                    msg += "\")";
+                    msg += TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -747,39 +747,39 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 }
 
 bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, FbxNode* kNode){
-    static const char __name_of_this_func[] = "SHRInitMeshNode(FbxManager*, FbxScene*, ControlPointMergeMap&, const FBXMesh*, FbxNode*)";
+    static const TCHAR __name_of_this_func[] = TEXT("SHRInitMeshNode(FbxManager*, FbxScene*, ControlPointMergeMap&, const FBXMesh*, FbxNode*)");
 
 
     const FBXSkinnedMesh* pSkinnedNode = nullptr;
     if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_SkinnedMesh))
         pSkinnedNode = static_cast<decltype(pSkinnedNode)>(pNode);
 
-    const auto strMeshName = ToString(pNode->Name);
+    const std::basic_string<TCHAR> strMeshName = pNode->Name.Values;
     auto* kMesh = kNode->GetMesh();
 
     {
         for(auto* pMaterial = pNode->Materials.Values; FBX_PTRDIFFU(pMaterial - pNode->Materials.Values) < pNode->Materials.Length; ++pMaterial){
             auto* kMaterial = kScene->GetMaterial((int)*pMaterial);
             if(!kMaterial){
-                std::string msg = "cannot find material index ";
-                msg += std::to_string(*pMaterial);
-                msg += " on scene materials";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("cannot find material index ");
+                msg += ToString<TCHAR>(*pMaterial);
+                msg += TEXT(" on scene materials");
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
 
-            const std::string strMaterialName = kMaterial->GetName();
+            const std::basic_string<TCHAR> strMaterialName = ConvertString<TCHAR>(kMaterial->GetName());
 
             if(kNode->AddMaterial(kMaterial) < 0){
-                std::string msg = "failed to add material \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to add material \"");
                 msg += strMaterialName;
-                msg += "\"";
-                msg += "(errored in \"";
+                msg += TEXT("\"");
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -835,18 +835,18 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(!kLayer){
             const auto idxNewLayer = kMesh->CreateLayer();
             if(idxNewLayer < 0){
-                std::string msg = "failed to create layer";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create layer");
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
             else if(idxLayer != idxNewLayer){
-                std::string msg = "the created layer has unexpected index number";
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("the created layer has unexpected index number");
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -862,10 +862,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Material.Length){
             auto* kMaterial = FbxLayerElementMaterial::Create(kMesh, "");
             if(!kMaterial){
-                std::string msg = "failed to create element material in the layer " + std::to_string(idxLayer);
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create element material in the layer ") + ToString<TCHAR>(idxLayer);
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -908,10 +908,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Color.Length){
             auto* kColor = FbxLayerElementVertexColor::Create(kMesh, "");
             if(!kColor){
-                std::string msg = "failed to create element vertex color in the layer " + std::to_string(idxLayer);
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create element vertex color in the layer ") + ToString<TCHAR>(idxLayer);
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -948,10 +948,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Normal.Length){
             auto* kNormal = FbxLayerElementNormal::Create(kMesh, "");
             if(!kNormal){
-                std::string msg = "failed to create element normal in the layer " + std::to_string(idxLayer);
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create element normal in the layer ") + ToString<TCHAR>(idxLayer);
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -989,10 +989,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Binormal.Length){
             auto* kBinormal = FbxLayerElementBinormal::Create(kMesh, "");
             if(!kBinormal){
-                std::string msg = "failed to create element binormal in the layer " + std::to_string(idxLayer);
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create element binormal in the layer ") + ToString<TCHAR>(idxLayer);
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -1030,10 +1030,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Tangent.Length){
             auto* kTangent = FbxLayerElementTangent::Create(kMesh, "");
             if(!kTangent){
-                std::string msg = "failed to create element tangent in the layer " + std::to_string(idxLayer);
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create element tangent in the layer ") + ToString<TCHAR>(idxLayer);
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -1071,10 +1071,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Texcoord.Length){
             auto* kUV = FbxLayerElementUV::Create(kMesh, "");
             if(!kUV){
-                std::string msg = "failed to create element UV in the layer " + std::to_string(idxLayer);
-                msg += "(errored in \"";
+                std::basic_string<TCHAR> msg = TEXT("failed to create element UV in the layer ") + ToString<TCHAR>(idxLayer);
+                msg += TEXT("(errored in \"");
                 msg += strMeshName;
-                msg += "\")";
+                msg += TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }

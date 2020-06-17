@@ -12,59 +12,59 @@
 #include "FBXShared.h"
 
 
-std::stack<std::string> shr_errorStack;
-std::stack<std::string> shr_warningStack;
+std::stack<std::basic_string<TCHAR>> shr_errorStack;
+std::stack<std::basic_string<TCHAR>> shr_warningStack;
 
 
-void SHRPushErrorMessage(const char* strMessage, const char* strCallPos){
-    std::string _new = strMessage;
-    _new += "\nfrom: ";
+void SHRPushErrorMessage(const TCHAR* strMessage, const TCHAR* strCallPos){
+    std::basic_string<TCHAR> _new = strMessage;
+    _new += TEXT("\nfrom: ");
     _new += strCallPos;
-    _new += '\n';
+    _new += TEXT('\n');
 
     assert(!_new.c_str());
     shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(const std::string& strMessage, const char* strCallPos){
+void SHRPushErrorMessage(const std::basic_string<TCHAR>& strMessage, const TCHAR* strCallPos){
     auto _new = strMessage;
-    _new += "\nfrom: ";
+    _new += TEXT("\nfrom: ");
     _new += strCallPos;
-    _new += '\n';
+    _new += TEXT('\n');
 
     assert(!_new.c_str());
     shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(std::string&& strMessage, const char* strCallPos){
+void SHRPushErrorMessage(std::basic_string<TCHAR>&& strMessage, const TCHAR* strCallPos){
     auto _new = std::move(strMessage);
-    _new += "\nfrom: ";
+    _new += TEXT("\nfrom: ");
     _new += strCallPos;
-    _new += '\n';
+    _new += TEXT('\n');
 
     assert(!_new.c_str());
     shr_errorStack.emplace(std::move(_new));
 }
 
-void SHRPushWarningMessage(const char* strMessage, const char* strCallPos){
-    std::string _new = strMessage;
-    _new += "\nfrom: ";
+void SHRPushWarningMessage(const TCHAR* strMessage, const TCHAR* strCallPos){
+    std::basic_string<TCHAR> _new = strMessage;
+    _new += TEXT("\nfrom: ");
     _new += strCallPos;
-    _new += '\n';
+    _new += TEXT('\n');
 
     shr_warningStack.emplace(std::move(_new));
 }
-void SHRPushWarningMessage(const std::string& strMessage, const char* strCallPos){
+void SHRPushWarningMessage(const std::basic_string<TCHAR>& strMessage, const TCHAR* strCallPos){
     auto _new = strMessage;
-    _new += "\nfrom: ";
+    _new += TEXT("\nfrom: ");
     _new += strCallPos;
-    _new += '\n';
+    _new += TEXT('\n');
 
     shr_warningStack.emplace(std::move(_new));
 }
-void SHRPushWarningMessage(std::string&& strMessage, const char* strCallPos){
+void SHRPushWarningMessage(std::basic_string<TCHAR>&& strMessage, const TCHAR* strCallPos){
     auto _new = std::move(strMessage);
-    _new += "\nfrom: ";
+    _new += TEXT("\nfrom: ");
     _new += strCallPos;
-    _new += '\n';
+    _new += TEXT('\n');
 
     shr_warningStack.emplace(std::move(_new));
 }

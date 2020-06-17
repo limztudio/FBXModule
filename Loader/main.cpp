@@ -1,4 +1,6 @@
-#include <cstdio>
+#include <tchar.h>
+
+#include <iostream>
 #include <windows.h>
 
 #include <string>
@@ -9,21 +11,28 @@
 #include <FBXModuleBind.hpp>
 
 
+#ifdef _UNICODE
+#define TOUT std::wcout
+#else
+#define TOUT std::cout
+#endif
+
+
 static HMODULE library = nullptr;
 static FBXRoot* fbxRoot = nullptr;
 
 static FBXIOSetting setting;
 
 
-static inline std::string getLastError(){
+static inline std::basic_string<TCHAR> getLastError(){
     auto len = FBXGetLastError(nullptr);
     if(len > 0){
-        std::string msg;
+        std::basic_string<TCHAR> msg;
         msg.resize(len);
         FBXGetLastError(&msg[0]);
     }
 
-    return "";
+    return TEXT("");
 }
 
 
@@ -41,14 +50,14 @@ static inline void closeLib(){
 }
 
 
-static inline void loadFile(const char* name){
-    if(!FBXOpenFile(name, "rb", &setting)){
-        printf_s("%s", getLastError().c_str());
+static inline void loadFile(const TCHAR* name){
+    if(!FBXOpenFile(name, TEXT("rb"), &setting)){
+        TOUT << getLastError();
         return;
     }
     
     if(!FBXReadScene()){
-        printf_s("%s", getLastError().c_str());
+        TOUT << getLastError();
         return;
     }
 
@@ -60,24 +69,24 @@ static inline void loadFile(const char* name){
     }
 
     if(!FBXCloseFile()){
-        printf_s("%s", getLastError().c_str());
+        TOUT << getLastError();
         return;
     }
 }
 
-static inline void storeNode(const char* name){
-    if(!FBXOpenFile(name, "wb", &setting)){
-        printf_s("%s", getLastError().c_str());
+static inline void storeNode(const TCHAR* name){
+    if(!FBXOpenFile(name, TEXT("wb"), &setting)){
+        TOUT << getLastError();
         return;
     }
 
     if(!FBXWriteScene(fbxRoot)){
-        printf_s("%s", getLastError().c_str());
+        TOUT << getLastError();
         return;
     }
 
     if(!FBXCloseFile()){
-        printf_s("%s", getLastError().c_str());
+        TOUT << getLastError();
         return;
     }
 }
@@ -89,7 +98,7 @@ static inline void deleteFBXObjects(){
 
 
 
-int main(int argc, char* argv[]){
+int _tmain(int argc, TCHAR* argv[]){
     setting.AxisSystem = FBXAxisSystem::FBXAxisSystem_Preset_Max;
 
     loadLib();

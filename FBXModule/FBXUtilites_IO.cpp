@@ -7,6 +7,8 @@
 
 #include "stdafx.h"
 
+#include <tchar.h>
+
 #include <algorithm>
 
 #include "FBXUtilites.h"
@@ -15,9 +17,9 @@
 using namespace fbxsdk;
 
 
-CustomStream::CustomStream(FbxManager* kSDKManager, const char* fileName, const char* mode, bool ascii)
+CustomStream::CustomStream(FbxManager* kSDKManager, std::basic_string<TCHAR>&& fileName, const TCHAR* mode, bool ascii)
     :
-    m_fileName(fileName),
+    m_fileName(std::move(fileName)),
     m_fileMode(mode),
 
     m_file(nullptr)
@@ -30,12 +32,12 @@ CustomStream::CustomStream(FbxManager* kSDKManager, const char* fileName, const 
 
     std::transform(m_fileMode.begin(), m_fileMode.end(), m_fileMode.begin(), tolower);
 
-    if(*m_fileMode.cbegin() == 'r'){
+    if(*m_fileMode.cbegin() == L'r'){
         static const char format[] = "FBX (*.fbx)";
         m_readerID = kSDKManager->GetIOPluginRegistry()->FindReaderIDByDescription(format);
         m_writerID = -1;
     }
-    else if(*m_fileMode.cbegin() == 'w'){
+    else if(*m_fileMode.cbegin() == L'w'){
         if(ascii){
             static const char format[] = "FBX ascii (*.fbx)";
             m_writerID = kSDKManager->GetIOPluginRegistry()->FindWriterIDByDescription(format);
@@ -53,7 +55,7 @@ CustomStream::~CustomStream(){
 
 bool CustomStream::Open(void* /*streamData*/){
     if(!m_file)
-        fopen_s(&m_file, m_fileName.c_str(), m_fileMode.c_str());
+        _tfopen_s(&m_file, m_fileName.c_str(), m_fileMode.c_str());
 
     if(m_file != nullptr)
         _fseeki64(m_file, 0, SEEK_SET);
