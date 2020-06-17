@@ -116,10 +116,10 @@ static inline bool ins_addMaterial(UintContainer& matTable, unsigned int sceneMa
 
 
 bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& controlPointRemap, FbxNode* kNode, NodeData* pNodeData){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRLoadMeshFromNode(MaterialTable&, ControlPointRemap&, FbxNode*, NodeData*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRLoadMeshFromNode(MaterialTable&, ControlPointRemap&, FbxNode*, NodeData*)");
 
 
-    const std::basic_string<TCHAR> strName = ConvertString<TCHAR>(kNode->GetName());
+    const std::basic_string<FBX_CHAR> strName = ConvertString<FBX_CHAR>(kNode->GetName());
 
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();
 
@@ -143,7 +143,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(vertID != ctrlPointIndex){
-                std::basic_string<TCHAR> msg = TEXT("vertex index and control point index are not matched");
+                std::basic_string<FBX_CHAR> msg = TEXT("vertex index and control point index are not matched");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -161,7 +161,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
         auto polySize = kMesh->GetPolygonSize(iPoly);
 
         if(polySize != 3){
-            std::basic_string<TCHAR> msg = TEXT("polygon size must be 3");
+            std::basic_string<FBX_CHAR> msg = TEXT("polygon size must be 3");
             msg += TEXT("(errored in \"");
             msg += strName;
             msg += TEXT("\")");
@@ -173,7 +173,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
             auto ctrlPointIndex = kMesh->GetPolygonVertex(iPoly, iVert);
 
             if(ctrlPointIndex < 0){
-                std::basic_string<TCHAR> msg = TEXT("vertex index must be bigger than or equal to 0");
+                std::basic_string<FBX_CHAR> msg = TEXT("vertex index must be bigger than or equal to 0");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -183,7 +183,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
             auto flatIndex = iPoly * 3 + iVert;
             if(t != flatIndex){
-                std::basic_string<TCHAR> msg = TEXT("vertex index is invalid");
+                std::basic_string<FBX_CHAR> msg = TEXT("vertex index is invalid");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -270,8 +270,8 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                         auto kIdxSceneMaterial = materialTable.emplace(kSurfMaterial);
 
                         if(!ins_addMaterial(materials, kIdxSceneMaterial, &poly)){
-                            std::basic_string<TCHAR> msg = TEXT("cannot load material \"");
-                            msg += ConvertString<TCHAR>(kSurfMaterial->GetName());
+                            std::basic_string<FBX_CHAR> msg = TEXT("cannot load material \"");
+                            msg += ConvertString<FBX_CHAR>(kSurfMaterial->GetName());
                             msg += TEXT("\" while reading material by FbxLayerElement::eByPolygon");
                             msg += TEXT("(errored in \"");
                             msg += strName;
@@ -291,8 +291,8 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                         auto kIdxSceneMaterial = materialTable.emplace(kSurfMaterial);
 
                         if(!ins_addMaterial(materials, kIdxSceneMaterial, &matIndex)){
-                            std::basic_string<TCHAR> msg = TEXT("cannot load material \"");
-                            msg += ConvertString<TCHAR>(kSurfMaterial->GetName());
+                            std::basic_string<FBX_CHAR> msg = TEXT("cannot load material \"");
+                            msg += ConvertString<FBX_CHAR>(kSurfMaterial->GetName());
                             msg += TEXT("\" while reading material by FbxLayerElement::eAllSame");
                             msg += TEXT("(errored in \"");
                             msg += strName;
@@ -313,7 +313,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::basic_string<TCHAR> msg = TEXT("material has unsupported mapping mode");
+                    std::basic_string<FBX_CHAR> msg = TEXT("material has unsupported mapping mode");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -349,7 +349,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex color has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -379,7 +379,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex color has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -393,7 +393,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported mapping mode");
+                    std::basic_string<FBX_CHAR> msg = TEXT("vertex color has unsupported mapping mode");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -432,7 +432,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex color has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -460,7 +460,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex color has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex color has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -474,7 +474,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::basic_string<TCHAR> msg = TEXT("texcoord has unsupported mapping mode");
+                    std::basic_string<FBX_CHAR> msg = TEXT("texcoord has unsupported mapping mode");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -515,7 +515,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex normal has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex normal has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -547,7 +547,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex normal has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex normal has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -563,7 +563,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::basic_string<TCHAR> msg = TEXT("vertex normal has unsupported mapping mode");
+                    std::basic_string<FBX_CHAR> msg = TEXT("vertex normal has unsupported mapping mode");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -599,7 +599,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex binormal has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex binormal has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -631,7 +631,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex binormal has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex binormal has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -647,7 +647,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::basic_string<TCHAR> msg = TEXT("vertex binormal has unsupported mapping mode");
+                    std::basic_string<FBX_CHAR> msg = TEXT("vertex binormal has unsupported mapping mode");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -683,7 +683,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex tangent has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex tangent has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -715,7 +715,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                             default:
                             {
-                                std::basic_string<TCHAR> msg = TEXT("vertex tangent has unsupported reference mode");
+                                std::basic_string<FBX_CHAR> msg = TEXT("vertex tangent has unsupported reference mode");
                                 msg += TEXT("(errored in \"");
                                 msg += strName;
                                 msg += TEXT("\")");
@@ -731,7 +731,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
                 default:
                 {
-                    std::basic_string<TCHAR> msg = TEXT("vertex tangent has unsupported mapping mode");
+                    std::basic_string<FBX_CHAR> msg = TEXT("vertex tangent has unsupported mapping mode");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -747,22 +747,22 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 }
 
 bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMergeMap& ctrlPointMergeMap, const FBXMesh* pNode, FbxNode* kNode){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRInitMeshNode(FbxManager*, FbxScene*, ControlPointMergeMap&, const FBXMesh*, FbxNode*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRInitMeshNode(FbxManager*, FbxScene*, ControlPointMergeMap&, const FBXMesh*, FbxNode*)");
 
 
     const FBXSkinnedMesh* pSkinnedNode = nullptr;
     if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_SkinnedMesh))
         pSkinnedNode = static_cast<decltype(pSkinnedNode)>(pNode);
 
-    const std::basic_string<TCHAR> strMeshName = pNode->Name.Values;
+    const std::basic_string<FBX_CHAR> strMeshName = pNode->Name.Values;
     auto* kMesh = kNode->GetMesh();
 
     {
         for(auto* pMaterial = pNode->Materials.Values; FBX_PTRDIFFU(pMaterial - pNode->Materials.Values) < pNode->Materials.Length; ++pMaterial){
             auto* kMaterial = kScene->GetMaterial((int)*pMaterial);
             if(!kMaterial){
-                std::basic_string<TCHAR> msg = TEXT("cannot find material index ");
-                msg += ToString<TCHAR>(*pMaterial);
+                std::basic_string<FBX_CHAR> msg = TEXT("cannot find material index ");
+                msg += ToString<FBX_CHAR>(*pMaterial);
                 msg += TEXT(" on scene materials");
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
@@ -771,10 +771,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
                 return false;
             }
 
-            const std::basic_string<TCHAR> strMaterialName = ConvertString<TCHAR>(kMaterial->GetName());
+            const std::basic_string<FBX_CHAR> strMaterialName = ConvertString<FBX_CHAR>(kMaterial->GetName());
 
             if(kNode->AddMaterial(kMaterial) < 0){
-                std::basic_string<TCHAR> msg = TEXT("failed to add material \"");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to add material \"");
                 msg += strMaterialName;
                 msg += TEXT("\"");
                 msg += TEXT("(errored in \"");
@@ -835,7 +835,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(!kLayer){
             const auto idxNewLayer = kMesh->CreateLayer();
             if(idxNewLayer < 0){
-                std::basic_string<TCHAR> msg = TEXT("failed to create layer");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create layer");
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");
@@ -843,7 +843,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
                 return false;
             }
             else if(idxLayer != idxNewLayer){
-                std::basic_string<TCHAR> msg = TEXT("the created layer has unexpected index number");
+                std::basic_string<FBX_CHAR> msg = TEXT("the created layer has unexpected index number");
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");
@@ -862,7 +862,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Material.Length){
             auto* kMaterial = FbxLayerElementMaterial::Create(kMesh, "");
             if(!kMaterial){
-                std::basic_string<TCHAR> msg = TEXT("failed to create element material in the layer ") + ToString<TCHAR>(idxLayer);
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create element material in the layer ") + ToString<FBX_CHAR>(idxLayer);
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");
@@ -908,7 +908,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Color.Length){
             auto* kColor = FbxLayerElementVertexColor::Create(kMesh, "");
             if(!kColor){
-                std::basic_string<TCHAR> msg = TEXT("failed to create element vertex color in the layer ") + ToString<TCHAR>(idxLayer);
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create element vertex color in the layer ") + ToString<FBX_CHAR>(idxLayer);
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");
@@ -948,7 +948,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Normal.Length){
             auto* kNormal = FbxLayerElementNormal::Create(kMesh, "");
             if(!kNormal){
-                std::basic_string<TCHAR> msg = TEXT("failed to create element normal in the layer ") + ToString<TCHAR>(idxLayer);
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create element normal in the layer ") + ToString<FBX_CHAR>(idxLayer);
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");
@@ -989,7 +989,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Binormal.Length){
             auto* kBinormal = FbxLayerElementBinormal::Create(kMesh, "");
             if(!kBinormal){
-                std::basic_string<TCHAR> msg = TEXT("failed to create element binormal in the layer ") + ToString<TCHAR>(idxLayer);
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create element binormal in the layer ") + ToString<FBX_CHAR>(idxLayer);
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");
@@ -1030,7 +1030,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Tangent.Length){
             auto* kTangent = FbxLayerElementTangent::Create(kMesh, "");
             if(!kTangent){
-                std::basic_string<TCHAR> msg = TEXT("failed to create element tangent in the layer ") + ToString<TCHAR>(idxLayer);
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create element tangent in the layer ") + ToString<FBX_CHAR>(idxLayer);
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");
@@ -1071,7 +1071,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         if(iLayer.Texcoord.Length){
             auto* kUV = FbxLayerElementUV::Create(kMesh, "");
             if(!kUV){
-                std::basic_string<TCHAR> msg = TEXT("failed to create element UV in the layer ") + ToString<TCHAR>(idxLayer);
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create element UV in the layer ") + ToString<FBX_CHAR>(idxLayer);
                 msg += TEXT("(errored in \"");
                 msg += strMeshName;
                 msg += TEXT("\")");

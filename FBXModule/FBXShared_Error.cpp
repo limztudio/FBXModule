@@ -12,12 +12,12 @@
 #include "FBXShared.h"
 
 
-std::stack<std::basic_string<TCHAR>> shr_errorStack;
-std::stack<std::basic_string<TCHAR>> shr_warningStack;
+std::stack<std::basic_string<FBX_CHAR>> shr_errorStack;
+std::stack<std::basic_string<FBX_CHAR>> shr_warningStack;
 
 
-void SHRPushErrorMessage(const TCHAR* strMessage, const TCHAR* strCallPos){
-    std::basic_string<TCHAR> _new = strMessage;
+void SHRPushErrorMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos){
+    std::basic_string<FBX_CHAR> _new = strMessage;
     _new += TEXT("\nfrom: ");
     _new += strCallPos;
     _new += TEXT('\n');
@@ -25,7 +25,7 @@ void SHRPushErrorMessage(const TCHAR* strMessage, const TCHAR* strCallPos){
     assert(!_new.c_str());
     shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(const std::basic_string<TCHAR>& strMessage, const TCHAR* strCallPos){
+void SHRPushErrorMessage(const std::basic_string<FBX_CHAR>& strMessage, const FBX_CHAR* strCallPos){
     auto _new = strMessage;
     _new += TEXT("\nfrom: ");
     _new += strCallPos;
@@ -34,7 +34,7 @@ void SHRPushErrorMessage(const std::basic_string<TCHAR>& strMessage, const TCHAR
     assert(!_new.c_str());
     shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(std::basic_string<TCHAR>&& strMessage, const TCHAR* strCallPos){
+void SHRPushErrorMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHAR* strCallPos){
     auto _new = std::move(strMessage);
     _new += TEXT("\nfrom: ");
     _new += strCallPos;
@@ -44,15 +44,15 @@ void SHRPushErrorMessage(std::basic_string<TCHAR>&& strMessage, const TCHAR* str
     shr_errorStack.emplace(std::move(_new));
 }
 
-void SHRPushWarningMessage(const TCHAR* strMessage, const TCHAR* strCallPos){
-    std::basic_string<TCHAR> _new = strMessage;
+void SHRPushWarningMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos){
+    std::basic_string<FBX_CHAR> _new = strMessage;
     _new += TEXT("\nfrom: ");
     _new += strCallPos;
     _new += TEXT('\n');
 
     shr_warningStack.emplace(std::move(_new));
 }
-void SHRPushWarningMessage(const std::basic_string<TCHAR>& strMessage, const TCHAR* strCallPos){
+void SHRPushWarningMessage(const std::basic_string<FBX_CHAR>& strMessage, const FBX_CHAR* strCallPos){
     auto _new = strMessage;
     _new += TEXT("\nfrom: ");
     _new += strCallPos;
@@ -60,7 +60,7 @@ void SHRPushWarningMessage(const std::basic_string<TCHAR>& strMessage, const TCH
 
     shr_warningStack.emplace(std::move(_new));
 }
-void SHRPushWarningMessage(std::basic_string<TCHAR>&& strMessage, const TCHAR* strCallPos){
+void SHRPushWarningMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHAR* strCallPos){
     auto _new = std::move(strMessage);
     _new += TEXT("\nfrom: ");
     _new += strCallPos;

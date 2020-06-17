@@ -22,7 +22,7 @@ MaterialTable shr_materialTable;
 
 
 bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMaterial>* pMaterials){
-    //static const TCHAR __name_of_this_func[] = TEXT("SHRLoadMaterials(const MaterialTable&, FBXDynamicArray<FBXMaterial>*)");
+    //static const FBX_CHAR __name_of_this_func[] = TEXT("SHRLoadMaterials(const MaterialTable&, FBXDynamicArray<FBXMaterial>*)");
 
 
     const auto& kMaterialTable = materialTable.getTable();
@@ -34,13 +34,13 @@ bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMat
         auto* kMaterial = kMaterialTable[idxMaterial];
         auto& iMaterial = iMaterialTable.Values[idxMaterial];
 
-        CopyString(iMaterial.Name, ConvertString<TCHAR>(kMaterial->GetName()));
+        CopyString(iMaterial.Name, ConvertString<FBX_CHAR>(kMaterial->GetName()));
 
         { // diffuse
             auto kProperty = kMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
             auto* kTexture = kProperty.GetSrcObject<FbxFileTexture>();
             if(kTexture)
-                CopyString(iMaterial.DiffuseTexturePath, ConvertString<TCHAR>(kTexture->GetFileName()));
+                CopyString(iMaterial.DiffuseTexturePath, ConvertString<FBX_CHAR>(kTexture->GetFileName()));
         }
     }
 
@@ -48,7 +48,7 @@ bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMat
 }
 
 bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynamicArray<FBXMaterial>& materialTable){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRStoreMaterials(FbxManager*, FbxScene*, const FBXDynamicArray<FBXMaterial>&)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRStoreMaterials(FbxManager*, FbxScene*, const FBXDynamicArray<FBXMaterial>&)");
 
 
     { // remove reserved materials
@@ -64,10 +64,10 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
             }
 
             for(auto* kMaterial : oldMatTable){
-                const std::basic_string<TCHAR> strName = ConvertString<TCHAR>(kMaterial->GetName());
+                const std::basic_string<FBX_CHAR> strName = ConvertString<FBX_CHAR>(kMaterial->GetName());
 
                 if(!kScene->RemoveMaterial(kMaterial)){
-                    std::basic_string<TCHAR> msg = TEXT("failed to remove material from scene");
+                    std::basic_string<FBX_CHAR> msg = TEXT("failed to remove material from scene");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -81,11 +81,11 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
     for(size_t idxMaterial = 0u; idxMaterial < materialTable.Length; ++idxMaterial){
         const auto& iMaterial = materialTable.Values[idxMaterial];
 
-        const std::basic_string<TCHAR> strName = iMaterial.Name.Values;
+        const std::basic_string<FBX_CHAR> strName = iMaterial.Name.Values;
 
         auto* kMaterial = FbxSurfacePhong::Create(kSDKManager, ConvertString<char>(strName).c_str());
         if(!kMaterial){
-            std::basic_string<TCHAR> msg = TEXT("failed to create FbxSurfacePhong");
+            std::basic_string<FBX_CHAR> msg = TEXT("failed to create FbxSurfacePhong");
             msg += TEXT("(errored in \"");
             msg += strName;
             msg += TEXT("\")");
@@ -102,7 +102,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
         if(iMaterial.DiffuseTexturePath.Length){
             auto* kTexture = FbxFileTexture::Create(kScene, FbxSurfaceMaterial::sDiffuse);
             if(!kTexture){
-                std::basic_string<TCHAR> msg = TEXT("failed to create FbxFileTexture");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create FbxFileTexture");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -111,7 +111,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
             }
 
             if(!kTexture->SetFileName(ConvertString<char>(iMaterial.DiffuseTexturePath.Values).c_str())){
-                std::basic_string<TCHAR> msg = TEXT("set valid filename: \"");
+                std::basic_string<FBX_CHAR> msg = TEXT("set valid filename: \"");
                 msg += iMaterial.DiffuseTexturePath.Values;
                 msg += TEXT("(errored in \"");
                 msg += strName;
@@ -121,7 +121,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
             }
 
             if(!kMaterial->Diffuse.ConnectSrcObject(kTexture)){
-                std::basic_string<TCHAR> msg = TEXT("failed to connect diffuse texture object");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to connect diffuse texture object");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -131,7 +131,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
         }
 
         if(!kScene->AddMaterial(kMaterial)){
-            std::basic_string<TCHAR> msg = TEXT("failed to add material to scene");
+            std::basic_string<FBX_CHAR> msg = TEXT("failed to add material to scene");
             msg += TEXT("(errored in \"");
             msg += strName;
             msg += TEXT("\")");

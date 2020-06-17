@@ -201,7 +201,7 @@ using Float4 = Container4<float>;
 
 class CustomStream : public FbxStream{
 public:
-    CustomStream(FbxManager* kSDKManager, std::basic_string<TCHAR>&& fileName, const TCHAR* mode, bool ascii = false);
+    CustomStream(FbxManager* kSDKManager, std::basic_string<FBX_CHAR>&& fileName, const FBX_CHAR* mode, bool ascii = false);
     virtual ~CustomStream();
 
 
@@ -234,8 +234,8 @@ public:
 
 
 private:
-    std::basic_string<TCHAR> m_fileName;
-    std::basic_string<TCHAR> m_fileMode;
+    std::basic_string<FBX_CHAR> m_fileName;
+    std::basic_string<FBX_CHAR> m_fileMode;
 
     FILE* m_file;
 

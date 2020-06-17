@@ -28,7 +28,7 @@ using namespace fbxsdk;
 
 class _DirectoryModifier{
 public:
-    _DirectoryModifier(const std::basic_string<TCHAR>& changeDir)
+    _DirectoryModifier(const std::basic_string<FBX_CHAR>& changeDir)
         :
         orgDir(GetCurrentDirectory(0, nullptr), 0)
     {
@@ -41,7 +41,7 @@ public:
 
 
 private:
-    std::basic_string<TCHAR> orgDir;
+    std::basic_string<FBX_CHAR> orgDir;
 };
 
 
@@ -52,7 +52,7 @@ static unsigned char ins_fileMode = 0;
 
 
 __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* mode, const void* ioSetting){
-    static const TCHAR __name_of_this_func[] = TEXT("FBXOpenFile(const char*, const char*, unsigned long, const void*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXOpenFile(const char*, const char*, unsigned long, const void*)");
 
 
     if(ioSetting)
@@ -172,13 +172,13 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
 
     if(ins_fileMode == 1){
         if(!std::filesystem::exists(ins_filePath)){
-            std::basic_string<TCHAR> msg = TEXT('\"') + ins_filePath.__tstring();
+            std::basic_string<FBX_CHAR> msg = TEXT('\"') + ins_filePath.__tstring();
             msg += TEXT("\" file not exist");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
         if(std::filesystem::is_directory(ins_filePath)){
-            std::basic_string<TCHAR> msg = TEXT('\"') + ins_filePath.__tstring();
+            std::basic_string<FBX_CHAR> msg = TEXT('\"') + ins_filePath.__tstring();
             msg += TEXT("\" must be a file not directory");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
@@ -225,7 +225,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
     return true;
 }
 __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
-    static const TCHAR __name_of_this_func[] = TEXT("FBXCloseFile(void)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXCloseFile(void)");
 
 
     if((!shr_SDKManager) || (!ins_IOSettings)){
@@ -242,7 +242,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             return false;
         }
         if(std::filesystem::is_directory(ins_filePath)){
-            std::basic_string<TCHAR> msg = TEXT('\"') + ins_filePath.__tstring();
+            std::basic_string<FBX_CHAR> msg = TEXT('\"') + ins_filePath.__tstring();
             msg += TEXT("\" must be a file path");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;

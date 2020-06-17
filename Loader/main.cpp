@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 
+#define FBX_CHAR TCHAR
 #include <FBXModule.hpp>
 #include <FBXModuleDef.hpp>
 #include <FBXModuleBind.hpp>

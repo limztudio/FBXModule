@@ -17,7 +17,7 @@
 using namespace fbxsdk;
 
 
-CustomStream::CustomStream(FbxManager* kSDKManager, std::basic_string<TCHAR>&& fileName, const TCHAR* mode, bool ascii)
+CustomStream::CustomStream(FbxManager* kSDKManager, std::basic_string<FBX_CHAR>&& fileName, const FBX_CHAR* mode, bool ascii)
     :
     m_fileName(std::move(fileName)),
     m_fileMode(mode),

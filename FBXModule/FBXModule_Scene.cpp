@@ -16,7 +16,7 @@
 
 
 __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
-    static const TCHAR __name_of_this_func[] = TEXT("FBXReadScene(void)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXReadScene(void)");
 
 
     if(!shr_root){
@@ -78,7 +78,7 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
 }
 
 __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
-    static const TCHAR __name_of_this_func[] = TEXT("FBXWriteScene(const void*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXWriteScene(const void*)");
 
 
     const auto* ext_root = reinterpret_cast<const FBXRoot*>(pRoot);

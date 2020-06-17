@@ -13,7 +13,7 @@
 
 
 __FBXM_MAKE_FUNC(bool, FBXCheckCompatibility, void){
-    static const TCHAR __name_of_this_func[] = TEXT("FBXCheckCompatibility(void)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXCheckCompatibility(void)");
 
     if(!SIMDCompetible()){
         SHRPushErrorMessage(TEXT("this CPU doesn't support FMA or AVX instruction"), __name_of_this_func);

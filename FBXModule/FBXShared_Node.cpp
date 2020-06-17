@@ -57,7 +57,7 @@ static inline void ins_collectUnlinkedNode(FbxNode* kNewNode, FBXNode* pRootNode
 
     auto* pNewNode = FBXNew<FBXNode>();
     {
-        CopyString(pNewNode->Name, ConvertString<TCHAR>(kNewNode->GetName()));
+        CopyString(pNewNode->Name, ConvertString<FBX_CHAR>(kNewNode->GetName()));
         if(kParentNode)
             CopyArrayData(pNewNode->TransformMatrix.Values, (const double*)GetLocalTransform(kNewNode));
         else
@@ -360,7 +360,7 @@ static void ins_addNodeRecursive(
 
     _ADD_NODE_AFTER_ALLOCATE:
         {
-            CopyString(pNode->Name, ConvertString<TCHAR>(genNodeData.strName));
+            CopyString(pNode->Name, ConvertString<FBX_CHAR>(genNodeData.strName));
 
             const auto& matrix = genNodeData.kTransformMatrix;
             CopyArrayData(pNode->TransformMatrix.Values, (const double*)matrix);
@@ -454,7 +454,7 @@ static void ins_bindSkinningInfoRecursive(const FbxNodeToExportNode& fbxNodeToEx
 
 
 bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTable& materialTable, FbxNodeToExportNode& fbxNodeToExportNode, FBXNode** pRootNode){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRGenerateNodeTree(FbxManager*, FbxScene*, MaterialTable&, FbxNodeToExportNode&, FBXNode**)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRGenerateNodeTree(FbxManager*, FbxScene*, MaterialTable&, FbxNodeToExportNode&, FBXNode**)");
 
 
     if(*pRootNode){
@@ -488,7 +488,7 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTabl
             const auto unlinkedNodeCount = fbxNodeToExportNode.size() - nodeCount;
 
             if(unlinkedNodeCount > 0)
-                SHRPushWarningMessage(ToString<TCHAR>(unlinkedNodeCount) + TEXT(" of unlinked(from root node) node(s) found.\n those nodes won't be loaded properly."), __name_of_this_func);
+                SHRPushWarningMessage(ToString<FBX_CHAR>(unlinkedNodeCount) + TEXT(" of unlinked(from root node) node(s) found.\n those nodes won't be loaded properly."), __name_of_this_func);
 
             ins_bindSkinningInfoRecursive(fbxNodeToExportNode, *pRootNode);
         }
@@ -509,15 +509,15 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTabl
 }
 
 FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeToFbxNode, FbxNode* kParentNode, const FBXNode* pNode){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRStoreNode(FbxManager*, ImportNodeToFbxNode&, FbxNode*, const FBXNode*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRStoreNode(FbxManager*, ImportNodeToFbxNode&, FbxNode*, const FBXNode*)");
 
 
     if(pNode){
-        const std::basic_string<TCHAR> strName = pNode->Name.Values;
+        const std::basic_string<FBX_CHAR> strName = pNode->Name.Values;
 
         auto* kNode = FbxNode::Create(kSDKManager, ConvertString<char>(strName).c_str());
         if(!kNode){
-            std::basic_string<TCHAR> msg = TEXT("failed to create FbxNode");
+            std::basic_string<FBX_CHAR> msg = TEXT("failed to create FbxNode");
             msg += TEXT("(errored in \"");
             msg += strName;
             msg += TEXT("\")");
@@ -530,7 +530,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
         if(FBXTypeHasMember(curID, FBXType::FBXType_Bone)){
             auto* kSkeleton = FbxSkeleton::Create(kSDKManager, "");
             if(!kSkeleton){
-                std::basic_string<TCHAR> msg = TEXT("failed to create FbxSkeleton");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create FbxSkeleton");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -541,7 +541,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
             kNode->SetNodeAttribute(kSkeleton);
 
             if(kNode->GetNodeAttribute() != kSkeleton){
-                std::basic_string<TCHAR> msg = TEXT("failed to set node attribute");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to set node attribute");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -553,7 +553,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
         if(FBXTypeHasMember(curID, FBXType::FBXType_Mesh)){
             auto* kMesh = FbxMesh::Create(kSDKManager, "");
             if(!kMesh){
-                std::basic_string<TCHAR> msg = TEXT("failed to create FbxMesh");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to create FbxMesh");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -564,7 +564,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
             kNode->SetNodeAttribute(kMesh);
 
             if(kNode->GetNodeAttribute() != kMesh){
-                std::basic_string<TCHAR> msg = TEXT("failed to set node attribute");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to set node attribute");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -590,7 +590,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
                 return nullptr;
 
             if(!kNode->AddChild(kNewNode)){
-                std::basic_string<TCHAR> msg = TEXT("an error occurred while adding child node");
+                std::basic_string<FBX_CHAR> msg = TEXT("an error occurred while adding child node");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -604,7 +604,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
                 return nullptr;
 
             if(!kParentNode->AddChild(kNewNode)){
-                std::basic_string<TCHAR> msg = TEXT("an error occurred while adding sibling node");
+                std::basic_string<FBX_CHAR> msg = TEXT("an error occurred while adding sibling node");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -619,7 +619,7 @@ FbxNode* SHRStoreNode(FbxManager* kSDKManager, ImportNodeToFbxNode& importNodeTo
     return nullptr;
 }
 bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNode& importNodeToFbxNode, PoseNodeList& poseNodeList, const FBXNode* pRootNode){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRStoreNodes(FbxManager*, FbxScene*, ImportNodeToFbxNode&, PoseNodeList&, const FBXNode*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRStoreNodes(FbxManager*, FbxScene*, ImportNodeToFbxNode&, PoseNodeList&, const FBXNode*)");
 
 
     importNodeToFbxNode.clear();
@@ -627,7 +627,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
     if(pRootNode){
         // if the first node has no sibling, treat it as root node
         if(!pRootNode->Sibling){
-            const std::basic_string<TCHAR> strName = pRootNode->Name.Values;
+            const std::basic_string<FBX_CHAR> strName = pRootNode->Name.Values;
 
             if(pRootNode->Child){
                 auto* kRootNode = kScene->GetRootNode();
@@ -637,7 +637,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
                     return false;
 
                 if(!kRootNode->AddChild(kNewNode)){
-                    std::basic_string<TCHAR> msg = TEXT("an error occurred while adding child node");
+                    std::basic_string<FBX_CHAR> msg = TEXT("an error occurred while adding child node");
                     msg += TEXT("(errored in \"");
                     msg += strName;
                     msg += TEXT("\")");
@@ -682,14 +682,14 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
     for(auto& i : importNodeToFbxNode){
         const auto curID = i.first->getID();
 
-        const std::basic_string<TCHAR> strName = i.first->Name.Values;
+        const std::basic_string<FBX_CHAR> strName = i.first->Name.Values;
 
         auto* kNode = i.second;
 
         if(FBXTypeHasMember(curID, FBXType::FBXType_Mesh)){
             auto* kNodeAttribute = kNode->GetNodeAttribute();
             if(!kNodeAttribute){
-                std::basic_string<TCHAR> msg = TEXT("node must have attribute");
+                std::basic_string<FBX_CHAR> msg = TEXT("node must have attribute");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -700,7 +700,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
             auto* kMesh = static_cast<FbxMesh*>(kNodeAttribute);
 
             if(kMesh->RemoveBadPolygons() < 0){
-                std::basic_string<TCHAR> msg = TEXT("failed to remove bad polygons");
+                std::basic_string<FBX_CHAR> msg = TEXT("failed to remove bad polygons");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");
@@ -716,7 +716,7 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
 }
 
 bool SHRCreateBindPose(FbxManager* kSDKManager, FbxScene* kScene, const PoseNodeList& poseNodeList){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRCreateBindPose(FbxManager*, FbxScene*, const PoseNodeList&)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRCreateBindPose(FbxManager*, FbxScene*, const PoseNodeList&)");
 
 
     if(!poseNodeList.empty()){
@@ -729,11 +729,11 @@ bool SHRCreateBindPose(FbxManager* kSDKManager, FbxScene* kScene, const PoseNode
         kPose->SetIsBindPose(true);
 
         for(auto* kNode : poseNodeList){
-            const std::basic_string<TCHAR> strName = ConvertString<TCHAR>(kNode->GetName());
+            const std::basic_string<FBX_CHAR> strName = ConvertString<FBX_CHAR>(kNode->GetName());
 
             auto kMat = GetGlobalTransform(kNode);
             if(kPose->Add(kNode, kMat) < 0){
-                std::basic_string<TCHAR> msg = TEXT("an error occurred while adding pose matrix. cannot find bind node");
+                std::basic_string<FBX_CHAR> msg = TEXT("an error occurred while adding pose matrix. cannot find bind node");
                 msg += TEXT("(errored in \"");
                 msg += strName;
                 msg += TEXT("\")");

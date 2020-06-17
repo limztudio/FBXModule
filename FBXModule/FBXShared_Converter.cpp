@@ -20,7 +20,7 @@ using namespace fbxsdk;
 
 
 bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRConvertNodes(FbxManager*, FbxNode*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRConvertNodes(FbxManager*, FbxNode*)");
 
 
     auto* kNodeAttribute = kNode->GetNodeAttribute();
@@ -78,7 +78,7 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
     return true;
 }
 bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
-    //static const TCHAR __name_of_this_func[] = TEXT("SHRConvertAnimations(FbxManager*, FbxScene*)");
+    //static const FBX_CHAR __name_of_this_func[] = TEXT("SHRConvertAnimations(FbxManager*, FbxScene*)");
 
 
     //FbxAnimCurveFilterKeyReducer kFilterReducer;
@@ -115,7 +115,7 @@ bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
     return true;
 }
 bool SHRPreparePointCaches(FbxScene* kScene){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRPreparePointCaches(FbxScene*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRPreparePointCaches(FbxScene*)");
 
 
     for(auto edxNode = kScene->GetNodeCount(), idxNode = 0; idxNode < edxNode; ++idxNode){

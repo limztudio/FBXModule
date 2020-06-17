@@ -34,7 +34,7 @@ void SHRDeleteRoot(){
 }
 
 void SHRNodeBinder(FBXNode* dest, const FBXNode* src){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRNodeBinder(FBXNode*, const FBXNode*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRNodeBinder(FBXNode*, const FBXNode*)");
 
 
     if(dest && src){
@@ -62,7 +62,7 @@ void SHRCopyRoot(FBXRoot* dest, const FBXRoot* src){
         SHRCopyAnimation(dest->Animations.Values[idxAnimation], src->Animations.Values[idxAnimation]);
 }
 void SHRCopyNode(FBXNode* dest, const FBXNode* src){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRCopyNode(FBXNode*, const FBXNode*)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRCopyNode(FBXNode*, const FBXNode*)");
 
 
     if(dest && src){
@@ -142,7 +142,7 @@ void SHRCopyNode(FBXNode* dest, const FBXNode* src){
         SHRPushErrorMessage(TEXT("destination and source must have value. but destination is null"), __name_of_this_func);
 }
 void SHRCopyAnimation(FBXAnimation& dest, const FBXAnimation& src){
-    static const TCHAR __name_of_this_func[] = TEXT("SHRCopyAnimation(FBXAnimation&, const FBXAnimation&)");
+    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRCopyAnimation(FBXAnimation&, const FBXAnimation&)");
 
 
     for(auto* p = dest.AnimationNodes.Values; FBX_PTRDIFFU(p - dest.AnimationNodes.Values) < dest.AnimationNodes.Length; ++p){
