@@ -16,7 +16,19 @@ __FBXM_MAKE_FUNC(bool, FBXCheckCompatibility, void){
     static const FBX_CHAR __name_of_this_func[] = TEXT("FBXCheckCompatibility(void)");
 
     if(!SIMDCompetible()){
-        SHRPushErrorMessage(TEXT("this CPU doesn't support FMA or AVX instruction"), __name_of_this_func);
+        SHRPushErrorMessage(
+            TEXT("this CPU doesn't support ")
+#if ((!defined(_SIMD_AVX)) && (!defined(_SIMD_FMA)))
+            TEXT("SSE4")
+#elif ((!defined(_SIMD_AVX)) && (defined(_SIMD_FMA)))
+            TEXT("SSE4 and FMA3")
+#elif ((defined(_SIMD_AVX)) && (!defined(_SIMD_FMA)))
+            TEXT("SSE4 and AVX2")
+#elif ((defined(_SIMD_AVX)) && (defined(_SIMD_FMA)))
+            TEXT("SSE4, FMA3 and AVX2")
+#endif
+            TEXT(" instruction")
+        , __name_of_this_func);
         return false;
     }
 
