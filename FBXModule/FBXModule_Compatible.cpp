@@ -17,7 +17,7 @@ __FBXM_MAKE_FUNC(bool, FBXCheckCompatibility, void){
 
     if(!SIMDCompetible()){
         SHRPushErrorMessage(
-            TEXT("this CPU doesn't support ")
+            TEXT("this CPU doesn't support one or more following instruction(s): ")
 #if ((!defined(_SIMD_AVX)) && (!defined(_SIMD_FMA)))
             TEXT("SSE4")
 #elif ((!defined(_SIMD_AVX)) && (defined(_SIMD_FMA)))
@@ -27,7 +27,6 @@ __FBXM_MAKE_FUNC(bool, FBXCheckCompatibility, void){
 #elif ((defined(_SIMD_AVX)) && (defined(_SIMD_FMA)))
             TEXT("SSE4, FMA3 and AVX2")
 #endif
-            TEXT(" instruction")
         , __name_of_this_func);
         return false;
     }
