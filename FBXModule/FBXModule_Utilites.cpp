@@ -134,3 +134,54 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationTransform, void* pOutScale, void* pOut
         ins_computeValueByTyime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
     }
 }
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationScale, void* pOutScale, const void* pAnimationNode, float time){
+    const auto* pConvAnimationNode = reinterpret_cast<const FBXAnimationNode*>(pAnimationNode);
+
+    Float3* pConvOutScale = reinterpret_cast<decltype(pConvOutScale)>(pOutScale);
+
+    if(!pConvAnimationNode->ScalingKeys.Length){
+        FbxAMatrix matRef;
+        CopyArrayData<pConvAnimationNode->BindNode->TransformMatrix.Length>((double*)matRef, pConvAnimationNode->BindNode->TransformMatrix.Values);
+
+        auto vValue = matRef.GetS();
+        CopyArrayData(pConvOutScale->raw, vValue.mData);
+    }
+    else{
+        auto fTime = std::min(time, pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time);
+        ins_computeValueByTyime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
+    }
+}
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationRotation, void* pOutRotation, const void* pAnimationNode, float time){
+    const auto* pConvAnimationNode = reinterpret_cast<const FBXAnimationNode*>(pAnimationNode);
+
+    Float4* pConvOutRotation = reinterpret_cast<decltype(pConvOutRotation)>(pOutRotation);
+
+    if(!pConvAnimationNode->RotationKeys.Length){
+        FbxAMatrix matRef;
+        CopyArrayData<pConvAnimationNode->BindNode->TransformMatrix.Length>((double*)matRef, pConvAnimationNode->BindNode->TransformMatrix.Values);
+
+        auto vValue = matRef.GetQ();
+        CopyArrayData(pConvOutRotation->raw, vValue.mData);
+    }
+    else{
+        auto fTime = std::min(time, pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time);
+        ins_computeValueByTyime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
+    }
+}
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationTranslation, void* pOutTranslation, const void* pAnimationNode, float time){
+    const auto* pConvAnimationNode = reinterpret_cast<const FBXAnimationNode*>(pAnimationNode);
+
+    Float3* pConvOutTranslation = reinterpret_cast<decltype(pConvOutTranslation)>(pOutTranslation);
+
+    if(!pConvAnimationNode->TranslationKeys.Length){
+        FbxAMatrix matRef;
+        CopyArrayData<pConvAnimationNode->BindNode->TransformMatrix.Length>((double*)matRef, pConvAnimationNode->BindNode->TransformMatrix.Values);
+
+        auto vValue = matRef.GetT();
+        CopyArrayData(pConvOutTranslation->raw, vValue.mData);
+    }
+    else{
+        auto fTime = std::min(time, pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time);
+        ins_computeValueByTyime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
+    }
+}

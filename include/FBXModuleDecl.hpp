@@ -27,3 +27,6 @@ __FBXM_MAKE_FUNC(void, FBXTransformCoord, void* pOutVec3, const void* pVec3, con
 __FBXM_MAKE_FUNC(void, FBXTransformNormal, void* pOutVec3, const void* pVec3, const void* pMatrix);
 
 __FBXM_MAKE_FUNC(void, FBXComputeAnimationTransform, void* pOutScale, void* pOutRotation, void* pOutTranslation, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationScale, void* pOutScale, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationRotation, void* pOutRotation, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationTranslation, void* pOutTranslation, const void* pAnimationNode, float time);

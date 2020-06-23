@@ -22,3 +22,6 @@ EXPORTS
  FBXTransformNormal
 
  FBXComputeAnimationTransform
+ FBXComputeAnimationScale
+ FBXComputeAnimationRotation
+ FBXComputeAnimationTranslation
