@@ -15,34 +15,34 @@
 
 
 template<typename T, unsigned long N>
-static inline void ins_interpolateValue(FBXStaticArray<T, N>* pOut, const FBXStaticArray<T, N>* pV0, const FBXStaticArray<T, N>* pV1, float t){}
+static inline void ins_interpolateValue(T(&pOut)[N], const FBXStaticArray<T, N>* pV0, const FBXStaticArray<T, N>* pV1, float t){}
 template<>
-inline void ins_interpolateValue(FBXStaticArray<float, 3>* pOut, const FBXStaticArray<float, 3>* pV0, const FBXStaticArray<float, 3>* pV1, float t){
+inline void ins_interpolateValue(float(&pOut)[3], const FBXStaticArray<float, 3>* pV0, const FBXStaticArray<float, 3>* pV1, float t){
     auto xmm_v0 = DirectX::XMLoadFloat3((const DirectX::XMFLOAT3*)pV0->Values);
     auto xmm_v1 = DirectX::XMLoadFloat3((const DirectX::XMFLOAT3*)pV1->Values);
 
     auto xmm_v = DirectX::XMVectorLerp(xmm_v0, xmm_v1, t);
-    DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)pOut->Values, xmm_v);
+    DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)pOut, xmm_v);
 }
 template<>
-inline void ins_interpolateValue(FBXStaticArray<float, 4>* pOut, const FBXStaticArray<float, 4>* pV0, const FBXStaticArray<float, 4>* pV1, float t){
+inline void ins_interpolateValue(float(&pOut)[4], const FBXStaticArray<float, 4>* pV0, const FBXStaticArray<float, 4>* pV1, float t){
     auto xmm_v0 = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)pV0->Values);
     auto xmm_v1 = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)pV1->Values);
 
     auto xmm_v = DirectX::XMQuaternionSlerp(xmm_v0, xmm_v1, t);
     xmm_v = DirectX::XMQuaternionNormalize(xmm_v);
-    DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)pOut->Values, xmm_v);
+    DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)pOut, xmm_v);
 }
 
 template<typename T, unsigned long N>
-static inline void ins_computeValueByTyime(FBXStaticArray<T, N>* pOut, float time, const FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<T, N>>>* pTable){
+static inline void ins_computeValueByTyime(T(&pOut)[N], float time, const FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<T, N>>>* pTable){
     const FBXAnimationKeyFrame<FBXStaticArray<T, N>> *pData = pTable->Values, *pOldData = pData;
     for(; FBX_PTRDIFFU(pData - pTable->Values) < pTable->Length; pOldData = pData++){
         if(pData->Time > time){
             switch(pOldData->InterpolationType){
             case FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped:
             {
-                (*pOut) = pOldData->Value;
+                CopyArrayData(pOut, pOldData->Value.Values);
                 return;
             }
             case FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear:
@@ -55,7 +55,7 @@ static inline void ins_computeValueByTyime(FBXStaticArray<T, N>* pOut, float tim
         }
     }
 
-    (*pOut) = pOldData->Value;
+    CopyArrayData(pOut, pOldData->Value.Values);
 }
 
 
@@ -100,37 +100,37 @@ __FBXM_MAKE_FUNC(void, FBXTransformNormal, void* pOutVec3, const void* pVec3, co
 __FBXM_MAKE_FUNC(void, FBXComputeAnimationTransform, void* pOutScale, void* pOutRotation, void* pOutTranslation, const void* pAnimationNode, float time){
     const auto* pConvAnimationNode = reinterpret_cast<const FBXAnimationNode*>(pAnimationNode);
 
-    FBXStaticArray<float, 3>* pConvOutScale = reinterpret_cast<decltype(pConvOutScale)>(pOutScale);
-    FBXStaticArray<float, 4>* pConvOutRotation = reinterpret_cast<decltype(pConvOutRotation)>(pOutRotation);
-    FBXStaticArray<float, 3>* pConvOutTranslation = reinterpret_cast<decltype(pConvOutTranslation)>(pOutTranslation);
+    Float3* pConvOutScale = reinterpret_cast<decltype(pConvOutScale)>(pOutScale);
+    Float4* pConvOutRotation = reinterpret_cast<decltype(pConvOutRotation)>(pOutRotation);
+    Float3* pConvOutTranslation = reinterpret_cast<decltype(pConvOutTranslation)>(pOutTranslation);
 
     FbxAMatrix matRef;
     CopyArrayData<pConvAnimationNode->BindNode->TransformMatrix.Length>((double*)matRef, pConvAnimationNode->BindNode->TransformMatrix.Values);
 
     if(!pConvAnimationNode->ScalingKeys.Length){
         auto vValue = matRef.GetS();
-        CopyArrayData(pConvOutScale->Values, vValue.mData);
+        CopyArrayData(pConvOutScale->raw, vValue.mData);
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time);
-        ins_computeValueByTyime(pConvOutScale, fTime, &pConvAnimationNode->ScalingKeys);
+        ins_computeValueByTyime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
     }
 
     if(!pConvAnimationNode->RotationKeys.Length){
         auto vValue = matRef.GetQ();
-        CopyArrayData(pConvOutRotation->Values, vValue.mData);
+        CopyArrayData(pConvOutRotation->raw, vValue.mData);
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time);
-        ins_computeValueByTyime(pConvOutRotation, fTime, &pConvAnimationNode->RotationKeys);
+        ins_computeValueByTyime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
     }
 
     if(!pConvAnimationNode->TranslationKeys.Length){
         auto vValue = matRef.GetT();
-        CopyArrayData(pConvOutTranslation->Values, vValue.mData);
+        CopyArrayData(pConvOutTranslation->raw, vValue.mData);
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time);
-        ins_computeValueByTyime(pConvOutTranslation, fTime, &pConvAnimationNode->TranslationKeys);
+        ins_computeValueByTyime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
     }
 }
