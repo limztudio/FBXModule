@@ -53,6 +53,7 @@ namespace __hidden_FBXModule{
             }
 
             dest->Name = src->Name;
+            dest->TransformMatrix = src->TransformMatrix;
 
             if(FBXTypeHasMember(srcID, FBXType::FBXType_Bone)){
                 auto* dest_c = static_cast<FBXBone*>(dest);
@@ -90,17 +91,18 @@ namespace __hidden_FBXModule{
 
 
 template<typename T>
-static void FBXAllocateRoot(T** pDest, const T* pSrc){
+static void FBXCopyRoot(T** pDest, const T* pSrc){
     if(!pSrc)
         return;
 
-    auto* src = reinterpret_cast<const FBXRoot*>(pSrc);
+    const auto* src = reinterpret_cast<const FBXRoot*>(pSrc);
     auto* dest = FBXNew<FBXRoot>();
 
     __hidden_FBXModule::allocateNode(dest->Nodes, src->Nodes);
-
     dest->Materials = src->Materials;
     dest->Animations = src->Animations;
+
+    __hidden_FBXModule_RebindRoot(dest, src);
 
     (*pDest) = dest;
 }

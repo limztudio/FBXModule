@@ -15,7 +15,6 @@ EXPORTS
  FBXWriteScene
 
  FBXGetRoot
- FBXCopyRoot
 
  FBXGetWorldMatrix
  FBXTransformCoord
@@ -25,3 +24,6 @@ EXPORTS
  FBXComputeAnimationScale
  FBXComputeAnimationRotation
  FBXComputeAnimationTranslation
+
+
+ __hidden_FBXModule_RebindRoot

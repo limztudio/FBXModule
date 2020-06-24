@@ -13,10 +13,6 @@
 
 #include "FBXType.hpp"
 
-#ifndef __FBXM_DLL_EXPORT
-#include "FBXAllocate.hpp"
-#endif
-
 #include "FBXBase.hpp"
 
 #include "FBXRoot.hpp"
@@ -51,6 +47,11 @@
 
 #undef __FBXM_MAKE_FUNC
 
+#endif
+
+
+#ifndef __FBXM_DLL_EXPORT
+#include "FBXAllocate.hpp"
 #endif
 
 

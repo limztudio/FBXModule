@@ -13,15 +13,18 @@
 
 
 namespace __hidden_FBXModule{
-    struct _IteratorThrower{};
-
     template<typename NODE, typename FUNC>
-    static void _breakableIterateNode(NODE* pNode, FUNC func){
+    static void _breakableIterateNode(bool& ret, NODE* pNode, FUNC func){
+        if(ret)
+            return;
+
         if(pNode){
-            FBXBreakableIterateNode(pNode->Child, func);
-            FBXBreakableIterateNode(pNode->Sibling, func);
-            if(!func(pNode))
-                throw _IteratorThrower();
+            _breakableIterateNode(ret, pNode->Child, func);
+            _breakableIterateNode(ret, pNode->Sibling, func);
+            if(!func(pNode)){
+                ret = true;
+                return;
+            }
         }
     }
 };
@@ -52,10 +55,8 @@ static void FBXIterateNode(NODE* pNode, FUNC func){
 }
 template<typename NODE, typename FUNC>
 static void FBXBreakableIterateNode(NODE* pNode, FUNC func){
-    try{
-        __hidden_FBXModule::_breakableIterateNode(pNode, func);
-    }
-    catch(__hidden_FBXModule::_IteratorThrower){}
+    bool ret = false;
+    __hidden_FBXModule::_breakableIterateNode(ret, pNode, func);
 }
 
 template<typename NODE, typename FUNC>

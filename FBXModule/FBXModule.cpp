@@ -13,9 +13,3 @@
 __FBXM_MAKE_FUNC(const void*, FBXGetRoot, void){
     return shr_root;
 }
-__FBXM_MAKE_FUNC(void, FBXCopyRoot, void* pDest, const void* pSrc){
-    auto* dest = static_cast<FBXRoot*>(pDest);
-    const auto* src = static_cast<const FBXRoot*>(pSrc);
-
-    SHRCopyRoot(dest, src);
-}

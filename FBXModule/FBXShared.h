@@ -34,6 +34,8 @@ using Unit3Container = std::vector<fbxsdk::FbxDouble3>;
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
+// FBXShared_Copy ///////////////////////////////////////////////////////////////////////////////////
+
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
 // FBXShared_Converter ///////////////////////////////////////////////////////////////////////////////
@@ -203,6 +205,8 @@ extern FBXRoot* shr_root;
 extern std::stack<std::basic_string<FBX_CHAR>> shr_errorStack;
 extern std::stack<std::basic_string<FBX_CHAR>> shr_warningStack;
 
+// FBXShared_Copy ///////////////////////////////////////////////////////////////////////////////////
+
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
 extern fbxsdk::FbxAxisSystem shr_axisSystem;
@@ -245,12 +249,6 @@ extern PoseNodeList shr_poseNodeList;
 extern void SHRCreateRoot();
 extern void SHRDeleteRoot();
 
-extern void SHRNodeBinder(FBXNode* dest, const FBXNode* src);
-
-extern void SHRCopyRoot(FBXRoot* dest, const FBXRoot* src);
-extern void SHRCopyNode(FBXNode* dest, const FBXNode* src);
-extern void SHRCopyAnimation(FBXAnimation& dest, const FBXAnimation& src);
-
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
 extern void SHRPushErrorMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos);
@@ -260,6 +258,12 @@ extern void SHRPushErrorMessage(std::basic_string<FBX_CHAR>&& strMessage, const 
 extern void SHRPushWarningMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos);
 extern void SHRPushWarningMessage(const std::basic_string<FBX_CHAR>& strMessage, const FBX_CHAR* strCallPos);
 extern void SHRPushWarningMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHAR* strCallPos);
+
+// FBXShared_Copy ///////////////////////////////////////////////////////////////////////////////////
+
+extern void SHRRebindRoot(FBXRoot* dest, const FBXRoot* src);
+extern void SHRRebindNode(FBXNode* dest, const FBXNode* src);
+extern void SHRRebindAnimation(FBXAnimation& dest, const FBXAnimation& src);
 
 // FBXShared_FbxSdk //////////////////////////////////////////////////////////////////////////////////
 
