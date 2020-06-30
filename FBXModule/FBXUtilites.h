@@ -16,6 +16,27 @@
 #include <FBXNode.hpp>
 
 
+namespace __hidden_FBXModule{
+    struct _stringConversionFlagList{
+        DWORD codePage;
+        DWORD flag;
+    };
+
+    static const _stringConversionFlagList _flagList_toW[] = {
+        { DWORD(CP_UTF8), DWORD(MB_ERR_INVALID_CHARS) },
+        { DWORD(CP_ACP), DWORD(MB_ERR_INVALID_CHARS) },
+        { DWORD(CP_UTF8), DWORD(0u) },
+        { DWORD(CP_ACP), DWORD(0u) },
+    };
+    static const _stringConversionFlagList _flagList_toA[] = {
+        { DWORD(CP_UTF8), DWORD(WC_ERR_INVALID_CHARS) },
+        { DWORD(CP_ACP), DWORD(WC_ERR_INVALID_CHARS) },
+        { DWORD(CP_UTF8), DWORD(0u) },
+        { DWORD(CP_ACP), DWORD(0u) },
+    };
+};
+
+
 template<typename KEY>
 class CustomHasher{
 public:
@@ -450,24 +471,33 @@ static inline std::basic_string<CTYPE> ToString(VALUE v){ return std::basic_stri
 template<>
 inline std::basic_string<wchar_t> ConvertString(const std::basic_string<char>& strA){
     std::basic_string<wchar_t> strW{};
-    if(strA.length() > 0){
-        auto len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, strA.c_str(), (int)strA.size(), nullptr, 0);
-        if(len == 0)
-            throw std::runtime_error("invalid character sequence");
-        strW.resize(len);
-        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, strA.c_str(), (int)strA.size(), strW.data(), (int)strW.size());
+    if(strA.length() > 0u){
+        for(const auto& curFlag : __hidden_FBXModule::_flagList_toW){
+            auto len = MultiByteToWideChar(curFlag.codePage, curFlag.flag, strA.c_str(), (int)strA.size(), nullptr, 0);
+            if(!len)
+                continue;
+            strW.resize(len);
+            MultiByteToWideChar(curFlag.codePage, curFlag.flag, strA.c_str(), (int)strA.size(), strW.data(), (int)strW.size());
+            return strW;
+        }
+
+        throw std::runtime_error("invalid character sequence");
     }
     return strW;
 }
 template<>
 inline std::basic_string<char> ConvertString(const std::basic_string<wchar_t>& strW){
     std::basic_string<char> strA{};
-    if(strW.length() > 0){
-        auto len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, strW.c_str(), (int)strW.size(), nullptr, 0, nullptr, 0);
-        if(len == 0)
-            throw std::runtime_error("invalid character sequence");
-        strA.resize(len);
-        WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, strW.c_str(), (int)strW.size(), strA.data(), (int)strA.size(), nullptr, 0);
+    if(strW.length() > 0u){
+        for(const auto& curFlag : __hidden_FBXModule::_flagList_toA){
+            auto len = WideCharToMultiByte(curFlag.codePage, curFlag.flag, strW.c_str(), (int)strW.size(), nullptr, 0, nullptr, 0);
+            if(!len)
+                continue;
+            strA.resize(len);
+            WideCharToMultiByte(curFlag.codePage, curFlag.flag, strW.c_str(), (int)strW.size(), strA.data(), (int)strA.size(), nullptr, 0);
+            return strA;
+        }
+        throw std::runtime_error("invalid character sequence");
     }
     return strA;
 }
