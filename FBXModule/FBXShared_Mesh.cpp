@@ -7,6 +7,8 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
+
 #include "FBXUtilites.h"
 #include "FBXMath.h"
 #include "FBXShared.h"
@@ -643,7 +645,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                             vert = Normalize3(vert);
                         }
                     }
-                    break;
+break;
 
                 default:
                 {
@@ -740,6 +742,23 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                 }
                 }
             }
+        }
+    }
+
+    {
+        auto& materials = pNodeData->bufMaterials;
+        auto& layers = pNodeData->bufLayers;
+
+        decltype(pNodeData->bufMaterials) matIndexer(materials);
+
+        std::sort(materials.begin(), materials.end());
+
+        for(auto& iMat : matIndexer)
+            iMat = materials[iMat];
+
+        for(auto& iLayer : layers){
+            for(auto& iMat : iLayer.materials)
+                iMat = matIndexer[iMat];
         }
     }
 
