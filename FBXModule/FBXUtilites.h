@@ -47,11 +47,7 @@ class PointerHasher{
 public:
     inline size_t operator()(const KEY& k)const{
         auto v = reinterpret_cast<size_t>(k);
-#ifdef _WIN64
-        v >>= 3;
-#else
-        v >>= 2;
-#endif
+        v /= sizeof(KEY);
         return v;
     }
 };

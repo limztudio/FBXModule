@@ -51,8 +51,8 @@ public:
         matFinder.clear();
     }
 
-    inline int emplace(fbxsdk::FbxSurfaceMaterial* kMaterial){
-        int ret;
+    inline unsigned int emplace(fbxsdk::FbxSurfaceMaterial* kMaterial){
+        unsigned int ret;
 
         auto f = matFinder.find(kMaterial);
         if(f == matFinder.end()){

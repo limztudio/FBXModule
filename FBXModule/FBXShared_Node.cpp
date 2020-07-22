@@ -9,6 +9,7 @@
 
 #include <unordered_set>
 #include <unordered_map>
+#include <set>
 
 #include <FBXAssign.hpp>
 
@@ -463,6 +464,15 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTabl
     }
 
     {
+        for(auto e = kScene->GetMaterialCount(), i = 0; i < e; ++i){
+            auto* kMaterial = kScene->GetMaterial(i);
+
+            if(kMaterial)
+                materialTable.emplace(kMaterial);
+        }
+    }
+
+    {
         auto* kRootNode = kScene->GetRootNode();
 
         FbxPose* kPose = nullptr;
@@ -502,6 +512,36 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTabl
                 break;
             }
             return false;
+        }
+    }
+
+    {
+        const auto oldSize = materialTable.getTable().size();
+
+        std::set<unsigned long> matRef;
+        FBXIterateNode((*pRootNode)->Child, [&matRef](const FBXNode* pNode){
+            if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_Mesh)){
+                const auto* pMesh = static_cast<const FBXMesh*>(pNode);
+                for(const auto* pMat = pMesh->Materials.Values; FBX_PTRDIFFU(pMat - pMesh->Materials.Values) < pMesh->Materials.Length; ++pMat)
+                    matRef.emplace(*pMat);
+            }
+        });
+
+        if(matRef.size() != oldSize){
+            std::vector<fbxsdk::FbxSurfaceMaterial*> matOldData(materialTable.getTable());
+            std::vector<unsigned long> matIndexer(oldSize, (unsigned long)(-1));
+
+            materialTable.clear();
+            for(const auto& i : matRef)
+                matIndexer[i] = (unsigned long)materialTable.emplace(matOldData[i]);
+
+            FBXIterateNode((*pRootNode)->Child, [&matIndexer](FBXNode* pNode){
+                if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_Mesh)){
+                    auto* pMesh = static_cast<FBXMesh*>(pNode);
+                    for(auto* pMat = pMesh->Materials.Values; FBX_PTRDIFFU(pMat - pMesh->Materials.Values) < pMesh->Materials.Length; ++pMat)
+                        *pMat = matIndexer[*pMat];
+                }
+            });
         }
     }
 
