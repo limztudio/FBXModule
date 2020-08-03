@@ -749,12 +749,19 @@ break;
         auto& materials = pNodeData->bufMaterials;
         auto& layers = pNodeData->bufLayers;
 
-        decltype(pNodeData->bufMaterials) matIndexer(materials);
+        decltype(pNodeData->bufMaterials) oldMaterials(materials);
+        std::unordered_map<unsigned int, unsigned int, CustomHasher<unsigned int>> matIndexer;
+        {
+            size_t maxInd = 0u;
+            for(const auto& iMat : materials)
+                maxInd = std::max(maxInd, decltype(maxInd)(iMat));
+
+            matIndexer.rehash(maxInd + 1u);
+        }
 
         std::sort(materials.begin(), materials.end());
-
-        for(auto& iMat : matIndexer)
-            iMat = materials[iMat];
+        for(size_t edxMat = materials.size(), idxMat = 0u; idxMat < edxMat; ++idxMat)
+            matIndexer[oldMaterials[idxMat]] = materials[idxMat];
 
         for(auto& iLayer : layers){
             for(auto& iMat : iLayer.materials)
