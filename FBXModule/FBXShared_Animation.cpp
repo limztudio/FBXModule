@@ -29,9 +29,8 @@ static inline void ins_keyTypeOptimze(KEY_TABLE& keyTable, const VALUE& kVal){
     const auto keycount = keyTable.size();
     if(keycount > 1){
         auto& iPrevKey = keyTable[keycount - 2];
-        const auto& kPrevVal = iPrevKey.value;
 
-        if(kPrevVal == kVal)
+        if(iPrevKey.local == kVal.first)
             iPrevKey.type = FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped;
     }
 }
@@ -54,9 +53,9 @@ static inline void ins_keyReduce(AnimationKeyFrames<KEY>& keyTable, DIFF valDiff
             const auto& iRhs = keyTable[idxPivot + 1];
 
             if(
-                ins_keyCompare(iCur.value, iLhs.value, valDiff) &&
-                ins_keyCompare(iCur.value, iRhs.value, valDiff) &&
-                ins_keyCompare(iLhs.value, iRhs.value, valDiff)
+                ins_keyCompare(iCur.local, iLhs.local, valDiff) &&
+                ins_keyCompare(iCur.local, iRhs.local, valDiff) &&
+                ins_keyCompare(iLhs.local, iRhs.local, valDiff)
                 )
             {
                 auto itr = keyTable.begin();
@@ -74,7 +73,7 @@ static inline void ins_keyReduce(AnimationKeyFrames<KEY>& keyTable, DIFF valDiff
         const auto& iLhs = keyTable[0];
         const auto& iRhs = keyTable[1];
 
-        if(ins_keyCompare(iLhs.value, iRhs.value, valDiff))
+        if(ins_keyCompare(iLhs.local, iRhs.local, valDiff))
             keyTable.pop_back();
     }
 }
@@ -104,7 +103,8 @@ static inline void ins_convAnimationKey(EXPORT_TYPE& expKey, FBX_TYPE& fbxKey){
     expKey.Time = decltype(expKey.Time)(fbxKey.time.GetSecondDouble());
     expKey.InterpolationType = fbxKey.type;
 
-    CopyArrayData(expKey.Value.Values, fbxKey.value.mData);
+    CopyArrayData(expKey.Local.Values, fbxKey.local.mData);
+    CopyArrayData(expKey.World.Values, fbxKey.world.mData);
 }
 
 static inline FbxAnimCurveDef::EInterpolationType ins_convInterpolationType(FBXAnimationInterpolationType type){
@@ -194,17 +194,26 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
             }
 
             FbxTime kDefaultTime;
-            FbxDouble3 kDefaultTranslation;
-            FbxDouble4 kDefaultQuaternion;
-            FbxDouble3 kDefaultScaling;
+            std::pair<FbxDouble3, FbxDouble3> kDefaultTranslation;
+            std::pair<FbxDouble4, FbxDouble4> kDefaultQuaternion;
+            std::pair<FbxDouble3, FbxDouble3> kDefaultScaling;
             {
                 kDefaultTime.SetSecondDouble(0.);
 
-                auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kDefaultTime);
+                {
+                    auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kDefaultTime);
 
-                kDefaultTranslation = kMat.GetT();
-                kDefaultQuaternion = kMat.GetQ();
-                kDefaultScaling = kMat.GetS();
+                    kDefaultTranslation.first = kMat.GetT();
+                    kDefaultQuaternion.first = kMat.GetQ();
+                    kDefaultScaling.first = kMat.GetS();
+                }
+                {
+                    auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kDefaultTime);
+
+                    kDefaultTranslation.second = kMat.GetT();
+                    kDefaultQuaternion.second = kMat.GetQ();
+                    kDefaultScaling.second = kMat.GetS();
+                }
             }
 
             auto kDefaultMat = GetLocalTransform(kNode);
@@ -216,8 +225,15 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 newNodes.translationKeys.clear();
                 newNodes.translationKeys.reserve(ins_animationKeyFrames[0].size());
                 for(const auto& kTime : ins_animationKeyFrames[0]){
-                    auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
-                    FbxDouble3 kVal = kMat.GetT();
+                    std::pair<FbxDouble3, FbxDouble3> kVal;
+                    {
+                        auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
+                        kVal.first = kMat.GetT();
+                    }
+                    {
+                        auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kTime);
+                        kVal.second = kMat.GetT();
+                    }
                     newNodes.translationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.translationKeys, kVal);
                 }
@@ -234,8 +250,15 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 newNodes.rotationKeys.clear();
                 newNodes.rotationKeys.reserve(ins_animationKeyFrames[1].size());
                 for(const auto& kTime : ins_animationKeyFrames[1]){
-                    auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
-                    FbxDouble4 kVal = kMat.GetQ();
+                    std::pair<FbxDouble4, FbxDouble4> kVal;
+                    {
+                        auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
+                        kVal.first = kMat.GetQ();
+                    }
+                    {
+                        auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kTime);
+                        kVal.second = kMat.GetQ();
+                    }
                     newNodes.rotationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.rotationKeys, kVal);
                 }
@@ -252,8 +275,15 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 newNodes.scalingKeys.clear();
                 newNodes.scalingKeys.reserve(ins_animationKeyFrames[2].size());
                 for(const auto& kTime : ins_animationKeyFrames[2]){
-                    auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
-                    FbxDouble3 kVal = kMat.GetS();
+                    std::pair<FbxDouble3, FbxDouble3> kVal;
+                    {
+                        auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
+                        kVal.first = kMat.GetS();
+                    }
+                    {
+                        auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kTime);
+                        kVal.second = kMat.GetS();
+                    }
                     newNodes.scalingKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.scalingKeys, kVal);
                 }
@@ -340,9 +370,16 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
 
                 ins_convAnimationKey(*pKey, iKey);
 
-                auto xmm_q = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)&(*pKey).Value.Values);
-                xmm_q = DirectX::XMQuaternionNormalize(xmm_q);
-                DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&(*pKey).Value.Values, xmm_q);
+                {
+                    auto xmm_q = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)&(*pKey).Local.Values);
+                    xmm_q = DirectX::XMQuaternionNormalize(xmm_q);
+                    DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&(*pKey).Local.Values, xmm_q);
+                }
+                {
+                    auto xmm_q = DirectX::XMLoadFloat4((const DirectX::XMFLOAT4*)&(*pKey).World.Values);
+                    xmm_q = DirectX::XMQuaternionNormalize(xmm_q);
+                    DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&(*pKey).World.Values, xmm_q);
+                }
             }
 
             pNode->TranslationKeys.Assign(iNode.translationKeys.size());
@@ -477,15 +514,15 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                         curTime.SetSecondDouble(pKey->Time);
 
                         curIndex = kCurveX->KeyAdd(curTime);
-                        kCurveX->KeySetValue(curIndex, pKey->Value.Values[0]);
+                        kCurveX->KeySetValue(curIndex, pKey->Local.Values[0]);
                         kCurveX->KeySetInterpolation(curIndex, curType);
 
                         curIndex = kCurveY->KeyAdd(curTime);
-                        kCurveY->KeySetValue(curIndex, pKey->Value.Values[1]);
+                        kCurveY->KeySetValue(curIndex, pKey->Local.Values[1]);
                         kCurveY->KeySetInterpolation(curIndex, curType);
 
                         curIndex = kCurveZ->KeyAdd(curTime);
-                        kCurveZ->KeySetValue(curIndex, pKey->Value.Values[2]);
+                        kCurveZ->KeySetValue(curIndex, pKey->Local.Values[2]);
                         kCurveZ->KeySetInterpolation(curIndex, curType);
                     }
 
@@ -546,7 +583,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                         int curIndex;
 
                         FbxAMatrix kMat;
-                        kMat.SetQ(FbxQuaternion(pKey->Value.Values[0], pKey->Value.Values[1], pKey->Value.Values[2], pKey->Value.Values[3]));
+                        kMat.SetQ(FbxQuaternion(pKey->Local.Values[0], pKey->Local.Values[1], pKey->Local.Values[2], pKey->Local.Values[3]));
                         auto kVal = kMat.GetR();
 
                         curTime.SetSecondDouble(pKey->Time);
@@ -637,15 +674,15 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                         curTime.SetSecondDouble(pKey->Time);
 
                         curIndex = kCurveX->KeyAdd(curTime);
-                        kCurveX->KeySetValue(curIndex, pKey->Value.Values[0]);
+                        kCurveX->KeySetValue(curIndex, pKey->Local.Values[0]);
                         kCurveX->KeySetInterpolation(curIndex, curType);
 
                         curIndex = kCurveY->KeyAdd(curTime);
-                        kCurveY->KeySetValue(curIndex, pKey->Value.Values[1]);
+                        kCurveY->KeySetValue(curIndex, pKey->Local.Values[1]);
                         kCurveY->KeySetInterpolation(curIndex, curType);
 
                         curIndex = kCurveZ->KeyAdd(curTime);
-                        kCurveZ->KeySetValue(curIndex, pKey->Value.Values[2]);
+                        kCurveZ->KeySetValue(curIndex, pKey->Local.Values[2]);
                         kCurveZ->KeySetInterpolation(curIndex, curType);
                     }
 

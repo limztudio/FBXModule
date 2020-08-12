@@ -25,10 +25,17 @@ __FBXM_MAKE_FUNC(void, FBXGetWorldMatrix, void* pOutMatrix, const void* pNode);
 __FBXM_MAKE_FUNC(void, FBXTransformCoord, void* pOutVec3, const void* pVec3, const void* pMatrix);
 __FBXM_MAKE_FUNC(void, FBXTransformNormal, void* pOutVec3, const void* pVec3, const void* pMatrix);
 
-__FBXM_MAKE_FUNC(void, FBXComputeAnimationTransform, void* pOutScale, void* pOutRotation, void* pOutTranslation, const void* pAnimationNode, float time);
-__FBXM_MAKE_FUNC(void, FBXComputeAnimationScale, void* pOutScale, const void* pAnimationNode, float time);
-__FBXM_MAKE_FUNC(void, FBXComputeAnimationRotation, void* pOutRotation, const void* pAnimationNode, float time);
-__FBXM_MAKE_FUNC(void, FBXComputeAnimationTranslation, void* pOutTranslation, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalTransform, void* pOutScale, void* pOutRotation, void* pOutTranslation, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void* pOutRotation, void* pOutTranslation, const void* pAnimationNode, float time);
+
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalScale, void* pOutScale, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldScale, void* pOutScale, const void* pAnimationNode, float time);
+
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalRotation, void* pOutRotation, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldRotation, void* pOutRotation, const void* pAnimationNode, float time);
+
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalTranslation, void* pOutTranslation, const void* pAnimationNode, float time);
+__FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTranslation, void* pOutTranslation, const void* pAnimationNode, float time);
 
 
 __FBXM_MAKE_FUNC(void, __hidden_FBXModule_RebindRoot, void* pDest, const void* pSrc);

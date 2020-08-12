@@ -157,18 +157,27 @@ template<typename T>
 class AnimationKeyFrame{
 public:
     AnimationKeyFrame(){}
-    AnimationKeyFrame(const FbxTime& _time, const FBXAnimationInterpolationType& _type, const T& _value)
+    AnimationKeyFrame(const FbxTime& _time, const FBXAnimationInterpolationType& _type, const T& _local, const T& _world)
         :
         time(_time),
         type(_type),
-        value(_value)
+        local(_local),
+        world(_world)
+    {}
+    AnimationKeyFrame(const FbxTime& _time, const FBXAnimationInterpolationType& _type, const std::pair<T, T>& _value)
+        :
+        time(_time),
+        type(_type),
+        local(_value.first),
+        world(_value.second)
     {}
 
 
 public:
     FbxTime time;
     FBXAnimationInterpolationType type;
-    T value;
+    T local;
+    T world;
 };
 template<typename T>
 using AnimationKeyFrames = std::vector<AnimationKeyFrame<T>>;

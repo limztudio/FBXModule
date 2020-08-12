@@ -20,10 +20,17 @@ EXPORTS
  FBXTransformCoord
  FBXTransformNormal
 
- FBXComputeAnimationTransform
- FBXComputeAnimationScale
- FBXComputeAnimationRotation
- FBXComputeAnimationTranslation
+ FBXComputeAnimationLocalTransform
+ FBXComputeAnimationWorldTransform
+
+ FBXComputeAnimationLocalScale
+ FBXComputeAnimationWorldScale
+
+ FBXComputeAnimationLocalRotation
+ FBXComputeAnimationWorldRotation
+
+ FBXComputeAnimationLocalTranslation
+ FBXComputeAnimationWorldTranslation
 
 
  __hidden_FBXModule_RebindRoot

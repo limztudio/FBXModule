@@ -25,7 +25,8 @@ enum class FBXAnimationInterpolationType : unsigned char{
 template<typename T>
 class FBXAnimationKeyFrame{
 public:
-    T Value;
+    T Local;
+    T World;
 
 public:
     float Time;
