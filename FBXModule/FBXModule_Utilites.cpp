@@ -35,50 +35,52 @@ inline void ins_interpolateValue(float(&pOut)[4], const FBXStaticArray<float, 4>
 }
 
 template<typename T, unsigned long N>
-static inline void ins_computeLocalByTyime(T(&pOut)[N], float time, const FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<T, N>>>* pTable){
-    const FBXAnimationKeyFrame<FBXStaticArray<T, N>> *pData = pTable->Values, *pOldData = pData;
-    for(; FBX_PTRDIFFU(pData - pTable->Values) < pTable->Length; pOldData = pData++){
-        if(pData->Time > time){
-            switch(pOldData->InterpolationType){
+static inline void ins_computeLocalByTime(T(&pOut)[N], float time, const FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<T, N>>>* pTable){
+    const FBXAnimationKeyFrame<FBXStaticArray<T, N>>* pNextData = pTable->Values;
+    const FBXAnimationKeyFrame<FBXStaticArray<T, N>>* pData = pNextData++;
+    for(; FBX_PTRDIFFU(pNextData - pTable->Values) < pTable->Length; pData = pNextData++){
+        if(pNextData->Time > time){
+            switch(pData->InterpolationType){
             case FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped:
             {
-                CopyArrayData(pOut, pOldData->Local.Values);
+                CopyArrayData(pOut, pData->Local.Values);
                 return;
             }
             case FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear:
             {
-                auto fTime = (time - pOldData->Time) / (pData->Time - pOldData->Time);
-                ins_interpolateValue<T, N>(pOut, &pOldData->Local, &pData->Local, fTime);
+                auto fTime = (time - pData->Time) / (pNextData->Time - pData->Time);
+                ins_interpolateValue<T, N>(pOut, &pData->Local, &pNextData->Local, fTime);
                 return;
             }
             }
         }
     }
 
-    CopyArrayData(pOut, pOldData->Local.Values);
+    CopyArrayData(pOut, pData->Local.Values);
 }
 template<typename T, unsigned long N>
-static inline void ins_computeWorldByTyime(T(&pOut)[N], float time, const FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<T, N>>>* pTable){
-    const FBXAnimationKeyFrame<FBXStaticArray<T, N>>* pData = pTable->Values, * pOldData = pData;
-    for(; FBX_PTRDIFFU(pData - pTable->Values) < pTable->Length; pOldData = pData++){
-        if(pData->Time > time){
-            switch(pOldData->InterpolationType){
+static inline void ins_computeWorldByTime(T(&pOut)[N], float time, const FBXDynamicArray<FBXAnimationKeyFrame<FBXStaticArray<T, N>>>* pTable){
+    const FBXAnimationKeyFrame<FBXStaticArray<T, N>>* pNextData = pTable->Values;
+    const FBXAnimationKeyFrame<FBXStaticArray<T, N>>* pData = pNextData++;
+    for(; FBX_PTRDIFFU(pNextData - pTable->Values) < pTable->Length; pData = pNextData++){
+        if(pNextData->Time > time){
+            switch(pData->InterpolationType){
             case FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped:
             {
-                CopyArrayData(pOut, pOldData->World.Values);
+                CopyArrayData(pOut, pData->World.Values);
                 return;
             }
             case FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear:
             {
-                auto fTime = (time - pOldData->Time) / (pData->Time - pOldData->Time);
-                ins_interpolateValue<T, N>(pOut, &pOldData->World, &pData->World, fTime);
+                auto fTime = (time - pData->Time) / (pNextData->Time - pData->Time);
+                ins_interpolateValue<T, N>(pOut, &pData->World, &pNextData->World, fTime);
                 return;
             }
             }
         }
     }
 
-    CopyArrayData(pOut, pOldData->World.Values);
+    CopyArrayData(pOut, pData->World.Values);
 }
 
 
@@ -136,7 +138,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalTransform, void* pOutScale, void*
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time);
-        ins_computeLocalByTyime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
+        ins_computeLocalByTime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
     }
 
     if(!pConvAnimationNode->RotationKeys.Length){
@@ -145,7 +147,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalTransform, void* pOutScale, void*
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time);
-        ins_computeLocalByTyime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
+        ins_computeLocalByTime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
     }
 
     if(!pConvAnimationNode->TranslationKeys.Length){
@@ -154,7 +156,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalTransform, void* pOutScale, void*
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time);
-        ins_computeLocalByTyime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
+        ins_computeLocalByTime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
     }
 }
 __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void* pOutRotation, void* pOutTranslation, const void* pAnimationNode, float time){
@@ -182,7 +184,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void*
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time);
-        ins_computeWorldByTyime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
+        ins_computeWorldByTime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
     }
 
     if(!pConvAnimationNode->RotationKeys.Length) {
@@ -191,7 +193,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void*
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time);
-        ins_computeWorldByTyime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
+        ins_computeWorldByTime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
     }
 
     if(!pConvAnimationNode->TranslationKeys.Length) {
@@ -200,7 +202,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void*
     }
     else{
         auto fTime = std::min(time, pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time);
-        ins_computeWorldByTyime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
+        ins_computeWorldByTime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
     }
 }
 
@@ -217,8 +219,12 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalScale, void* pOutScale, const voi
         CopyArrayData(pConvOutScale->raw, vValue.mData);
     }
     else{
-        auto fTime = std::min(time, pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time);
-        ins_computeLocalByTyime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
+        auto fTime = std::clamp(
+            time,
+            pConvAnimationNode->ScalingKeys.Values[0].Time,
+            pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time
+        );
+        ins_computeLocalByTime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
     }
 }
 __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldScale, void* pOutScale, const void* pAnimationNode, float time){
@@ -243,8 +249,12 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldScale, void* pOutScale, const voi
         CopyArrayData(pConvOutScale->raw, vValue.mData);
     }
     else{
-        auto fTime = std::min(time, pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time);
-        ins_computeWorldByTyime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
+        auto fTime = std::clamp(
+            time,
+            pConvAnimationNode->ScalingKeys.Values[0].Time,
+            pConvAnimationNode->ScalingKeys.Values[pConvAnimationNode->ScalingKeys.Length - 1].Time
+        );
+        ins_computeWorldByTime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
     }
 }
 
@@ -261,8 +271,12 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalRotation, void* pOutRotation, con
         CopyArrayData(pConvOutRotation->raw, vValue.mData);
     }
     else{
-        auto fTime = std::min(time, pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time);
-        ins_computeLocalByTyime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
+        auto fTime = std::clamp(
+            time,
+            pConvAnimationNode->RotationKeys.Values[0].Time,
+            pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time
+        );
+        ins_computeLocalByTime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
     }
 }
 __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldRotation, void* pOutRotation, const void* pAnimationNode, float time){
@@ -287,8 +301,12 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldRotation, void* pOutRotation, con
         CopyArrayData(pConvOutRotation->raw, vValue.mData);
     }
     else{
-        auto fTime = std::min(time, pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time);
-        ins_computeWorldByTyime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
+        auto fTime = std::clamp(
+            time,
+            pConvAnimationNode->RotationKeys.Values[0].Time,
+            pConvAnimationNode->RotationKeys.Values[pConvAnimationNode->RotationKeys.Length - 1].Time
+        );
+        ins_computeWorldByTime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
     }
 }
 
@@ -305,8 +323,12 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalTranslation, void* pOutTranslatio
         CopyArrayData(pConvOutTranslation->raw, vValue.mData);
     }
     else{
-        auto fTime = std::min(time, pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time);
-        ins_computeLocalByTyime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
+        auto fTime = std::clamp(
+            time,
+            pConvAnimationNode->TranslationKeys.Values[0].Time,
+            pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time
+        );
+        ins_computeLocalByTime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
     }
 }
 __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTranslation, void* pOutTranslation, const void* pAnimationNode, float time){
@@ -331,7 +353,11 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTranslation, void* pOutTranslatio
         CopyArrayData(pConvOutTranslation->raw, vValue.mData);
     }
     else{
-        auto fTime = std::min(time, pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time);
-        ins_computeWorldByTyime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
+        auto fTime = std::clamp(
+            time,
+            pConvAnimationNode->TranslationKeys.Values[0].Time,
+            pConvAnimationNode->TranslationKeys.Values[pConvAnimationNode->TranslationKeys.Length - 1].Time
+            );
+        ins_computeWorldByTime(pConvOutTranslation->raw, fTime, &pConvAnimationNode->TranslationKeys);
     }
 }
