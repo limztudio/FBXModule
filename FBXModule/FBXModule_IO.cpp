@@ -8,7 +8,6 @@
 #include "stdafx.h"
 
 #include <filesystem>
-#include <string>
 
 #include <FBXModule.hpp>
 
@@ -28,7 +27,7 @@ using namespace fbxsdk;
 
 class _DirectoryModifier{
 public:
-    _DirectoryModifier(const std::basic_string<FBX_CHAR>& changeDir)
+    _DirectoryModifier(const fbx_string& changeDir)
         :
         orgDir(GetCurrentDirectory(0, nullptr), 0)
     {
@@ -41,7 +40,7 @@ public:
 
 
 private:
-    std::basic_string<FBX_CHAR> orgDir;
+    fbx_string orgDir;
 };
 
 
@@ -172,19 +171,19 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
 
     if(ins_fileMode == 1){
         if(!std::filesystem::exists(ins_filePath)){
-            std::basic_string<FBX_CHAR> msg = FBX_TEXT('\"') + ins_filePath.__tstring();
+            fbx_string msg = FBX_TEXT('\"') + ins_filePath.__tstring().c_str();
             msg += FBX_TEXT("\" file not exist");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
         if(std::filesystem::is_directory(ins_filePath)){
-            std::basic_string<FBX_CHAR> msg = FBX_TEXT('\"') + ins_filePath.__tstring();
+            fbx_string msg = FBX_TEXT('\"') + ins_filePath.__tstring().c_str();
             msg += FBX_TEXT("\" must be a file not directory");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
 
-        _DirectoryModifier dirMod(ins_filePath.parent_path().__tstring());
+        _DirectoryModifier dirMod(ins_filePath.parent_path().__tstring().c_str());
 
         auto* kImporter = FbxImporter::Create(shr_SDKManager, "");
         if(!kImporter){
@@ -192,7 +191,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
             return false;
         }
 
-        CustomStream stream(shr_SDKManager, ins_filePath.__tstring(), FBX_TEXT("rb"));
+        CustomStream stream(shr_SDKManager, ins_filePath.__tstring().c_str(), FBX_TEXT("rb"));
 
         void* streamData = nullptr;
         if(!kImporter->Initialize(&stream, streamData, -1, ins_IOSettings)){
@@ -242,7 +241,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             return false;
         }
         if(std::filesystem::is_directory(ins_filePath)){
-            std::basic_string<FBX_CHAR> msg = FBX_TEXT('\"') + ins_filePath.__tstring();
+            fbx_string msg = FBX_TEXT('\"') + ins_filePath.__tstring().c_str();
             msg += FBX_TEXT("\" must be a file path");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
@@ -260,7 +259,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             ins_IOSettings->SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
         }
 
-        _DirectoryModifier dirMod(ins_filePath.parent_path().__tstring());
+        _DirectoryModifier dirMod(ins_filePath.parent_path().__tstring().c_str());
 
         auto* kExporter = FbxExporter::Create(shr_SDKManager, "");
         if(!kExporter){
@@ -268,7 +267,7 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
             return false;
         }
 
-        CustomStream stream(shr_SDKManager, ins_filePath.__tstring(), FBX_TEXT("wb"), shr_ioSetting.ExportAsASCII);
+        CustomStream stream(shr_SDKManager, ins_filePath.__tstring().c_str(), FBX_TEXT("wb"), shr_ioSetting.ExportAsASCII);
 
         void* streamData = nullptr;
         if(!kExporter->Initialize(&stream, streamData, writeFormat, ins_IOSettings)){

@@ -7,8 +7,6 @@
 
 #include "stdafx.h"
 
-#include <unordered_set>
-
 #include <FBXAssign.hpp>
 
 #include "FBXUtilites.h"
@@ -54,7 +52,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
     { // remove reserved materials
         const auto oldMatCount = kScene->GetMaterialCount();
         if(oldMatCount){
-            std::unordered_set<FbxSurfaceMaterial*, PointerHasher<FbxSurfaceMaterial*>> oldMatTable;
+            fbx_unordered_set<FbxSurfaceMaterial*, PointerHasher<FbxSurfaceMaterial*>> oldMatTable;
 
             for(auto i = decltype(oldMatCount){ 0 }; i < oldMatCount; ++i){
                 auto* kMaterial = kScene->GetMaterial(i);
@@ -64,10 +62,10 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
             }
 
             for(auto* kMaterial : oldMatTable){
-                const std::basic_string<FBX_CHAR> strName = ConvertString<FBX_CHAR>(kMaterial->GetName());
+                const fbx_string strName = ConvertString<FBX_CHAR>(kMaterial->GetName());
 
                 if(!kScene->RemoveMaterial(kMaterial)){
-                    std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to remove material from scene");
+                    fbx_string msg = FBX_TEXT("failed to remove material from scene");
                     msg += FBX_TEXT("(errored in \"");
                     msg += strName;
                     msg += FBX_TEXT("\")");
@@ -81,11 +79,11 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
     for(size_t idxMaterial = 0u; idxMaterial < materialTable.Length; ++idxMaterial){
         const auto& iMaterial = materialTable.Values[idxMaterial];
 
-        const std::basic_string<FBX_CHAR> strName = iMaterial.Name.Values;
+        const fbx_string strName = iMaterial.Name.Values;
 
         auto* kMaterial = FbxSurfacePhong::Create(kSDKManager, ConvertString<char>(strName).c_str());
         if(!kMaterial){
-            std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to create FbxSurfacePhong");
+            fbx_string msg = FBX_TEXT("failed to create FbxSurfacePhong");
             msg += FBX_TEXT("(errored in \"");
             msg += strName;
             msg += FBX_TEXT("\")");
@@ -102,7 +100,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
         if(iMaterial.DiffuseTexturePath.Length){
             auto* kTexture = FbxFileTexture::Create(kScene, FbxSurfaceMaterial::sDiffuse);
             if(!kTexture){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to create FbxFileTexture");
+                fbx_string msg = FBX_TEXT("failed to create FbxFileTexture");
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
                 msg += FBX_TEXT("\")");
@@ -111,7 +109,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
             }
 
             if(!kTexture->SetFileName(ConvertString<char>(iMaterial.DiffuseTexturePath.Values).c_str())){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("set valid filename: \"");
+                fbx_string msg = FBX_TEXT("set valid filename: \"");
                 msg += iMaterial.DiffuseTexturePath.Values;
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
@@ -121,7 +119,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
             }
 
             if(!kMaterial->Diffuse.ConnectSrcObject(kTexture)){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to connect diffuse texture object");
+                fbx_string msg = FBX_TEXT("failed to connect diffuse texture object");
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
                 msg += FBX_TEXT("\")");
@@ -131,7 +129,7 @@ bool SHRStoreMaterials(FbxManager* kSDKManager, FbxScene* kScene, const FBXDynam
         }
 
         if(!kScene->AddMaterial(kMaterial)){
-            std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to add material to scene");
+            fbx_string msg = FBX_TEXT("failed to add material to scene");
             msg += FBX_TEXT("(errored in \"");
             msg += strName;
             msg += FBX_TEXT("\")");

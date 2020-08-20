@@ -8,14 +8,13 @@
 #include "stdafx.h"
 
 #include <map>
-#include <vector>
 
 #include "FBXUtilites.h"
 #include "FBXMath.h"
 #include "FBXShared.h"
 
 
-static std::vector<std::vector<unsigned int>> ins_newToOldIndexer;
+static fbx_vector<fbx_vector<unsigned int>> ins_newToOldIndexer;
 
 
 FbxAMatrix SHRGetBlendMatrix(const SkinData* skins, size_t count){
@@ -55,9 +54,9 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         skinTable.resize(pNodeData->bufPositions.size());
     }
 
-    std::vector<FbxCluster*> clusterFinder(clusterCount, nullptr);
-    std::vector<std::unordered_map<unsigned int, FbxDouble>> boneMapList(clusterCount);
-    std::vector<std::multimap<double, unsigned int>> vertexBoneList(pNodeData->bufPositions.size());
+    fbx_vector<FbxCluster*> clusterFinder(clusterCount, nullptr);
+    fbx_vector<fbx_unordered_map<unsigned int, FbxDouble>> boneMapList(clusterCount);
+    fbx_vector<std::multimap<double, unsigned int>> vertexBoneList(pNodeData->bufPositions.size());
 
     const auto ctrlPointCount = (unsigned int)kMesh->GetControlPointsCount();
 
@@ -234,16 +233,16 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRInitSkinData(FbxManager*, PoseNodeList&, const FBXNodeToFbxNode&, const ControlPointMergeMap&, const FBXSkinnedMesh*, FbxNode*)");
 
 
-    const std::basic_string<FBX_CHAR> strName = pNode->Name.Values;
+    const fbx_string strName = pNode->Name.Values;
 
-    std::unordered_map<const FBXNode*, FbxCluster*, PointerHasher<const FBXNode*>> clusterFinder;
-    std::unordered_map<const FBXNode*, float, PointerHasher<const FBXNode*>> tmpSkinTable;
+    fbx_unordered_map<const FBXNode*, FbxCluster*, PointerHasher<const FBXNode*>> clusterFinder;
+    fbx_unordered_map<const FBXNode*, float, PointerHasher<const FBXNode*>> tmpSkinTable;
 
     auto* kMesh = kNode->GetMesh();
 
     auto* kSkin = FbxSkin::Create(kSDKManager, "");
     if(!kSkin){
-        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to create FbxSkin");
+        fbx_string msg = FBX_TEXT("failed to create FbxSkin");
         msg += FBX_TEXT("(errored in \"");
         msg += strName;
         msg += FBX_TEXT("\")");
@@ -261,7 +260,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     }
     for(const auto& i : ins_newToOldIndexer){
         if(i.empty()){
-            std::basic_string<FBX_CHAR> msg = FBX_TEXT("an error occurred while creating control point remapper");
+            fbx_string msg = FBX_TEXT("an error occurred while creating control point remapper");
             msg += FBX_TEXT("(errored in \"");
             msg += strName;
             msg += FBX_TEXT("\")");
@@ -271,14 +270,14 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     }
 
     if(!pNode->SkinDeforms.Length){
-        std::unordered_map<FbxNode*, const FBXNode*, PointerHasher<FbxNode*>> bindedNodes;
+        fbx_unordered_map<FbxNode*, const FBXNode*, PointerHasher<FbxNode*>> bindedNodes;
 
         for(const auto* pSkinInfos = pNode->SkinInfos.Values; FBX_PTRDIFFU(pSkinInfos - pNode->SkinInfos.Values) < pNode->SkinInfos.Length; ++pSkinInfos){
             for(const auto* pSkinInfo = pSkinInfos->Values; FBX_PTRDIFFU(pSkinInfo - pSkinInfos->Values) < pSkinInfos->Length; ++pSkinInfo){
                 const auto* pBindNode = pSkinInfo->BindNode;
 
                 if(!pBindNode){
-                    std::basic_string<FBX_CHAR> msg = FBX_TEXT("skin info must have value not null");
+                    fbx_string msg = FBX_TEXT("skin info must have value not null");
                     msg += FBX_TEXT("(errored in \"");
                     msg += strName;
                     msg += FBX_TEXT("\")");
@@ -290,7 +289,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
                 {
                     auto f = nodeBinder.find(pBindNode);
                     if(f == nodeBinder.cend()){
-                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to find bind node of ");
+                        fbx_string msg = FBX_TEXT("failed to find bind node of ");
                         msg += pBindNode->Name.Values;
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
@@ -310,7 +309,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
 
             auto* kCluster = FbxCluster::Create(kSDKManager, "");
             if(!kCluster){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to create FbxCluster");
+                fbx_string msg = FBX_TEXT("failed to create FbxCluster");
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
                 msg += FBX_TEXT("\")");
@@ -328,7 +327,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             kCluster->SetTransformLinkMatrix(kMatLink);
 
             if(!kSkin->AddCluster(kCluster)){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to add cluster");
+                fbx_string msg = FBX_TEXT("failed to add cluster");
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
                 msg += FBX_TEXT("\")");
@@ -348,7 +347,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             const auto* pTargetNode = pDeform->TargetNode;
 
             if(!pTargetNode){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("skin deformer must have value not null");
+                fbx_string msg = FBX_TEXT("skin deformer must have value not null");
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
                 msg += FBX_TEXT("\")");
@@ -360,7 +359,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             {
                 auto f = nodeBinder.find(pTargetNode);
                 if(f == nodeBinder.cend()){
-                    std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to find target node of ");
+                    fbx_string msg = FBX_TEXT("failed to find target node of ");
                     msg += pTargetNode->Name.Values;
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
@@ -371,7 +370,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
 
             auto* kCluster = FbxCluster::Create(kSDKManager, "");
             if(!kCluster){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to create FbxCluster");
+                fbx_string msg = FBX_TEXT("failed to create FbxCluster");
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
                 msg += FBX_TEXT("\")");
@@ -392,7 +391,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             kCluster->SetTransformLinkMatrix(kMatDeformLink);
 
             if(!kSkin->AddCluster(kCluster)){
-                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to add cluster");
+                fbx_string msg = FBX_TEXT("failed to add cluster");
                 msg += FBX_TEXT("(errored in \"");
                 msg += strName;
                 msg += FBX_TEXT("\")");
@@ -436,7 +435,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
             {
                 auto f = clusterFinder.find(iCluster.first);
                 if(f == clusterFinder.end()){
-                    std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to link cluster");
+                    fbx_string msg = FBX_TEXT("failed to link cluster");
                     msg += FBX_TEXT("(errored in \"");
                     msg += strName;
                     msg += FBX_TEXT("\")");
@@ -452,7 +451,7 @@ bool SHRInitSkinData(FbxManager* kSDKManager, PoseNodeList& poseNodeList, const 
     }
 
     if(kMesh->AddDeformer(kSkin) < 0){
-        std::basic_string<FBX_CHAR> msg = FBX_TEXT("an error occurred while adding deformer");
+        fbx_string msg = FBX_TEXT("an error occurred while adding deformer");
         msg += FBX_TEXT("(errored in \"");
         msg += strName;
         msg += FBX_TEXT("\")");

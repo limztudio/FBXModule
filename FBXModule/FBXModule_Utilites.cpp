@@ -8,7 +8,6 @@
 #include "stdafx.h"
 
 #include <algorithm>
-#include <unordered_map>
 
 #include "FBXMath.h"
 #include "FBXShared.h"

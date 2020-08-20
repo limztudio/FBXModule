@@ -12,12 +12,12 @@
 #include "FBXShared.h"
 
 
-std::stack<std::basic_string<FBX_CHAR>> shr_errorStack;
-std::stack<std::basic_string<FBX_CHAR>> shr_warningStack;
+fbx_stack<fbx_string> shr_errorStack;
+fbx_stack<fbx_string> shr_warningStack;
 
 
 void SHRPushErrorMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos){
-    std::basic_string<FBX_CHAR> _new = strMessage;
+    fbx_string _new = strMessage;
     _new += FBX_TEXT("\nfrom: ");
     _new += strCallPos;
     _new += FBX_TEXT('\n');
@@ -25,7 +25,7 @@ void SHRPushErrorMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos)
     assert(!_new.c_str());
     shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(const std::basic_string<FBX_CHAR>& strMessage, const FBX_CHAR* strCallPos){
+void SHRPushErrorMessage(const fbx_string& strMessage, const FBX_CHAR* strCallPos){
     auto _new = strMessage;
     _new += FBX_TEXT("\nfrom: ");
     _new += strCallPos;
@@ -34,7 +34,7 @@ void SHRPushErrorMessage(const std::basic_string<FBX_CHAR>& strMessage, const FB
     assert(!_new.c_str());
     shr_errorStack.emplace(std::move(_new));
 }
-void SHRPushErrorMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHAR* strCallPos){
+void SHRPushErrorMessage(fbx_string&& strMessage, const FBX_CHAR* strCallPos){
     auto _new = std::move(strMessage);
     _new += FBX_TEXT("\nfrom: ");
     _new += strCallPos;
@@ -45,14 +45,14 @@ void SHRPushErrorMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHA
 }
 
 void SHRPushWarningMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos){
-    std::basic_string<FBX_CHAR> _new = strMessage;
+    fbx_string _new = strMessage;
     _new += FBX_TEXT("\nfrom: ");
     _new += strCallPos;
     _new += FBX_TEXT('\n');
 
     shr_warningStack.emplace(std::move(_new));
 }
-void SHRPushWarningMessage(const std::basic_string<FBX_CHAR>& strMessage, const FBX_CHAR* strCallPos){
+void SHRPushWarningMessage(const fbx_string& strMessage, const FBX_CHAR* strCallPos){
     auto _new = strMessage;
     _new += FBX_TEXT("\nfrom: ");
     _new += strCallPos;
@@ -60,7 +60,7 @@ void SHRPushWarningMessage(const std::basic_string<FBX_CHAR>& strMessage, const 
 
     shr_warningStack.emplace(std::move(_new));
 }
-void SHRPushWarningMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHAR* strCallPos){
+void SHRPushWarningMessage(fbx_string&& strMessage, const FBX_CHAR* strCallPos){
     auto _new = std::move(strMessage);
     _new += FBX_TEXT("\nfrom: ");
     _new += strCallPos;

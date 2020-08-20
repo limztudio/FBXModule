@@ -7,8 +7,6 @@
 
 #include "stdafx.h"
 
-#include <unordered_set>
-
 #include <FBXAssign.hpp>
 
 #include "FBXUtilites.h"
@@ -18,7 +16,7 @@
 using namespace fbxsdk;
 
 
-static std::unordered_set<const FbxCluster*, PointerHasher<const FbxCluster*>> ins_nodeUsageChecker;
+static fbx_unordered_set<const FbxCluster*, PointerHasher<const FbxCluster*>> ins_nodeUsageChecker;
 
 
 class _VertexInfo{
@@ -78,7 +76,7 @@ public:
 public:
     fbxsdk::FbxDouble3 position;
 
-    std::vector<SkinInfo> skinData;
+    fbx_vector<SkinInfo> skinData;
 
     Vector4Container layeredColor;
 
@@ -86,7 +84,7 @@ public:
     Unit3Container layeredBinormal;
     Unit3Container layeredTangent;
 
-    std::vector<std::pair<std::basic_string<char>, fbxsdk::FbxDouble2>> layeredUV;
+    fbx_vector<std::pair<fbx_basic_string<char>, fbxsdk::FbxDouble2>> layeredUV;
 };
 static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
     {
@@ -229,11 +227,11 @@ static inline bool operator==(const _VertexInfoKey& lhs, const _VertexInfoKey& r
 }
 
 
-static std::vector<_VertexInfo> ins_aosVertices;
-static std::vector<_PolygonInfo> ins_aosPolygons;
+static fbx_vector<_VertexInfo> ins_aosVertices;
+static fbx_vector<_PolygonInfo> ins_aosPolygons;
 
-static std::unordered_map<_VertexInfoKey, unsigned int, CustomHasher<_VertexInfoKey>> ins_aosVertexFinder;
-static std::vector<unsigned int> ins_flatVertexBinder;
+static fbx_unordered_map<_VertexInfoKey, unsigned int, CustomHasher<_VertexInfoKey>> ins_aosVertexFinder;
+static fbx_vector<unsigned int> ins_flatVertexBinder;
 
 
 static inline void ins_fillAOSContainers(const NodeData* pNodeData){

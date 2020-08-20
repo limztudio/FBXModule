@@ -8,10 +8,6 @@
 #pragma once
 
 
-#include <string>
-#include <vector>
-#include <unordered_map>
-
 #include <fbxsdk.h>
 #include <FBXNode.hpp>
 
@@ -218,7 +214,7 @@ using Float4 = Container4<float>;
 
 class CustomStream : public FbxStream{
 public:
-    CustomStream(FbxManager* kSDKManager, std::basic_string<FBX_CHAR>&& fileName, const FBX_CHAR* mode, bool ascii = false);
+    CustomStream(FbxManager* kSDKManager, fbx_string&& fileName, const FBX_CHAR* mode, bool ascii = false);
     virtual ~CustomStream();
 
 
@@ -251,8 +247,8 @@ public:
 
 
 private:
-    std::basic_string<FBX_CHAR> m_fileName;
-    std::basic_string<FBX_CHAR> m_fileMode;
+    fbx_string m_fileName;
+    fbx_string m_fileMode;
 
     FILE* m_file;
 
@@ -300,8 +296,8 @@ public:
         for(unsigned int i = 0u; i < len; ++i)
             m_oldData[i] = func(i);
     }
-    OverlapReducer(const std::vector<T>& data) : m_oldData(data){}
-    OverlapReducer(std::vector<T>&& data) : m_oldData(std::move(data)){}
+    OverlapReducer(const fbx_vector<T>& data) : m_oldData(data){}
+    OverlapReducer(fbx_vector<T>&& data) : m_oldData(std::move(data)){}
 
 
 public:
@@ -311,8 +307,8 @@ public:
         for(size_t i = 0; i < len; ++i)
             m_oldData[i] = func(i);
     }
-    inline void init(const std::vector<T>& data){ m_oldData = data; }
-    inline void init(std::vector<T>&& data){ m_oldData = std::(data); }
+    inline void init(const fbx_vector<T>& data){ m_oldData = data; }
+    inline void init(fbx_vector<T>&& data){ m_oldData = std::(data); }
 
 
 public:
@@ -350,19 +346,19 @@ public:
     }
 
 public:
-    inline const std::vector<T>& getConvertedTable()const{ return m_convData; }
-    inline std::vector<T>& getConvertedTable(){ return m_convData; }
+    inline const fbx_vector<T>& getConvertedTable()const{ return m_convData; }
+    inline fbx_vector<T>& getConvertedTable(){ return m_convData; }
 
-    inline const std::vector<unsigned int>& getOldToConvertIndexer()const{ return m_oldToConvIndexer; }
-    inline std::vector<unsigned int>& getOldToConvertIndexer(){ return m_oldToConvIndexer; }
+    inline const fbx_vector<unsigned int>& getOldToConvertIndexer()const{ return m_oldToConvIndexer; }
+    inline fbx_vector<unsigned int>& getOldToConvertIndexer(){ return m_oldToConvIndexer; }
 
 
 private:
-    std::vector<T> m_oldData;
-    std::vector<T> m_convData;
+    fbx_vector<T> m_oldData;
+    fbx_vector<T> m_convData;
 
-    std::vector<unsigned int> m_oldToConvIndexer;
-    std::unordered_map<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>, size_t, CustomHasher<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>>> m_comparer;
+    fbx_vector<unsigned int> m_oldToConvIndexer;
+    fbx_unordered_map<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>, size_t, CustomHasher<__hidden_FBXModule::_OverlapReducer_Compare_Key<T>>> m_comparer;
 };
 
 
@@ -413,7 +409,7 @@ static inline void CopyArrayData(LHS<LHS_T>& lhs, const RHS* rhs, INDEX_TYPE len
 }
 
 template<template<typename> typename LHS, typename TYPE>
-static inline void CopyString(LHS<TYPE>& lhs, const std::basic_string<TYPE>& rhs){
+static inline void CopyString(LHS<TYPE>& lhs, const fbx_basic_string<TYPE>& rhs){
     const auto lenStr = rhs.length();
     if(lenStr){
         lhs.Assign(lenStr + 1);
@@ -436,10 +432,10 @@ static inline void CopyString(LHS<TYPE>& lhs, const TYPE* rhs){
 }
 
 template<template<typename> typename TABLE, typename TYPE>
-static inline std::basic_string<TYPE> ToString(const TABLE<TYPE>& str){
+static inline fbx_basic_string<TYPE> ToString(const TABLE<TYPE>& str){
     if(str.Length)
-        return std::basic_string<TYPE>(str.Values);
-    return std::basic_string<TYPE>();
+        return fbx_basic_string<TYPE>(str.Values);
+    return fbx_basic_string<TYPE>();
 }
 
 static inline fbxsdk::FbxAMatrix GetGeometry(fbxsdk::FbxNode* kNode){
@@ -453,20 +449,20 @@ static inline fbxsdk::FbxAMatrix GetGeometry(fbxsdk::FbxNode* kNode){
 }
 
 template<typename L_TYPE, typename R_TYPE>
-static inline std::basic_string<L_TYPE> ConvertString(const std::basic_string<R_TYPE>& strSrc){ return strSrc; }
+static inline fbx_basic_string<L_TYPE> ConvertString(const fbx_basic_string<R_TYPE>& strSrc){ return strSrc; }
 
 template<typename L_TYPE, typename R_TYPE>
-static inline std::basic_string<L_TYPE> ConvertString(std::basic_string<R_TYPE>&& strSrc){ return std::move(strSrc); }
+static inline fbx_basic_string<L_TYPE> ConvertString(fbx_basic_string<R_TYPE>&& strSrc){ return std::move(strSrc); }
 
 template<typename L_TYPE, typename R_TYPE>
-static inline std::basic_string<L_TYPE> ConvertString(const R_TYPE* strSrc){ return std::basic_string<L_TYPE>(strSrc); }
+static inline fbx_basic_string<L_TYPE> ConvertString(const R_TYPE* strSrc){ return fbx_basic_string<L_TYPE>(strSrc); }
 
 template<typename CTYPE, typename VALUE>
-static inline std::basic_string<CTYPE> ToString(VALUE v){ return std::basic_string<CTYPE>(); }
+static inline fbx_basic_string<CTYPE> ToString(VALUE v){ return fbx_basic_string<CTYPE>(); }
 
 template<>
-inline std::basic_string<wchar_t> ConvertString(const std::basic_string<char>& strA){
-    std::basic_string<wchar_t> strW{};
+inline fbx_basic_string<wchar_t> ConvertString(const fbx_basic_string<char>& strA){
+    fbx_basic_string<wchar_t> strW{};
     if(strA.length() > 0u){
         for(const auto& curFlag : __hidden_FBXModule::_flagList_toW){
             auto len = MultiByteToWideChar(curFlag.codePage, curFlag.flag, strA.c_str(), (int)strA.size(), nullptr, 0);
@@ -476,14 +472,13 @@ inline std::basic_string<wchar_t> ConvertString(const std::basic_string<char>& s
             MultiByteToWideChar(curFlag.codePage, curFlag.flag, strA.c_str(), (int)strA.size(), strW.data(), (int)strW.size());
             return strW;
         }
-
         throw std::runtime_error("invalid character sequence");
     }
     return strW;
 }
 template<>
-inline std::basic_string<char> ConvertString(const std::basic_string<wchar_t>& strW){
-    std::basic_string<char> strA{};
+inline fbx_basic_string<char> ConvertString(const fbx_basic_string<wchar_t>& strW){
+    fbx_basic_string<char> strA{};
     if(strW.length() > 0u){
         for(const auto& curFlag : __hidden_FBXModule::_flagList_toA){
             auto len = WideCharToMultiByte(curFlag.codePage, curFlag.flag, strW.c_str(), (int)strW.size(), nullptr, 0, nullptr, 0);
@@ -499,19 +494,19 @@ inline std::basic_string<char> ConvertString(const std::basic_string<wchar_t>& s
 }
 
 template<>
-inline std::basic_string<wchar_t> ConvertString(std::basic_string<char>&& strA){ return ConvertString<wchar_t, char>(strA); }
+inline fbx_basic_string<wchar_t> ConvertString(fbx_basic_string<char>&& strA){ return ConvertString<wchar_t, char>(strA); }
 template<>
-inline std::basic_string<char> ConvertString(std::basic_string<wchar_t>&& strW){ return ConvertString<char, wchar_t>(strW); }
+inline fbx_basic_string<char> ConvertString(fbx_basic_string<wchar_t>&& strW){ return ConvertString<char, wchar_t>(strW); }
 
 template<>
-inline std::basic_string<wchar_t> ConvertString(const char* strA){ return ConvertString<wchar_t, char>(std::basic_string<char>(strA)); }
+inline fbx_basic_string<wchar_t> ConvertString(const char* strA){ return ConvertString<wchar_t, char>(fbx_basic_string<char>(strA)); }
 template<>
-inline std::basic_string<char> ConvertString(const wchar_t* strW){ return ConvertString<char, wchar_t>(std::basic_string<wchar_t>(strW)); }
+inline fbx_basic_string<char> ConvertString(const wchar_t* strW){ return ConvertString<char, wchar_t>(fbx_basic_string<wchar_t>(strW)); }
 
 template<typename VALUE>
-static inline std::basic_string<char> ToString(VALUE v){ return std::to_string(v); }
+static inline fbx_basic_string<char> ToString(VALUE v){ return fbx_to_string(v); }
 template<typename VALUE>
-static inline std::basic_string<wchar_t> ToString(VALUE v){ return std::to_wstring(v); }
+static inline fbx_basic_string<wchar_t> ToString(VALUE v){ return fbx_to_wstring(v); }
 
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode){
     auto kMatGeometry = GetGeometry(kNode);

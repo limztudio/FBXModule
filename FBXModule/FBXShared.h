@@ -8,12 +8,6 @@
 #pragma once
 
 
-#include <stack>
-#include <vector>
-#include <unordered_set>
-#include <unordered_map>
-#include <string>
-
 #include <fbxsdk.h>
 
 #include "FBXUtilites.h"
@@ -24,13 +18,13 @@
 // structures
 // Common ////////////////////////////////////////////////////////////////////////////////////////////
 
-using UintContainer = std::vector<unsigned int>;
-using IntContainer = std::vector<int>;
-using Uint3Container = std::vector<Uint3>;
-using Int3Container = std::vector<Int3>;
-using Vector3Container = std::vector<fbxsdk::FbxDouble3>;
-using Vector4Container = std::vector<fbxsdk::FbxDouble4>;
-using Unit3Container = std::vector<fbxsdk::FbxDouble3>;
+using UintContainer = fbx_vector<unsigned int>;
+using IntContainer = fbx_vector<int>;
+using Uint3Container = fbx_vector<Uint3>;
+using Int3Container = fbx_vector<Int3>;
+using Vector3Container = fbx_vector<fbxsdk::FbxDouble3>;
+using Vector4Container = fbx_vector<fbxsdk::FbxDouble4>;
+using Unit3Container = fbx_vector<fbxsdk::FbxDouble3>;
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
@@ -68,22 +62,22 @@ public:
     }
 
 public:
-    inline const std::vector<fbxsdk::FbxSurfaceMaterial*>& getTable()const{ return matTable; }
+    inline const fbx_vector<fbxsdk::FbxSurfaceMaterial*>& getTable()const{ return matTable; }
 
 
 private:
-    std::vector<fbxsdk::FbxSurfaceMaterial*> matTable;
-    std::unordered_map<fbxsdk::FbxSurfaceMaterial*, unsigned int, PointerHasher<fbxsdk::FbxSurfaceMaterial*>> matFinder;
+    fbx_vector<fbxsdk::FbxSurfaceMaterial*> matTable;
+    fbx_unordered_map<fbxsdk::FbxSurfaceMaterial*, unsigned int, PointerHasher<fbxsdk::FbxSurfaceMaterial*>> matFinder;
 };
 
 // FBXShared_Mesh ////////////////////////////////////////////////////////////////////////////////////
 
 struct TexcoordTable{
-    std::basic_string<char> name;
-    std::vector<fbxsdk::FbxDouble2> table;
+    fbx_basic_string<char> name;
+    fbx_vector<fbxsdk::FbxDouble2> table;
 };
 
-using ControlPointRemap = std::vector<std::unordered_set<unsigned int>>;
+using ControlPointRemap = fbx_vector<fbx_unordered_set<unsigned int>>;
 
 struct LayerElement{
     UintContainer materials;
@@ -108,9 +102,9 @@ struct SkinData{
     fbxsdk::FbxDouble weight;
 };
 
-using SkinInfoContainer = std::vector<std::vector<SkinInfo>>;
+using SkinInfoContainer = fbx_vector<fbx_vector<SkinInfo>>;
 
-using BoneOffsetMatrixMap = std::unordered_map<fbxsdk::FbxCluster*, std::pair<fbxsdk::FbxAMatrix, fbxsdk::FbxAMatrix>, PointerHasher<fbxsdk::FbxCluster*>>;
+using BoneOffsetMatrixMap = fbx_unordered_map<fbxsdk::FbxCluster*, std::pair<fbxsdk::FbxAMatrix, fbxsdk::FbxAMatrix>, PointerHasher<fbxsdk::FbxCluster*>>;
 
 // FBXShared_BoneCombination /////////////////////////////////////////////////////////////////////////
 
@@ -122,34 +116,34 @@ struct MeshAttributeElement{
     unsigned long VertexLast;
 };
 
-using MeshAttribute = std::vector<MeshAttributeElement>;
-using BoneCombination = std::vector<fbxsdk::FbxCluster*>;
+using MeshAttribute = fbx_vector<MeshAttributeElement>;
+using BoneCombination = fbx_vector<fbxsdk::FbxCluster*>;
 
 // FBXShared_Node ////////////////////////////////////////////////////////////////////////////////////
 
 struct NodeData{
-    std::basic_string<char> strName;
+    fbx_basic_string<char> strName;
 
     FbxAMatrix kTransformMatrix;
 
     UintContainer bufMaterials;
 
     MeshAttribute bufMeshAttribute;
-    std::vector<BoneCombination> bufBoneCombination;
+    fbx_vector<BoneCombination> bufBoneCombination;
 
     Vector3Container bufPositions;
     Uint3Container bufIndices;
 
-    std::vector<LayerElement> bufLayers;
+    fbx_vector<LayerElement> bufLayers;
 
     SkinInfoContainer bufSkinData;
     BoneOffsetMatrixMap mapBoneDeformMatrices;
 };
 
-using FbxNodeToExportNode = std::unordered_map<fbxsdk::FbxNode*, FBXNode*, PointerHasher<fbxsdk::FbxNode*>>;
-using ImportNodeToFbxNode = std::unordered_map<const FBXNode*, fbxsdk::FbxNode*, PointerHasher<const FBXNode*>>;
+using FbxNodeToExportNode = fbx_unordered_map<fbxsdk::FbxNode*, FBXNode*, PointerHasher<fbxsdk::FbxNode*>>;
+using ImportNodeToFbxNode = fbx_unordered_map<const FBXNode*, fbxsdk::FbxNode*, PointerHasher<const FBXNode*>>;
 
-using PoseNodeList = std::unordered_set<fbxsdk::FbxNode*, PointerHasher<fbxsdk::FbxNode*>>;
+using PoseNodeList = fbx_unordered_set<fbxsdk::FbxNode*, PointerHasher<fbxsdk::FbxNode*>>;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
@@ -180,7 +174,7 @@ public:
     T world;
 };
 template<typename T>
-using AnimationKeyFrames = std::vector<AnimationKeyFrame<T>>;
+using AnimationKeyFrames = fbx_vector<AnimationKeyFrame<T>>;
 
 struct AnimationNode{
     fbxsdk::FbxNode* bindNode;
@@ -192,10 +186,10 @@ struct AnimationNode{
 struct AnimationStack{
     FbxAnimStack* animStack;
     FbxTime endTime;
-    std::vector<AnimationNode> nodes;
+    fbx_vector<AnimationNode> nodes;
 };
 
-using AnimationNodes = std::vector<fbxsdk::FbxNode*>;
+using AnimationNodes = fbx_vector<fbxsdk::FbxNode*>;
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
@@ -211,8 +205,8 @@ extern FBXRoot* shr_root;
 
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
-extern std::stack<std::basic_string<FBX_CHAR>> shr_errorStack;
-extern std::stack<std::basic_string<FBX_CHAR>> shr_warningStack;
+extern fbx_stack<fbx_string> shr_errorStack;
+extern fbx_stack<fbx_string> shr_warningStack;
 
 // FBXShared_Copy ///////////////////////////////////////////////////////////////////////////////////
 
@@ -261,12 +255,12 @@ extern void SHRDeleteRoot();
 // FBXShared_Error ///////////////////////////////////////////////////////////////////////////////////
 
 extern void SHRPushErrorMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos);
-extern void SHRPushErrorMessage(const std::basic_string<FBX_CHAR>& strMessage, const FBX_CHAR* strCallPos);
-extern void SHRPushErrorMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHAR* strCallPos);
+extern void SHRPushErrorMessage(const fbx_string& strMessage, const FBX_CHAR* strCallPos);
+extern void SHRPushErrorMessage(fbx_string&& strMessage, const FBX_CHAR* strCallPos);
 
 extern void SHRPushWarningMessage(const FBX_CHAR* strMessage, const FBX_CHAR* strCallPos);
-extern void SHRPushWarningMessage(const std::basic_string<FBX_CHAR>& strMessage, const FBX_CHAR* strCallPos);
-extern void SHRPushWarningMessage(std::basic_string<FBX_CHAR>&& strMessage, const FBX_CHAR* strCallPos);
+extern void SHRPushWarningMessage(const fbx_string& strMessage, const FBX_CHAR* strCallPos);
+extern void SHRPushWarningMessage(fbx_string&& strMessage, const FBX_CHAR* strCallPos);
 
 // FBXShared_Copy ///////////////////////////////////////////////////////////////////////////////////
 

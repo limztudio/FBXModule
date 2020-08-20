@@ -7,13 +7,10 @@
 
 #include "stdafx.h"
 
-#include <map>
-#include <unordered_set>
-
 #include "FBXShared.h"
 
 
-using _ClusterCountChecker = std::unordered_set<FbxCluster*, PointerHasher<FbxCluster*>>;
+using _ClusterCountChecker = fbx_unordered_set<FbxCluster*, PointerHasher<FbxCluster*>>;
 
 class _OrderedKey{
 public:
@@ -59,8 +56,8 @@ struct _MeshPolyValue{
     UintContainer polyIndices;
 };
 
-using _TempMeshPolys = std::map<_OrderedKey, UintContainer>;
-using _MeshPolys = std::multimap<_OrderedKey, _MeshPolyValue>;
+using _TempMeshPolys = fbx_map<_OrderedKey, UintContainer>;
+using _MeshPolys = fbx_multimap<_OrderedKey, _MeshPolyValue>;
 
 
 static _TempMeshPolys ins_tmpMeshPolys;
@@ -68,13 +65,13 @@ static _MeshPolys ins_meshPolys;
 
 static _ClusterCountChecker ins_localClusterCounterChecker[2];
 
-static std::unordered_map<_OrderdKeyWithIndex, unsigned int, CustomHasher<_OrderdKeyWithIndex>> ins_vertOldToNew;
-static std::vector<unsigned int> ins_vertNewToOld;
+static fbx_unordered_map<_OrderdKeyWithIndex, unsigned int, CustomHasher<_OrderdKeyWithIndex>> ins_vertOldToNew;
+static fbx_vector<unsigned int> ins_vertNewToOld;
 
 static Vector3Container ins_bufPositions;
 static Uint3Container ins_bufIndices;
 
-static std::vector<LayerElement> ins_bufLayers;
+static fbx_vector<LayerElement> ins_bufLayers;
 
 static SkinInfoContainer ins_bufSkinData;
 

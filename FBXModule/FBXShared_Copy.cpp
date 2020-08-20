@@ -7,13 +7,11 @@
 
 #include "stdafx.h"
 
-#include <unordered_map>
-
 #include "FBXUtilites.h"
 #include "FBXShared.h"
 
 
-static std::unordered_map<const FBXNode*, FBXNode*, PointerHasher<const FBXNode*>> ins_nodeBinder;
+static fbx_unordered_map<const FBXNode*, FBXNode*, PointerHasher<const FBXNode*>> ins_nodeBinder;
 
 
 static void ins_initNodeBinder(FBXNode* dest, const FBXNode* src){

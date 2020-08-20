@@ -8,7 +8,6 @@
 #include <windows.h>
 
 #include <string>
-#include <unordered_map>
 
 #define FBX_CHAR TCHAR
 #include <FBXModule.hpp>

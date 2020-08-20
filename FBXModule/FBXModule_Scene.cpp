@@ -7,8 +7,6 @@
 
 #include "stdafx.h"
 
-#include <string>
-
 #include <FBXModule.hpp>
 
 #include "FBXUtilites.h"
