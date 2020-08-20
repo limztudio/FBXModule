@@ -31,7 +31,7 @@ public:
         :
         orgDir(GetCurrentDirectory(0, nullptr), 0)
     {
-        GetCurrentDirectory(orgDir.length(), orgDir.data());
+        GetCurrentDirectory(DWORD(orgDir.length()), orgDir.data());
         SetCurrentDirectory(changeDir.c_str());
     }
     ~_DirectoryModifier(){

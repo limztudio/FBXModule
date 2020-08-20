@@ -157,13 +157,8 @@ public:
         for(; FBX_PTRDIFFU(s - rhs.Values) < rhs.Length; ++s, ++d)
             (*d) = (*s);
     }
-    FBXStaticArray(std::initializer_list<T> table){
-        assert(table.size() <= Length);
-
-        auto* p = Values;
-        for(auto& i : table)
-            (*p++) = std::move(i);
-    }
+    template<typename... U>
+    FBXStaticArray(U... args) : Values{ static_cast<T>(args)... }{}
 
 
 public:

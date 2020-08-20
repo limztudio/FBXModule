@@ -107,7 +107,7 @@ public:
     template<class _Objty, class... _Types>
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS inline void construct(_Objty* const _Ptr, _Types&&... _Args){
         // construct _Objty(_Types...) at _Ptr
-        ::new (const_cast<void*>(static_cast<const volatile void *>(_Ptr)))_Objty(std::forward<_Types>(_Args)...);
+        ::new (const_cast<void*>(static_cast<const volatile void*>(_Ptr)))_Objty(std::forward<_Types>(_Args)...);
     }
 
     template<class _Uty>

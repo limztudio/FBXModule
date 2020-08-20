@@ -174,8 +174,8 @@ static inline Float3 Normalize3(const Float3& flt3){
 
     xmm_v = DirectX::XMVector3Normalize(xmm_v);
 
-    alignas(16) Float3 ret;
-    DirectX::XMStoreFloat3A((DirectX::XMFLOAT3A*)ret.raw, xmm_v);
+    Float3 ret;
+    DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)ret.raw, xmm_v);
 
     return ret;
 }

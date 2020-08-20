@@ -291,9 +291,9 @@ class OverlapReducer{
 public:
     OverlapReducer(){}
     template<typename FILL_FUNC>
-    OverlapReducer(unsigned int len, FILL_FUNC func){
+    OverlapReducer(FBX_SIZE len, FILL_FUNC func){
         m_oldData.resize(len);
-        for(unsigned int i = 0u; i < len; ++i)
+        for(FBX_SIZE i = 0u; i < len; ++i)
             m_oldData[i] = func(i);
     }
     OverlapReducer(const fbx_vector<T>& data) : m_oldData(data){}

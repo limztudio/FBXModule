@@ -33,12 +33,12 @@ public:
 
 
 public:
-    _PositionSkin& operator=(const _PositionSkin& rhs){
+    _PositionSkin& operator=(const _PositionSkin& rhs)noexcept{
         position = rhs.position;
         skinInfos = rhs.skinInfos;
         return (*this);
     }
-    _PositionSkin& operator=(_PositionSkin&& rhs){
+    _PositionSkin& operator=(_PositionSkin&& rhs)noexcept{
         position = rhs.position;
         skinInfos = rhs.skinInfos;
         return (*this);
@@ -213,7 +213,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
             materials.clear();
             materials.reserve((size_t)kNode->GetMaterialCount());
 
-            positions.resize(size_t(polyCount * 3));
+            positions.resize(size_t(polyCount) * 3u);
             indices.resize((size_t)polyCount);
 
             layers.resize((size_t)layerCount);
@@ -815,7 +815,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
     }
 
     { // create control point & make convert table
-        OverlapReducer<_PositionSkin> reducer(pNode->Vertices.Length, [&pNode, &pSkinnedNode](size_t idx)->_PositionSkin{
+        OverlapReducer<_PositionSkin> reducer(pNode->Vertices.Length, [&pNode, &pSkinnedNode](FBX_SIZE idx)->_PositionSkin{
             const auto& oldVal = pNode->Vertices.Values[idx];
 
             Float3 newVal;
@@ -947,7 +947,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             kColor->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
             kColor->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
-            OverlapReducer<Float4> reducer(iLayer.Color.Length, [&iLayer](size_t idx)->Float4{
+            OverlapReducer<Float4> reducer(iLayer.Color.Length, [&iLayer](FBX_SIZE idx)->Float4{
                 const auto& oldVal = iLayer.Color.Values[idx];
 
                 Float4 newVal;
@@ -987,7 +987,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             kNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
             kNormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
-            OverlapReducer<Float3> reducer(iLayer.Normal.Length, [&iLayer](size_t idx)->Float3{
+            OverlapReducer<Float3> reducer(iLayer.Normal.Length, [&iLayer](FBX_SIZE idx)->Float3{
                 const auto& oldVal = iLayer.Normal.Values[idx];
 
                 Float3 newVal;
@@ -1028,7 +1028,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             kBinormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
             kBinormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
-            OverlapReducer<Float3> reducer(iLayer.Binormal.Length, [&iLayer](size_t idx)->Float3{
+            OverlapReducer<Float3> reducer(iLayer.Binormal.Length, [&iLayer](FBX_SIZE idx)->Float3{
                 const auto& oldVal = iLayer.Binormal.Values[idx];
 
                 Float3 newVal;
@@ -1069,7 +1069,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             kTangent->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
             kTangent->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
-            OverlapReducer<Float3> reducer(iLayer.Tangent.Length, [&iLayer](size_t idx)->Float3{
+            OverlapReducer<Float3> reducer(iLayer.Tangent.Length, [&iLayer](FBX_SIZE idx)->Float3{
                 const auto& oldVal = iLayer.Tangent.Values[idx];
 
                 Float3 newVal;
@@ -1110,7 +1110,7 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
             kUV->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
             kUV->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
-            OverlapReducer<Float2> reducer(iLayer.Texcoord.Length, [&iLayer](size_t idx)->Float2{
+            OverlapReducer<Float2> reducer(iLayer.Texcoord.Length, [&iLayer](FBX_SIZE idx)->Float2{
                 const auto& oldVal = iLayer.Texcoord.Values[idx];
 
                 Float2 newVal;
