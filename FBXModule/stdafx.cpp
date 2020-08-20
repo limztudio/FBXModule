@@ -34,3 +34,5 @@
 
 
 #include "stdafx.h"
+
+#include "AllocateManager.hpp"

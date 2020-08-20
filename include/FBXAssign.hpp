@@ -20,16 +20,13 @@ typedef unsigned long FBX_SIZE;
 #endif
 
 
-#include <malloc.h>
-
-
 template<typename T>
 static inline T* FBXAllocate(FBX_SIZE len){
-    return reinterpret_cast<T*>(malloc(len * sizeof(T)));
+    return reinterpret_cast<T*>(FBX_ALLOC(len * sizeof(T)));
 }
 
 static inline void FBXFree(void* obj){
-    free(obj);
+    FBX_FREE(obj);
 }
 
 
@@ -37,7 +34,7 @@ template<typename T, typename... ARGS>
 static inline T* FBXNew(ARGS&&... args){
     static const FBX_SIZE size = sizeof(T);
 
-    void* ptr = malloc(size);
+    void* ptr = FBX_ALLOC(size);
     if(ptr){
         auto* _new = reinterpret_cast<T*>(ptr);
         ::new(_new) T(std::forward<ARGS>(args)...);
@@ -51,7 +48,7 @@ static inline T* FBXNew(ARGS&&... args){
 template<typename T>
 static inline void FBXDelete(T* obj){
     obj->~T();
-    free(obj);
+    FBX_FREE(obj);
 }
 
 

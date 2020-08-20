@@ -9,6 +9,14 @@
 #define _FBXMODULE_HPP_
 
 
+#ifndef __FBXM_DLL_EXPORT
+
+#include <malloc.h>
+#define FBX_ALLOC malloc
+#define FBX_FREE free
+
+#endif
+
 #include "FBXConfig.hpp"
 
 #include "FBXType.hpp"
@@ -51,7 +59,9 @@
 
 
 #ifndef __FBXM_DLL_EXPORT
+
 #include "FBXAllocate.hpp"
+
 #endif
 
 

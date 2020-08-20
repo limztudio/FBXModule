@@ -14,3 +14,7 @@
 #include <windows.h>
 
 #include <fbxsdk.h>
+
+
+extern void* FBX_ALLOC(size_t size);
+extern void FBX_FREE(void* object);
