@@ -98,7 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FBXMath.h" />
-    <None Include="FBXModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FBXModule.rc" />

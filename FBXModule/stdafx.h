@@ -28,20 +28,6 @@
 #include <fbxsdk.h>
 
 
-#ifndef _CXX17_DEPRECATE_ALLOCATOR_VOID
-// N4659 D.9 [depr.default.allocator]
-#if _HAS_CXX17 && !defined(_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING) \
-	&& !defined(_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
-#define _CXX17_DEPRECATE_ALLOCATOR_VOID	[[deprecated("warning STL4009: " \
-	"std::allocator<void> is deprecated in C++17. " \
-	"You can define _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING " \
-	"or _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS to acknowledge that you have received this warning.")]]
-#else
-#define _CXX17_DEPRECATE_ALLOCATOR_VOID
-#endif
-#endif
-
-
 #ifndef FBXM_DECLSPEC_ALLOCATOR
 #ifdef __clang__
 #define FBXM_DECLSPEC_ALLOCATOR
@@ -138,7 +124,7 @@ public:
 
 // CLASS allocator<void>
 template<>
-class _CXX17_DEPRECATE_ALLOCATOR_VOID FBX_ALLOCATOR<void>{
+class FBX_ALLOCATOR<void>{
     // generic allocator for type void
 public:
     using value_type = void;
