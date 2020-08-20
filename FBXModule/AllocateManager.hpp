@@ -11,7 +11,7 @@
 
 #include <cassert>
 
-#include <malloc.h>
+#include <jemalloc/jemalloc.h>
 
 
 size_t dynamicAllocCount = 0u;
@@ -23,7 +23,7 @@ void* FBX_ALLOC(size_t size){
         return nullptr;
     }
 
-    auto* ptr = malloc(size);
+    auto* ptr = je_malloc(size);
     if(!ptr){
         FBXM_ASSERT(("ALLOCATION FAILED: failed to allocate.", ptr != nullptr));
         return nullptr;
@@ -43,7 +43,7 @@ void FBX_FREE(void* object){
         return;
     }
 
-    free(object);
+    je_free(object);
     --dynamicAllocCount;
 }
 

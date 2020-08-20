@@ -84,6 +84,11 @@
   <ItemGroup>
     <ResourceCompile Include="FBXModule.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\jemalloc\jemalloc.vcxproj">
+      <Project>{8d6bb292-9e1c-413d-9f98-4864bdc1514a}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{AE89CFD7-6000-418C-9DE5-1C235DE41310}</ProjectGuid>
@@ -95,21 +100,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -117,7 +122,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -168,9 +173,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;JEMALLOC_EXPORT=;JEMALLOC_STATIC;WIN32;_WINDOWS;_USRDLL;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../internal_include;../internal_include/msvc_compat;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/utf-8 -msse4.1 %(AdditionalOptions)</AdditionalOptions>
@@ -189,9 +194,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;JEMALLOC_EXPORT=;JEMALLOC_STATIC;WIN32;_WINDOWS;_USRDLL;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../internal_include;../internal_include/msvc_compat;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/utf-8 -msse4.1 %(AdditionalOptions)</AdditionalOptions>
@@ -212,9 +217,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;JEMALLOC_EXPORT=;JEMALLOC_STATIC;WIN32;_WINDOWS;_USRDLL;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../internal_include;../internal_include/msvc_compat;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
@@ -241,9 +246,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;WIN32;_WINDOWS;_USRDLL;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FBX_CHAR=TCHAR;FBX_TEXT=TEXT;__FBXM_DLL_EXPORT;JEMALLOC_EXPORT=;JEMALLOC_STATIC;WIN32;_WINDOWS;_USRDLL;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>./;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../internal_include;../internal_include/msvc_compat;../include;./fbxsdk/include;./DirectXMath/Inc</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>

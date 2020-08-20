@@ -1,0 +1,266 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\internal_include\jemalloc\internal\arena.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\assert.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\atomic.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\base.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\bitmap.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\chunk.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\chunk_dss.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\chunk_mmap.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\ckh.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\ctl.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\extent.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\hash.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\huge.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\jemalloc_internal.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\jemalloc_internal_decls.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\jemalloc_internal_defs.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\jemalloc_internal_macros.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\mb.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\mutex.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\nstime.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\pages.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\ph.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\private_namespace.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\private_unnamespace.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\prng.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\prof.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\public_namespace.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\public_unnamespace.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\ql.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\qr.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\quarantine.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\rb.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\rtree.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\size_classes.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\smoothstep.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\spin.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\stats.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\tcache.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\ticker.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\tsd.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\util.h" />
+    <ClInclude Include="..\internal_include\jemalloc\internal\witness.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc_defs.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc_macros.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc_mangle.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc_protos.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc_protos_jet.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc_rename.h" />
+    <ClInclude Include="..\internal_include\jemalloc\jemalloc_typedefs.h" />
+    <ClInclude Include="..\internal_include\msvc_compat\C99\stdbool.h" />
+    <ClInclude Include="..\internal_include\msvc_compat\C99\stdint.h" />
+    <ClInclude Include="..\internal_include\msvc_compat\strings.h" />
+    <ClInclude Include="..\internal_include\msvc_compat\windows_extra.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include=".\arena.c" />
+    <ClCompile Include=".\atomic.c" />
+    <ClCompile Include=".\base.c" />
+    <ClCompile Include=".\bitmap.c" />
+    <ClCompile Include=".\chunk.c" />
+    <ClCompile Include=".\chunk_dss.c" />
+    <ClCompile Include=".\chunk_mmap.c" />
+    <ClCompile Include=".\ckh.c" />
+    <ClCompile Include=".\ctl.c" />
+    <ClCompile Include=".\extent.c" />
+    <ClCompile Include=".\hash.c" />
+    <ClCompile Include=".\huge.c" />
+    <ClCompile Include=".\jemalloc.c" />
+    <ClCompile Include=".\mb.c" />
+    <ClCompile Include=".\mutex.c" />
+    <ClCompile Include=".\nstime.c" />
+    <ClCompile Include=".\pages.c" />
+    <ClCompile Include=".\prng.c" />
+    <ClCompile Include=".\prof.c" />
+    <ClCompile Include=".\quarantine.c" />
+    <ClCompile Include=".\rtree.c" />
+    <ClCompile Include=".\spin.c" />
+    <ClCompile Include=".\stats.c" />
+    <ClCompile Include=".\tcache.c" />
+    <ClCompile Include=".\ticker.c" />
+    <ClCompile Include=".\tsd.c" />
+    <ClCompile Include=".\util.c" />
+    <ClCompile Include=".\witness.c" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8D6BB292-9E1C-413D-9F98-4864BDC1514A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>jemalloc</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)exec\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)__build_obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)exec\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)__build_obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)exec\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)__build_obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)exec\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)__build_obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>JEMALLOC_DEBUG;_REENTRANT;JEMALLOC_EXPORT=;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../internal_include;../internal_include/msvc_compat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DisableSpecificWarnings>4090;4146;4267;4334</DisableSpecificWarnings>
+      <ProgramDataBaseFileName>$(OutputPath)$(TargetName).pdb</ProgramDataBaseFileName>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>JEMALLOC_DEBUG;_REENTRANT;JEMALLOC_EXPORT=;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../internal_include;../internal_include/msvc_compat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DisableSpecificWarnings>4090;4146;4267;4334</DisableSpecificWarnings>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <MinimalRebuild>false</MinimalRebuild>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_REENTRANT;JEMALLOC_EXPORT=;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../internal_include;../internal_include/msvc_compat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>4090;4146;4267;4334</DisableSpecificWarnings>
+      <ProgramDataBaseFileName>$(OutputPath)$(TargetName).pdb</ProgramDataBaseFileName>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_REENTRANT;JEMALLOC_EXPORT=;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../internal_include;../internal_include/msvc_compat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>4090;4146;4267;4334</DisableSpecificWarnings>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
