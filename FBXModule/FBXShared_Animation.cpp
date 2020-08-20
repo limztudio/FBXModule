@@ -118,12 +118,16 @@ static inline FbxAnimCurveDef::EInterpolationType ins_convInterpolationType(FBXA
 
 
 bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const AnimationNodes& kNodeTable){
-    //static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)");
 
 
     auto* kDefaultAnimStack = kScene->GetCurrentAnimationStack();
 
     auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
+    if(!kAnimEvaluator){
+        SHRPushErrorMessage(FBX_TEXT("an error occurred while calling GetAnimationEvaluator(...)"), __name_of_this_func);
+        return false;
+    }
 
     const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
 
