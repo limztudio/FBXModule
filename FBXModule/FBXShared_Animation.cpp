@@ -128,6 +128,10 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
         SHRPushErrorMessage(FBX_TEXT("an error occurred while calling GetAnimationEvaluator(...)"), __name_of_this_func);
         return false;
     }
+    if(!dynamic_cast<FbxAnimEvaluator*>(kAnimEvaluator)){
+        SHRPushErrorMessage(FBX_TEXT("FbxAnimEvaluator object returned by GetAnimationEvaluator(...) is corrupted"), __name_of_this_func);
+        return false;
+    }
 
     const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
 
