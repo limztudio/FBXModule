@@ -1,5 +1,9 @@
 #include <tchar.h>
 
+#ifdef _DEBUG
+#include <crtdbg.h>
+#endif
+
 #include <iostream>
 #include <windows.h>
 
@@ -47,7 +51,8 @@ static inline void loadLib(){
     FBXBindFunction(library);
 }
 static inline void closeLib(){
-    FreeLibrary(library);
+    if(!FreeLibrary(library))
+        TOUT << GetLastError();
 }
 
 
@@ -99,14 +104,34 @@ static inline void deleteFBXObjects(){
 
 
 int _tmain(int argc, TCHAR* argv[]){
+#ifdef _DEBUG
+    {
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF);
+
+        _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
+        _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
+        _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_DEBUG);
+    }
+#endif
+
     setting.AxisSystem = FBXAxisSystem::FBXAxisSystem_Preset_Max;
 
     loadLib();
 
-    loadFile(argv[1]);
-    storeNode(argv[2]);
+    //for(size_t i = 0u; i < 10u; ++i)
+    {
+        loadFile(argv[1]);
+        storeNode(argv[2]);
+        deleteFBXObjects();
+    }
 
-    deleteFBXObjects();
     closeLib();
+
+#ifdef _DEBUG
+    {
+        _CrtDumpMemoryLeaks();
+    }
+#endif
+
     return 0;
 }
