@@ -19,13 +19,13 @@ size_t dynamicAllocCount = 0u;
 
 void* FBX_ALLOC(size_t size){
     if(!size){
-        assert(("ALLOCATION FAILED: tried to allocate 0.", size != 0u));
+        FBXM_ASSERT(("ALLOCATION FAILED: tried to allocate 0.", size != 0u));
         return nullptr;
     }
 
     auto* ptr = malloc(size);
     if(!ptr){
-        assert(("ALLOCATION FAILED: failed to allocate.", ptr != nullptr));
+        FBXM_ASSERT(("ALLOCATION FAILED: failed to allocate.", ptr != nullptr));
         return nullptr;
     }
 
@@ -34,12 +34,12 @@ void* FBX_ALLOC(size_t size){
 }
 void FBX_FREE(void* object){
     if(!dynamicAllocCount){
-        assert(("ALLOCATION FAILED: object must be allocated through 'FBX_ALLOC'.", dynamicAllocCount != 0u));
+        FBXM_ASSERT(("DEALLOCATION FAILED: object must be allocated through 'FBX_ALLOC'.", dynamicAllocCount != 0u));
         return;
     }
 
     if(!object){
-        assert(("ALLOCATION FAILED: object must not be null.", object != nullptr));
+        FBXM_ASSERT(("DEALLOCATION FAILED: object must not be null.", object != nullptr));
         return;
     }
 

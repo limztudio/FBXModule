@@ -126,11 +126,11 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
         }
     }
 
-    if((*mode == L'r') || (*mode == L'R')){
+    if((*mode == FBX_TEXT('r')) || (*mode == FBX_TEXT('R'))){
         ins_fileMode = 1;
         ins_filePath = szFilePath;
     }
-    else if((*mode == L'w') || (*mode == L'W')){
+    else if((*mode == FBX_TEXT('w')) || (*mode == FBX_TEXT('W'))){
         ins_fileMode = 2;
         ins_filePath = szFilePath;
     }

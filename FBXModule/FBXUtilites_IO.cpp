@@ -10,6 +10,7 @@
 #include <tchar.h>
 
 #include <algorithm>
+#include <filesystem>
 
 #include "FBXUtilites.h"
 
@@ -54,8 +55,18 @@ CustomStream::~CustomStream(){
 }
 
 bool CustomStream::Open(void* /*streamData*/){
-    if(!m_file)
+    if(!m_file){
+        if(*m_fileMode.cbegin() == FBX_TEXT('w')){
+            std::filesystem::path rootPath(m_fileName.c_str());
+            rootPath = rootPath.parent_path();
+
+            if(!std::filesystem::is_directory(rootPath)){
+                if(!std::filesystem::create_directories(rootPath))
+                    return false;
+            }
+        }
         _tfopen_s(&m_file, m_fileName.c_str(), m_fileMode.c_str());
+    }
 
     if(m_file != nullptr)
         _fseeki64(m_file, 0, SEEK_SET);

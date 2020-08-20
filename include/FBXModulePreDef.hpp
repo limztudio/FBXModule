@@ -10,7 +10,7 @@
 
 
 #ifndef __FBXM_CALL_TYPE
-#define __FBXM_CALL_TYPE __stdcall
+#define __FBXM_CALL_TYPE __cdecl
 #endif
 
 

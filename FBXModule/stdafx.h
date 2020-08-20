@@ -28,6 +28,9 @@
 #include <fbxsdk.h>
 
 
+#define FBXM_ASSERT _ASSERTE
+
+
 extern void* FBX_ALLOC(size_t size);
 extern void FBX_FREE(void* object);
 
