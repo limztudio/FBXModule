@@ -52,7 +52,7 @@ static unsigned char ins_fileMode = 0;
 
 
 __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* mode, const void* ioSetting){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXOpenFile(const char*, const char*, unsigned long, const void*)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("FBXOpenFile(const char*, const char*, unsigned long, const void*)");
 
 
     if(ioSetting)
@@ -60,7 +60,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
 
     {
         if(shr_ioSetting.MaxBoneCountPerMesh < shr_ioSetting.MaxParticipateClusterPerVertex){
-            SHRPushErrorMessage(TEXT("\'MaxBoneCountPerMesh\' must be bigger or equal to \'MaxParticipateClusterPerVertex\'"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("\'MaxBoneCountPerMesh\' must be bigger or equal to \'MaxParticipateClusterPerVertex\'"), __name_of_this_func);
             return false;
         }
 
@@ -86,7 +86,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
                 kUpVector = decltype(kUpVector)(-FbxAxisSystem::eZAxis);
                 break;
             default:
-                SHRPushErrorMessage(TEXT("UpVector in \'AxisSystem\' has invalid value"), __name_of_this_func);
+                SHRPushErrorMessage(FBX_TEXT("UpVector in \'AxisSystem\' has invalid value"), __name_of_this_func);
                 return false;
             }
 
@@ -105,7 +105,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
                 kFrontVector = decltype(kFrontVector)(-FbxAxisSystem::eParityOdd);
                 break;
             default:
-                SHRPushErrorMessage(TEXT("FrontVector in \'AxisSystem\' has invalid value"), __name_of_this_func);
+                SHRPushErrorMessage(FBX_TEXT("FrontVector in \'AxisSystem\' has invalid value"), __name_of_this_func);
                 return false;
             }
 
@@ -118,7 +118,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
                 kCoordSystem = FbxAxisSystem::eRightHanded;
                 break;
             default:
-                SHRPushErrorMessage(TEXT("CoordSystem in \'AxisSystem\' has invalid value"), __name_of_this_func);
+                SHRPushErrorMessage(FBX_TEXT("CoordSystem in \'AxisSystem\' has invalid value"), __name_of_this_func);
                 return false;
             }
 
@@ -139,24 +139,24 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
         ins_fileMode = 0;
         ins_filePath.clear();
 
-        SHRPushErrorMessage(TEXT("unexpected file mode"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("unexpected file mode"), __name_of_this_func);
         return false;
     }
 
     if(shr_SDKManager){
-        SHRPushErrorMessage(TEXT("close current file before open a new one"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("close current file before open a new one"), __name_of_this_func);
         return false;
     }
 
     shr_SDKManager = FbxManager::Create();
     if(!shr_SDKManager){
-        SHRPushErrorMessage(TEXT("null returned from FbxManager::Create(...)"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("null returned from FbxManager::Create(...)"), __name_of_this_func);
         return false;
     }
 
     ins_IOSettings = FbxIOSettings::Create(shr_SDKManager, IOSROOT);
     if(!ins_IOSettings){
-        SHRPushErrorMessage(TEXT("null returned from FbxIOSettings::Create(...)"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("null returned from FbxIOSettings::Create(...)"), __name_of_this_func);
         return false;
     }
 
@@ -164,7 +164,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
 
     shr_scene = FbxScene::Create(shr_SDKManager, "");
     if(!shr_scene){
-        SHRPushErrorMessage(TEXT("null returned from FbxScene::Create(...)"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("null returned from FbxScene::Create(...)"), __name_of_this_func);
         return false;
     }
 
@@ -172,14 +172,14 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
 
     if(ins_fileMode == 1){
         if(!std::filesystem::exists(ins_filePath)){
-            std::basic_string<FBX_CHAR> msg = TEXT('\"') + ins_filePath.__tstring();
-            msg += TEXT("\" file not exist");
+            std::basic_string<FBX_CHAR> msg = FBX_TEXT('\"') + ins_filePath.__tstring();
+            msg += FBX_TEXT("\" file not exist");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
         if(std::filesystem::is_directory(ins_filePath)){
-            std::basic_string<FBX_CHAR> msg = TEXT('\"') + ins_filePath.__tstring();
-            msg += TEXT("\" must be a file not directory");
+            std::basic_string<FBX_CHAR> msg = FBX_TEXT('\"') + ins_filePath.__tstring();
+            msg += FBX_TEXT("\" must be a file not directory");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
@@ -188,15 +188,15 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
 
         auto* kImporter = FbxImporter::Create(shr_SDKManager, "");
         if(!kImporter){
-            SHRPushErrorMessage(TEXT("null returned from FbxImporter::Create(...)"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("null returned from FbxImporter::Create(...)"), __name_of_this_func);
             return false;
         }
 
-        CustomStream stream(shr_SDKManager, ins_filePath.__tstring(), TEXT("rb"));
+        CustomStream stream(shr_SDKManager, ins_filePath.__tstring(), FBX_TEXT("rb"));
 
         void* streamData = nullptr;
         if(!kImporter->Initialize(&stream, streamData, -1, ins_IOSettings)){
-            SHRPushErrorMessage(TEXT("an error occurred from FbxImporter::Initialize(...)"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("an error occurred from FbxImporter::Initialize(...)"), __name_of_this_func);
             return false;
         }
 
@@ -213,7 +213,7 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
         }
 
         if(!kImporter->Import(shr_scene)){
-            SHRPushErrorMessage(TEXT("an error occurred from FbxImporter::Import(...)"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("an error occurred from FbxImporter::Import(...)"), __name_of_this_func);
             return false;
         }
 
@@ -225,11 +225,11 @@ __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* 
     return true;
 }
 __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXCloseFile(void)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("FBXCloseFile(void)");
 
 
     if((!shr_SDKManager) || (!ins_IOSettings)){
-        SHRPushErrorMessage(TEXT("file must be opened/created before close"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("file must be opened/created before close"), __name_of_this_func);
         return false;
     }
 
@@ -238,12 +238,12 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
     }
     else if(ins_fileMode == 2){
         if(ins_filePath.empty()){
-            SHRPushErrorMessage(TEXT("file name must be set before export"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("file name must be set before export"), __name_of_this_func);
             return false;
         }
         if(std::filesystem::is_directory(ins_filePath)){
-            std::basic_string<FBX_CHAR> msg = TEXT('\"') + ins_filePath.__tstring();
-            msg += TEXT("\" must be a file path");
+            std::basic_string<FBX_CHAR> msg = FBX_TEXT('\"') + ins_filePath.__tstring();
+            msg += FBX_TEXT("\" must be a file path");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
@@ -264,20 +264,20 @@ __FBXM_MAKE_FUNC(bool, FBXCloseFile, void){
 
         auto* kExporter = FbxExporter::Create(shr_SDKManager, "");
         if(!kExporter){
-            SHRPushErrorMessage(TEXT("null returned from FbxExporter::Create(...)"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("null returned from FbxExporter::Create(...)"), __name_of_this_func);
             return false;
         }
 
-        CustomStream stream(shr_SDKManager, ins_filePath.__tstring(), TEXT("wb"), shr_ioSetting.ExportAsASCII);
+        CustomStream stream(shr_SDKManager, ins_filePath.__tstring(), FBX_TEXT("wb"), shr_ioSetting.ExportAsASCII);
 
         void* streamData = nullptr;
         if(!kExporter->Initialize(&stream, streamData, writeFormat, ins_IOSettings)){
-            SHRPushErrorMessage(TEXT("an error occurred from FbxExporter::Initialize(...)"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("an error occurred from FbxExporter::Initialize(...)"), __name_of_this_func);
             return false;
         }
 
         if(!kExporter->Export(shr_scene)){
-            SHRPushErrorMessage(TEXT("an error occurred from FbxExporter::Export(...)"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("an error occurred from FbxExporter::Export(...)"), __name_of_this_func);
             return false;
         }
         kExporter->Destroy();
