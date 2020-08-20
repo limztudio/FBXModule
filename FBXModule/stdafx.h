@@ -28,6 +28,15 @@
 #include <fbxsdk.h>
 
 
+#ifndef FBXM_DECLSPEC_ALLOCATOR
+#ifdef __clang__
+#define FBXM_DECLSPEC_ALLOCATOR
+#else
+#define FBXM_DECLSPEC_ALLOCATOR	__declspec(allocator)
+#endif
+#endif
+
+
 #define FBXM_ASSERT _ASSERTE
 
 
@@ -81,7 +90,7 @@ public:
         FBX_FREE(_Ptr);
     }
 
-    _NODISCARD _DECLSPEC_ALLOCATOR inline _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count){
+    _NODISCARD FBXM_DECLSPEC_ALLOCATOR inline _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count){
         // allocate array of _Count elements
         void* ptr = FBX_ALLOC(std::_Get_size_of_n<sizeof(_Ty)>(_Count));
         if(!ptr)
@@ -90,7 +99,7 @@ public:
         return reinterpret_cast<_Ty*>(ptr);
     }
 
-    _NODISCARD _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS _DECLSPEC_ALLOCATOR inline _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count, const void*){
+    _NODISCARD _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS FBXM_DECLSPEC_ALLOCATOR inline _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count, const void*){
         // allocate array of _Count elements, ignore hint
         return (allocate(_Count));
     }
