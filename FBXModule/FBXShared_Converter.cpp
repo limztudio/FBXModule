@@ -20,7 +20,7 @@ using namespace fbxsdk;
 
 
 bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRConvertNodes(FbxManager*, FbxNode*)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRConvertNodes(FbxManager*, FbxNode*)");
 
 
     auto* kNodeAttribute = kNode->GetNodeAttribute();
@@ -32,7 +32,7 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
             FbxGeometryConverter kConverter(kSDKManager);
 
             if(!kConverter.Triangulate(kNode->GetNodeAttribute(), true)){
-                SHRPushErrorMessage(TEXT("failed to triangulate mesh object"), __name_of_this_func);
+                SHRPushErrorMessage(FBX_TEXT("failed to triangulate mesh object"), __name_of_this_func);
                 return false;
             }
 
@@ -44,7 +44,7 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
             FbxGeometryConverter kConverter(kSDKManager);
 
             if(!kConverter.Triangulate(kNode->GetNodeAttribute(), true)){
-                SHRPushErrorMessage(TEXT("failed to triangulate nurbs object"), __name_of_this_func);
+                SHRPushErrorMessage(FBX_TEXT("failed to triangulate nurbs object"), __name_of_this_func);
                 return false;
             }
             //kConverter.TriangulateInPlace(kNode);
@@ -57,7 +57,7 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
             FbxGeometryConverter kConverter(kSDKManager);
 
             if(!kConverter.Triangulate(kNode->GetNodeAttribute(), true)){
-                SHRPushErrorMessage(TEXT("failed to triangulate patch object"), __name_of_this_func);
+                SHRPushErrorMessage(FBX_TEXT("failed to triangulate patch object"), __name_of_this_func);
                 return false;
             }
             //kConverter.TriangulateInPlace(kNode);
@@ -78,7 +78,7 @@ bool SHRConvertNodes(FbxManager* kSDKManager, FbxNode* kNode){
     return true;
 }
 bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
-    //static const FBX_CHAR __name_of_this_func[] = TEXT("SHRConvertAnimations(FbxManager*, FbxScene*)");
+    //static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRConvertAnimations(FbxManager*, FbxScene*)");
 
 
     //FbxAnimCurveFilterKeyReducer kFilterReducer;
@@ -102,12 +102,12 @@ bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
     //        continue;
 
     //    if(!kFilterReducer.Apply(kAnimStack)){
-    //        SHRPushErrorMessage(TEXT("failed to apply reduction filter to animation"), __name_of_this_func);
+    //        SHRPushErrorMessage(FBX_TEXT("failed to apply reduction filter to animation"), __name_of_this_func);
     //        return false;
     //    }
 
     //    if(!kFilterConstantReducer.Apply(kAnimStack)){
-    //        SHRPushErrorMessage(TEXT("failed to apply constant reduction filter to animation"), __name_of_this_func);
+    //        SHRPushErrorMessage(FBX_TEXT("failed to apply constant reduction filter to animation"), __name_of_this_func);
     //        return false;
     //    }
     //}
@@ -115,7 +115,7 @@ bool SHRConvertAnimations(FbxManager* kSDKManager, FbxScene* kScene){
     return true;
 }
 bool SHRPreparePointCaches(FbxScene* kScene){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRPreparePointCaches(FbxScene*)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRPreparePointCaches(FbxScene*)");
 
 
     for(auto edxNode = kScene->GetNodeCount(), idxNode = 0; idxNode < edxNode; ++idxNode){
@@ -148,7 +148,7 @@ bool SHRPreparePointCaches(FbxScene* kScene){
                 // turn it on if you need it.
                 //
                 if(!kCache->ConvertFromMCToPC2(FbxTime::GetFrameRate(kScene->GetGlobalSettings().GetTimeMode()), 0)){
-                    SHRPushErrorMessage(TEXT("failed to ConvertFromMCToPC2"), __name_of_this_func);
+                    SHRPushErrorMessage(FBX_TEXT("failed to ConvertFromMCToPC2"), __name_of_this_func);
                     return false;
 
                     // Conversion failed, retrieve the error here

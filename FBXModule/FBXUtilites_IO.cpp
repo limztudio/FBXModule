@@ -32,12 +32,12 @@ CustomStream::CustomStream(FbxManager* kSDKManager, std::basic_string<FBX_CHAR>&
 
     std::transform(m_fileMode.begin(), m_fileMode.end(), m_fileMode.begin(), tolower);
 
-    if(*m_fileMode.cbegin() == TEXT('r')){
+    if(*m_fileMode.cbegin() == FBX_TEXT('r')){
         static const char format[] = "FBX (*.fbx)";
         m_readerID = kSDKManager->GetIOPluginRegistry()->FindReaderIDByDescription(format);
         m_writerID = -1;
     }
-    else if(*m_fileMode.cbegin() == TEXT('w')){
+    else if(*m_fileMode.cbegin() == FBX_TEXT('w')){
         if(ascii){
             static const char format[] = "FBX ascii (*.fbx)";
             m_writerID = kSDKManager->GetIOPluginRegistry()->FindWriterIDByDescription(format);

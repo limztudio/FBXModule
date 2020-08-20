@@ -120,7 +120,7 @@ static inline FbxAnimCurveDef::EInterpolationType ins_convInterpolationType(FBXA
 
 
 bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const AnimationNodes& kNodeTable){
-    //static const FBX_CHAR __name_of_this_func[] = TEXT("SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)");
+    //static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)");
 
 
     auto* kDefaultAnimStack = kScene->GetCurrentAnimationStack();
@@ -311,7 +311,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
     return true;
 }
 bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode, FBXDynamicArray<FBXAnimation>* pAnimations){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRLoadAnimations(FbxManager*, FbxScene*, const FbxNodeToExportNode&, FBXDynamicArray<FBXAnimation>*)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRLoadAnimations(FbxManager*, FbxScene*, const FbxNodeToExportNode&, FBXDynamicArray<FBXAnimation>*)");
 
 
     AnimationNodes kNodeTable;
@@ -344,10 +344,10 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
             {
                 auto f = fbxNodeToExportNode.find(iNode.bindNode);
                 if(f == fbxNodeToExportNode.end()){
-                    std::basic_string<FBX_CHAR> msg = TEXT("bind node not found");
-                    msg += TEXT("(errored in \"");
+                    std::basic_string<FBX_CHAR> msg = FBX_TEXT("bind node not found");
+                    msg += FBX_TEXT("(errored in \"");
                     msg += strNodeName;
-                    msg += TEXT("\")");
+                    msg += FBX_TEXT("\")");
                     SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
@@ -396,7 +396,7 @@ bool SHRLoadAnimations(FbxManager* kSDKManager, FbxScene* kScene, const FbxNodeT
 }
 
 bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXAnimation* pAnimStack){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("SHRStoreAnimation(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXAnimation*)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRStoreAnimation(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXAnimation*)");
 
 
     FbxAnimCurveFilterUnroll kFilterUnroll;
@@ -409,10 +409,10 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
 
         auto* kAnimStack = FbxAnimStack::Create(kScene, ConvertString<char>(strStackName).c_str());
         if(!kAnimStack){
-            std::basic_string<FBX_CHAR> msg = TEXT("failed to create FbxAnimStack");
-            msg += TEXT("(errored in \"");
+            std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to create FbxAnimStack");
+            msg += FBX_TEXT("(errored in \"");
             msg += strStackName;
-            msg += TEXT("\")");
+            msg += FBX_TEXT("\")");
             SHRPushErrorMessage(std::move(msg), __name_of_this_func);
             return false;
         }
@@ -431,16 +431,16 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
         }
 
         {
-            static const std::basic_string<FBX_CHAR> strLayerName = TEXT("Base Layer");
+            static const std::basic_string<FBX_CHAR> strLayerName = FBX_TEXT("Base Layer");
 
             auto* kAnimLayer = FbxAnimLayer::Create(kScene, ConvertString<char>(strLayerName).c_str());
             if(!kAnimLayer){
-                std::basic_string<FBX_CHAR> msg = TEXT("failed to create FbxAnimLayer");
-                msg += TEXT("(errored in \"");
+                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to create FbxAnimLayer");
+                msg += FBX_TEXT("(errored in \"");
                 msg += strLayerName;
-                msg += TEXT("\" of stack \"");
+                msg += FBX_TEXT("\" of stack \"");
                 msg += strStackName;
-                msg += TEXT("\")");
+                msg += FBX_TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -452,10 +452,10 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                 {
                     auto f = importNodeToFbxNode.find(pAnimNode->BindNode);
                     if(f == importNodeToFbxNode.cend()){
-                        std::basic_string<FBX_CHAR> msg = TEXT("an error occurred while adding key frame. cannot find bind node");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("an error occurred while adding key frame. cannot find bind node");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strNodeName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
@@ -465,36 +465,36 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                 if(pAnimNode->TranslationKeys.Length){ // translation
                     auto* kCurveX = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
                     if(!kCurveX){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of X translation component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of X translation component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
 
                     auto* kCurveY = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
                     if(!kCurveY){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of Y translation component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of Y translation component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
 
                     auto* kCurveZ = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
                     if(!kCurveZ){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of Z translation component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of Z translation component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
@@ -536,36 +536,36 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                 if(pAnimNode->RotationKeys.Length){ // rotation
                     auto* kCurveX = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
                     if(!kCurveX){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of X rotation component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of X rotation component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
 
                     auto* kCurveY = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
                     if(!kCurveY){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of Y rotation component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of Y rotation component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
 
                     auto* kCurveZ = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
                     if(!kCurveZ){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of Z rotation component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of Z rotation component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
@@ -611,12 +611,12 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                         FbxAnimCurve* kCurves[] = { kCurveX, kCurveY, kCurveZ };
 
                         if(!kFilterUnroll.Apply((FbxAnimCurve**)&kCurves, _countof(kCurves))){
-                            std::basic_string<FBX_CHAR> msg = TEXT("failed to unroll rotation component");
-                            msg += TEXT("(errored in \"");
+                            std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to unroll rotation component");
+                            msg += FBX_TEXT("(errored in \"");
                             msg += strLayerName;
-                            msg += TEXT("\" of stack \"");
+                            msg += FBX_TEXT("\" of stack \"");
                             msg += strStackName;
-                            msg += TEXT("\")");
+                            msg += FBX_TEXT("\")");
                             SHRPushWarningMessage(std::move(msg), __name_of_this_func);
                         }
                     }
@@ -625,36 +625,36 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
                 if(pAnimNode->ScalingKeys.Length){ // scaling
                     auto* kCurveX = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
                     if(!kCurveX){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of X scaling component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of X scaling component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
 
                     auto* kCurveY = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
                     if(!kCurveY){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of Y scaling component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of Y scaling component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
 
                     auto* kCurveZ = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
                     if(!kCurveZ){
-                        std::basic_string<FBX_CHAR> msg = TEXT("failed to get curve of Z scaling component");
-                        msg += TEXT("(errored in \"");
+                        std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to get curve of Z scaling component");
+                        msg += FBX_TEXT("(errored in \"");
                         msg += strLayerName;
-                        msg += TEXT("\" of stack \"");
+                        msg += FBX_TEXT("\" of stack \"");
                         msg += strStackName;
-                        msg += TEXT("\")");
+                        msg += FBX_TEXT("\")");
                         SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                         return false;
                     }
@@ -695,12 +695,12 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
             }
 
             if(!kAnimStack->AddMember(kAnimLayer)){
-                std::basic_string<FBX_CHAR> msg = TEXT("failed to add FbxAnimLayer member to FbxAnimStack");
-                msg += TEXT("(errored in \"");
+                std::basic_string<FBX_CHAR> msg = FBX_TEXT("failed to add FbxAnimLayer member to FbxAnimStack");
+                msg += FBX_TEXT("(errored in \"");
                 msg += strLayerName;
-                msg += TEXT("\" of stack \"");
+                msg += FBX_TEXT("\" of stack \"");
                 msg += strStackName;
-                msg += TEXT("\")");
+                msg += FBX_TEXT("\")");
                 SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                 return false;
             }
@@ -710,7 +710,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
     return true;
 }
 bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXDynamicArray<FBXAnimation>& animStacks){
-    //static const FBX_CHAR __name_of_this_func[] = TEXT("SHRStoreAnimations(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXDynamicArray<FBXAnimation>&)");
+    //static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRStoreAnimations(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXDynamicArray<FBXAnimation>&)");
 
 
     for(size_t idxAnimation = 0; idxAnimation < animStacks.Length; ++idxAnimation){

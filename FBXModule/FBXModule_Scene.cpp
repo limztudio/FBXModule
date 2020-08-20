@@ -16,16 +16,16 @@
 
 
 __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXReadScene(void)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("FBXReadScene(void)");
 
 
     if(!shr_root){
-        SHRPushErrorMessage(TEXT("this function is only available on read mode"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("this function is only available on read mode"), __name_of_this_func);
         return false;
     }
 
     if(!shr_scene){
-        SHRPushErrorMessage(TEXT("scene must be opened before read"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("scene must be opened before read"), __name_of_this_func);
         return false;
     }
 
@@ -48,7 +48,7 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
     }
 
     if(!SHRConvertOjbects(shr_SDKManager, shr_scene)){
-        SHRPushErrorMessage(TEXT("failed convert fbx objects"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("failed convert fbx objects"), __name_of_this_func);
         return false;
     }
 
@@ -57,18 +57,18 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
         shr_fbxNodeToExportNode.clear();
 
         if(!SHRGenerateNodeTree(shr_SDKManager, shr_scene, shr_materialTable, shr_fbxNodeToExportNode, &shr_root->Nodes)){
-            SHRPushErrorMessage(TEXT("an error occurred while generating object nodes"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("an error occurred while generating object nodes"), __name_of_this_func);
             return false;
         }
 
         if(!SHRLoadMaterials(shr_materialTable, &shr_root->Materials)){
-            SHRPushErrorMessage(TEXT("an error occurred while loading material data"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("an error occurred while loading material data"), __name_of_this_func);
             return false;
         }
 
         if(!shr_ioSetting.IgnoreAnimationIO){
             if(!SHRLoadAnimations(shr_SDKManager, shr_scene, shr_fbxNodeToExportNode, &shr_root->Animations)){
-                SHRPushErrorMessage(TEXT("an error occurred while loading animation data"), __name_of_this_func);
+                SHRPushErrorMessage(FBX_TEXT("an error occurred while loading animation data"), __name_of_this_func);
                 return false;
             }
         }
@@ -78,7 +78,7 @@ __FBXM_MAKE_FUNC(bool, FBXReadScene, void){
 }
 
 __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
-    static const FBX_CHAR __name_of_this_func[] = TEXT("FBXWriteScene(const void*)");
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("FBXWriteScene(const void*)");
 
 
     const auto* ext_root = reinterpret_cast<const FBXRoot*>(pRoot);
@@ -102,28 +102,28 @@ __FBXM_MAKE_FUNC(bool, FBXWriteScene, const void* pRoot){
     }
 
     if(!shr_scene){
-        SHRPushErrorMessage(TEXT("scene must be created before write"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("scene must be created before write"), __name_of_this_func);
         return false;
     }
 
     if(!SHRStoreMaterials(shr_SDKManager, shr_scene, ext_root->Materials)){
-        SHRPushErrorMessage(TEXT("an error occurred while storing materials"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("an error occurred while storing materials"), __name_of_this_func);
         return false;
     }
 
     if(!SHRStoreNodes(shr_SDKManager, shr_scene, shr_importNodeToFbxNode, shr_poseNodeList, ext_root->Nodes)){
-        SHRPushErrorMessage(TEXT("an error occurred while storing object nodes"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("an error occurred while storing object nodes"), __name_of_this_func);
         return false;
     }
 
     if(!SHRCreateBindPose(shr_SDKManager, shr_scene, shr_poseNodeList)){
-        SHRPushErrorMessage(TEXT("an error occurred while storing bind poses"), __name_of_this_func);
+        SHRPushErrorMessage(FBX_TEXT("an error occurred while storing bind poses"), __name_of_this_func);
         return false;
     }
 
     if(!shr_ioSetting.IgnoreAnimationIO){
         if(!SHRStoreAnimations(shr_SDKManager, shr_scene, shr_importNodeToFbxNode, ext_root->Animations)){
-            SHRPushErrorMessage(TEXT("an error occurred while storing animations"), __name_of_this_func);
+            SHRPushErrorMessage(FBX_TEXT("an error occurred while storing animations"), __name_of_this_func);
             return false;
         }
     }
