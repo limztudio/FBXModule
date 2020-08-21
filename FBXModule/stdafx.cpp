@@ -1,8 +1,8 @@
 ﻿/**
-* @file stdafx.cpp
-* @date 2018/06/15
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file stdafx.cpp
+ * @date 2018/06/15
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifdef _WIN64

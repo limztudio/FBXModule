@@ -1,8 +1,8 @@
 /**
-* @file FBXSkinnedMesh.hpp
-* @date 2019/10/11
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXSkinnedMesh.hpp
+ * @date 2019/10/11
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXSKINNEDMESH_HPP_

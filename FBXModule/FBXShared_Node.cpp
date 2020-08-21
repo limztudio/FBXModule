@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXShared_Node.cpp
-* @date 2019/04/11
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXShared_Node.cpp
+ * @date 2019/04/11
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

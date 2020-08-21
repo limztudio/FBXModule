@@ -1,8 +1,8 @@
 /**
-* @file FBXConfig.hpp
-* @date 2020/06/12
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXConfig.hpp
+ * @date 2020/06/12
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXCONFIG_HPP_

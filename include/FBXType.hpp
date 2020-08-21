@@ -1,8 +1,8 @@
 /**
-* @file FBXType.hpp
-* @date 2019/10/11
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXType.hpp
+ * @date 2019/10/11
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXTYPE_HPP_

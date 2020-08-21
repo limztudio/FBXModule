@@ -1,8 +1,8 @@
 /**
-* @file FBXMesh.hpp
-* @date 2019/10/11
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXMesh.hpp
+ * @date 2019/10/11
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXMESH_HPP_

@@ -1,8 +1,8 @@
 /**
-* @file FBXMaterial.hpp
-* @date 2019/05/27
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXMaterial.hpp
+ * @date 2019/05/27
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXMATERIAL_HPP_

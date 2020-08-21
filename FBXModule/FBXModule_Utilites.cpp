@@ -1,8 +1,8 @@
 /**
-* @file FBXModule_Utilites.cpp
-* @date 2020/06/05
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXModule_Utilites.cpp
+ * @date 2020/06/05
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

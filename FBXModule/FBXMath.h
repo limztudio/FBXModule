@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXMath.h
-* @date 2020/05/21
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXMath.h
+ * @date 2020/05/21
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #pragma once

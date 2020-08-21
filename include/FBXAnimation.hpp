@@ -1,8 +1,8 @@
 /**
-* @file FBXAnimation.hpp
-* @date 2019/04/19
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXAnimation.hpp
+ * @date 2019/04/19
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXANIMATION_HPP_

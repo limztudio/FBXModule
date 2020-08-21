@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXShared_Bone.cpp
-* @date 2020/05/11
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXShared_Bone.cpp
+ * @date 2020/05/11
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

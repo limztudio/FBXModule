@@ -1,8 +1,8 @@
 /**
-* @file FBXAssign.hpp
-* @date 2020/05/08
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXAssign.hpp
+ * @date 2020/05/08
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXASSIGN_HPP_

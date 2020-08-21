@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXModule_Scene.cpp
-* @date 2018/06/17
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXModule_Scene.cpp
+ * @date 2018/06/17
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

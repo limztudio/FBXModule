@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXUtilites_Mesh.cpp
-* @date 2019/04/12
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXUtilites_Mesh.cpp
+ * @date 2019/04/12
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

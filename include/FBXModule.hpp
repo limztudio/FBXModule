@@ -1,8 +1,8 @@
 /**
-* @file FBXModule.hpp
-* @date 2018/06/15
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXModule.hpp
+ * @date 2018/06/15
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXMODULE_HPP_

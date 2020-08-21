@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXUtilites_Skin.cpp
-* @date 2019/04/15
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXUtilites_Skin.cpp
+ * @date 2019/04/15
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

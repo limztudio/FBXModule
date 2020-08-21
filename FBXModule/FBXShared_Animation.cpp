@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXShared_Animation.cpp
-* @date 2019/04/19
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXShared_Animation.cpp
+ * @date 2019/04/19
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

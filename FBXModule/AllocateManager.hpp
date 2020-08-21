@@ -1,8 +1,8 @@
 /**
-* @file AllocateManager.hpp
-* @date 2020/08/20
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file AllocateManager.hpp
+ * @date 2020/08/20
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _ALLOCATEMANAGER_HPP_

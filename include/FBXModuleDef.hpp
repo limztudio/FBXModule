@@ -1,8 +1,8 @@
 /**
-* @file FBXModuleDef.hpp
-* @date 2020/05/27
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXModuleDef.hpp
+ * @date 2020/05/27
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef __FBXM_DLL_EXPORT

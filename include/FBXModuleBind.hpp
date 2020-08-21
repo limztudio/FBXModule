@@ -1,8 +1,8 @@
 /**
-* @file FBXModuleBind.hpp
-* @date 2020/05/28
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXModuleBind.hpp
+ * @date 2020/05/28
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXMODULEBIND_HPP_

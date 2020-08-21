@@ -1,8 +1,8 @@
 /**
-* @file FBXBone.hpp
-* @date 2019/10/11
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXBone.hpp
+ * @date 2019/10/11
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXBONE_HPP_

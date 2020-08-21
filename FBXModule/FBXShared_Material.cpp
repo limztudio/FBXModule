@@ -1,8 +1,8 @@
 ﻿/**
-* @file FBXShared_Material.cpp
-* @date 2020/05/26
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXShared_Material.cpp
+ * @date 2020/05/26
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #include "stdafx.h"

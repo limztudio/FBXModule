@@ -1,8 +1,8 @@
 /**
-* @file FBXNode.hpp
-* @date 2019/04/11
-* @author Lim Taewoo (limztudio@gmail.com)
-*/
+ * @file FBXNode.hpp
+ * @date 2019/04/11
+ * @author Lim Taewoo (limztudio@gmail.com)
+ */
 
 
 #ifndef _FBXNODE_HPP_
