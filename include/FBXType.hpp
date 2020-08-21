@@ -158,7 +158,7 @@ public:
             (*d) = (*s);
     }
     template<typename... U>
-    FBXStaticArray(U... args) : Values{ static_cast<T>(args)... }{}
+    FBXStaticArray(U&&... args) : Values{ static_cast<T>(std::forward<U>(args))... }{}
 
 
 public:
