@@ -12,8 +12,8 @@
 #ifndef __FBXM_DLL_EXPORT
 
 #include <malloc.h>
-#define FBX_ALLOC malloc
-#define FBX_FREE free
+#define FBXM_ALLOC malloc
+#define FBXM_FREE free
 
 #endif
 

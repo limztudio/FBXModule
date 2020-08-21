@@ -22,11 +22,11 @@ typedef unsigned long FBX_SIZE;
 
 template<typename T>
 static inline T* FBXAllocate(FBX_SIZE len){
-    return reinterpret_cast<T*>(FBX_ALLOC(len * sizeof(T)));
+    return reinterpret_cast<T*>(FBXM_ALLOC(len * sizeof(T)));
 }
 
 static inline void FBXFree(void* obj){
-    FBX_FREE(obj);
+    FBXM_FREE(obj);
 }
 
 
@@ -34,7 +34,7 @@ template<typename T, typename... ARGS>
 static inline T* FBXNew(ARGS&&... args){
     static const FBX_SIZE size = sizeof(T);
 
-    void* ptr = FBX_ALLOC(size);
+    void* ptr = FBXM_ALLOC(size);
     if(ptr){
         auto* _new = reinterpret_cast<T*>(ptr);
         ::new(_new) T(std::forward<ARGS>(args)...);
@@ -48,7 +48,7 @@ static inline T* FBXNew(ARGS&&... args){
 template<typename T>
 static inline void FBXDelete(T* obj){
     obj->~T();
-    FBX_FREE(obj);
+    FBXM_FREE(obj);
 }
 
 

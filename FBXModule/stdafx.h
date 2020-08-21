@@ -40,12 +40,15 @@
 #define FBXM_ASSERT _ASSERTE
 
 
-extern void* FBX_ALLOC(size_t size);
-extern void FBX_FREE(void* object);
+extern void* FBXM_ALLOC(std::size_t size);
+extern void* FBXM_ALIGN_ALLOC(std::size_t size, std::align_val_t align);
+
+extern void FBXM_FREE(void* object);
+extern void FBXM_ALIGN_FREE(void* object);
 
 
 template<class _Ty>
-class FBX_ALLOCATOR{
+class FBXM_ALLOCATOR{
 public:
     using _Not_user_specialized = void;
 
@@ -66,7 +69,7 @@ public:
     template<class _Other>
     struct _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS rebind{
         // convert this type to allocator<_Other>
-        using other = FBX_ALLOCATOR<_Other>;
+        using other = FBXM_ALLOCATOR<_Other>;
     };
 
     _NODISCARD _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS inline _Ty* address(_Ty& _Val)const noexcept{
@@ -79,20 +82,20 @@ public:
         return (std::addressof(_Val));
     }
 
-    constexpr FBX_ALLOCATOR()noexcept{}
-    constexpr FBX_ALLOCATOR(const FBX_ALLOCATOR&)noexcept = default;
+    constexpr FBXM_ALLOCATOR()noexcept{}
+    constexpr FBXM_ALLOCATOR(const FBXM_ALLOCATOR&)noexcept = default;
     template<class _Other>
-    constexpr FBX_ALLOCATOR(const FBX_ALLOCATOR<_Other>&)noexcept{}
+    constexpr FBXM_ALLOCATOR(const FBXM_ALLOCATOR<_Other>&)noexcept{}
 
     inline void deallocate(_Ty* const _Ptr, const size_t _Count){
         // deallocate object at _Ptr
         // no overflow check on the following multiply; we assume _Allocate did that check
-        FBX_FREE(_Ptr);
+        FBXM_FREE(_Ptr);
     }
 
     _NODISCARD FBXM_DECLSPEC_ALLOCATOR inline _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count){
         // allocate array of _Count elements
-        void* ptr = FBX_ALLOC(std::_Get_size_of_n<sizeof(_Ty)>(_Count));
+        void* ptr = FBXM_ALLOC(std::_Get_size_of_n<sizeof(_Ty)>(_Count));
         if(!ptr)
             throw std::bad_alloc();
 
@@ -124,7 +127,7 @@ public:
 
 // CLASS allocator<void>
 template<>
-class FBX_ALLOCATOR<void>{
+class FBXM_ALLOCATOR<void>{
     // generic allocator for type void
 public:
     using value_type = void;
@@ -134,20 +137,98 @@ public:
     template<class _Other>
     struct rebind{
         // convert this type to an allocator<_Other>
-        using other = FBX_ALLOCATOR<_Other>;
+        using other = FBXM_ALLOCATOR<_Other>;
     };
 };
 
 template<class _Ty, class _Other>
-_NODISCARD inline bool operator==(const FBX_ALLOCATOR<_Ty>&, const FBX_ALLOCATOR<_Other>&)noexcept{
+_NODISCARD inline bool operator==(const FBXM_ALLOCATOR<_Ty>&, const FBXM_ALLOCATOR<_Other>&)noexcept{
     // test for allocator equality
     return (true);
 }
 
 template<class _Ty, class _Other>
-_NODISCARD inline bool operator!=(const FBX_ALLOCATOR<_Ty>&, const FBX_ALLOCATOR<_Other>&)noexcept{
+_NODISCARD inline bool operator!=(const FBXM_ALLOCATOR<_Ty>&, const FBXM_ALLOCATOR<_Other>&)noexcept{
     // test for allocator inequality
     return (false);
+}
+
+
+inline void* operator new(std::size_t count){
+    auto* ptr = FBXM_ALLOC(count);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+inline void* operator new[](std::size_t count){
+    auto* ptr = FBXM_ALLOC(count);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+inline void* operator new(std::size_t count, const std::nothrow_t&)noexcept{
+    return FBXM_ALLOC(count);
+}
+inline void* operator new[](std::size_t count, const std::nothrow_t&)noexcept{
+    return FBXM_ALLOC(count);
+}
+
+inline void* operator new(std::size_t count, std::align_val_t al){
+    auto* ptr = FBXM_ALIGN_ALLOC(count, al);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+inline void* operator new[](std::size_t count, std::align_val_t al){
+    auto* ptr = FBXM_ALIGN_ALLOC(count, al);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+inline void* operator new(std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept{
+    return FBXM_ALIGN_ALLOC(count, al);
+}
+inline void* operator new[](std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept{
+    return FBXM_ALIGN_ALLOC(count, al);
+}
+
+
+inline void operator delete(void* ptr)noexcept{
+    FBXM_FREE(ptr);
+}
+inline void operator delete[](void* ptr)noexcept{
+    FBXM_FREE(ptr);
+}
+inline void operator delete(void* ptr, std::size_t sz)noexcept{
+    FBXM_FREE(ptr);
+}
+inline void operator delete[](void* ptr, std::size_t sz)noexcept{
+    FBXM_FREE(ptr);
+}
+inline void operator delete(void* ptr, const std::nothrow_t&)noexcept{
+    FBXM_FREE(ptr);
+}
+inline void operator delete[](void* ptr, const std::nothrow_t&)noexcept{
+    FBXM_FREE(ptr);
+}
+
+inline void operator delete(void* ptr, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+inline void operator delete[](void* ptr, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+inline void operator delete(void* ptr, std::size_t sz, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+inline void operator delete[](void* ptr, std::size_t sz, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+inline void operator delete(void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+inline void operator delete[](void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept{
+    FBXM_ALIGN_FREE(ptr);
 }
 
 
@@ -155,20 +236,20 @@ template<
     class _Elem,
     class _Traits = std::char_traits<_Elem>
 >
-using fbx_basic_string = std::basic_string<_Elem, _Traits, FBX_ALLOCATOR<_Elem>>;
+using fbx_basic_string = std::basic_string<_Elem, _Traits, FBXM_ALLOCATOR<_Elem>>;
 using fbx_string = fbx_basic_string<FBX_CHAR>;
 
 template<typename T>
-using fbx_vector = std::vector<T, FBX_ALLOCATOR<T>>;
+using fbx_vector = std::vector<T, FBXM_ALLOCATOR<T>>;
 
 template<typename T>
-using fbx_list = std::list<T, FBX_ALLOCATOR<T>>;
+using fbx_list = std::list<T, FBXM_ALLOCATOR<T>>;
 
 template<typename T>
-using fbx_forward_list = std::forward_list<T, FBX_ALLOCATOR<T>>;
+using fbx_forward_list = std::forward_list<T, FBXM_ALLOCATOR<T>>;
 
 template<typename T>
-using fbx_deque = std::deque<T, FBX_ALLOCATOR<T>>;
+using fbx_deque = std::deque<T, FBXM_ALLOCATOR<T>>;
 
 template<typename T>
 using fbx_stack = std::stack<T, fbx_deque<T>>;
@@ -180,41 +261,41 @@ template<
     class _Kty,
     class _Pr = std::less<_Kty>
 >
-using fbx_set = std::set<_Kty, _Pr, FBX_ALLOCATOR<_Kty>>;
+using fbx_set = std::set<_Kty, _Pr, FBXM_ALLOCATOR<_Kty>>;
 
 template<
     class _Kty,
     class _Pr = std::less<_Kty>
 >
-using fbx_multiset = std::multiset<_Kty, _Pr, FBX_ALLOCATOR<_Kty>>;
-
-template<
-    class _Kty,
-    class _Ty,
-    class _Pr = std::less<_Kty>
->
-using fbx_map = std::map<_Kty, _Ty, _Pr, FBX_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
+using fbx_multiset = std::multiset<_Kty, _Pr, FBXM_ALLOCATOR<_Kty>>;
 
 template<
     class _Kty,
     class _Ty,
     class _Pr = std::less<_Kty>
 >
-using fbx_multimap = std::multimap<_Kty, _Ty, _Pr, FBX_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
+using fbx_map = std::map<_Kty, _Ty, _Pr, FBXM_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
+
+template<
+    class _Kty,
+    class _Ty,
+    class _Pr = std::less<_Kty>
+>
+using fbx_multimap = std::multimap<_Kty, _Ty, _Pr, FBXM_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
 
 template<
     class _Kty,
     class _Hasher = std::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
-using fbx_unordered_set = std::unordered_set<_Kty, _Hasher, _Keyeq, FBX_ALLOCATOR<_Kty>>;
+using fbx_unordered_set = std::unordered_set<_Kty, _Hasher, _Keyeq, FBXM_ALLOCATOR<_Kty>>;
 
 template<
     class _Kty,
     class _Hasher = std::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
-using fbx_unordered_multiset = std::unordered_multiset<_Kty, _Hasher, _Keyeq, FBX_ALLOCATOR<_Kty>>;
+using fbx_unordered_multiset = std::unordered_multiset<_Kty, _Hasher, _Keyeq, FBXM_ALLOCATOR<_Kty>>;
 
 template<
     class _Kty,
@@ -222,7 +303,7 @@ template<
     class _Hasher = std::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
-using fbx_unordered_map = std::unordered_map<_Kty, _Ty, _Hasher, _Keyeq, FBX_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
+using fbx_unordered_map = std::unordered_map<_Kty, _Ty, _Hasher, _Keyeq, FBXM_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
 
 template<
     class _Kty,
@@ -230,7 +311,7 @@ template<
     class _Hasher = std::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
-using fbx_unordered_multimap = std::unordered_multimap<_Kty, _Ty, _Hasher, _Keyeq, FBX_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
+using fbx_unordered_multimap = std::unordered_multimap<_Kty, _Ty, _Hasher, _Keyeq, FBXM_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
 
 
 template<class _Ty>
