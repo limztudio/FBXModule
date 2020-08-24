@@ -61,12 +61,6 @@
     <ClInclude Include="..\include\FBXRoot.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\FBXUtilites.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\FBXAllocate.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="..\include\FBXMaterial.hpp">
       <Filter>include</Filter>
@@ -87,6 +81,12 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="AllocateManager.hpp" />
+    <ClInclude Include="..\include\FBXUtilites_independent.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\FBXUtilites_dependent.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

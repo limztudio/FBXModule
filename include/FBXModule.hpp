@@ -60,7 +60,7 @@
 
 #ifndef __FBXM_DLL_EXPORT
 
-#include "FBXAllocate.hpp"
+#include "FBXUtilites_dependent.hpp"
 
 #endif
 

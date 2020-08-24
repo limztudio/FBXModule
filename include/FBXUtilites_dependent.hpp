@@ -1,16 +1,16 @@
 /**
- * @file FBXAllocate.hpp
+ * @file FBXUtilites_dependent.hpp
  * @date 2020/05/08
  * @author Lim Taewoo (limztudio@gmail.com)
  */
 
 
-#ifndef _FBXALLOCATE_HPP_
-#define _FBXALLOCATE_HPP_
+#ifndef _FBXUTILITES_DEPENDENT_HPP_
+#define _FBXUTILITES_DEPENDENT_HPP_
 
 
 #include "FBXAssign.hpp"
-#include "FBXUtilites.hpp"
+#include "FBXUtilites_independent.hpp"
 
 #include "FBXBase.hpp"
 
@@ -108,4 +108,4 @@ static void FBXCopyRoot(T** pDest, const T* pSrc){
 }
 
 
-#endif // _FBXALLOCATE_HPP_
+#endif // _FBXUTILITES_DEPENDENT_HPP_

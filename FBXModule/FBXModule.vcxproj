@@ -50,7 +50,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\FBXAllocate.hpp" />
+    <ClInclude Include="..\include\FBXUtilites_dependent.hpp" />
     <ClInclude Include="..\include\FBXAnimation.hpp" />
     <ClInclude Include="..\include\FBXAssign.hpp" />
     <ClInclude Include="..\include\FBXBase.hpp" />
@@ -67,7 +67,7 @@
     <ClInclude Include="..\include\FBXRoot.hpp" />
     <ClInclude Include="..\include\FBXSkinnedMesh.hpp" />
     <ClInclude Include="..\include\FBXType.hpp" />
-    <ClInclude Include="..\include\FBXUtilites.hpp" />
+    <ClInclude Include="..\include\FBXUtilites_independent.hpp" />
     <ClInclude Include="AllocateManager.hpp" />
     <ClInclude Include="FBXShared.h" />
     <ClInclude Include="FBXUtilites.h" />

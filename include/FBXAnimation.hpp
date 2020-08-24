@@ -9,7 +9,7 @@
 #define _FBXANIMATION_HPP_
 
 
-#include "FBXUtilites.hpp"
+#include "FBXUtilites_independent.hpp"
 
 #include "FBXBase.hpp"
 

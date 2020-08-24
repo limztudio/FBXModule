@@ -9,7 +9,7 @@
 #define _FBXMATERIAL_HPP_
 
 
-#include "FBXUtilites.hpp"
+#include "FBXUtilites_independent.hpp"
 #include "FBXType.hpp"
 
 #include "FBXBase.hpp"

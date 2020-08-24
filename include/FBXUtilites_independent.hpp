@@ -1,12 +1,12 @@
 /**
- * @file FBXUtilites.hpp
+ * @file FBXUtilites_independent.hpp
  * @date 2020/05/08
  * @author Lim Taewoo (limztudio@gmail.com)
  */
 
 
-#ifndef _FBXUTILITES_HPP_
-#define _FBXUTILITES_HPP_
+#ifndef _FBXUTILITES_INDEPENDENT_HPP_
+#define _FBXUTILITES_INDEPENDENT_HPP_
 
 
 #include "FBXType.hpp"
@@ -116,4 +116,4 @@ static inline NODE*& FBXFindLastAddible(NODE*& pNode){
 }
 
 
-#endif // _FBXUTILITES_HPP_
+#endif // _FBXUTILITES_INDEPENDENT_HPP_
