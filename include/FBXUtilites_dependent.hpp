@@ -121,15 +121,6 @@ static bool FBXCollapseBone(ROOT* pFBXRoot, SKINNED_MESH** pSkinnedMesh, const N
     if((*pSkinnedMesh)->getID() != FBXType::FBXType_SkinnedMesh)
         return false;
 
-    decltype(nodeCount) sameCounter = 0u;
-    for(decltype(nodeCount) idxNode = 0u; idxNode < nodeCount; ++idxNode){
-        if(pOldNodes[idxNode] == pNewNodes[idxNode])
-            ++sameCounter;
-    }
-
-    if(sameCounter == nodeCount)
-        return true;
-
     FBXSkinnedMesh* pInnerMesh = nullptr;
     if(!__hidden_FBXModule_CollapseMesh(reinterpret_cast<void**>(&pInnerMesh), *pSkinnedMesh, reinterpret_cast<const void**>(pOldNodes), reinterpret_cast<const void**>(pNewNodes), nodeCount))
         return false;
