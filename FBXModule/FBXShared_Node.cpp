@@ -129,7 +129,7 @@ static inline bool ins_addMeshNode(
         auto* pMesh = static_cast<FBXMesh*>(pNode);
 
         pMesh->Attributes.Assign(pNodeData->bufMeshAttribute.size());
-        for(size_t idxAttr = 0; idxAttr < pMesh->Attributes.Length; ++idxAttr){
+        for(size_t idxAttr = 0u; idxAttr < pMesh->Attributes.Length; ++idxAttr){
             const auto& iOldAttr = pNodeData->bufMeshAttribute[idxAttr];
             auto& iNewAttr = pMesh->Attributes.Values[idxAttr];
 
@@ -141,21 +141,21 @@ static inline bool ins_addMeshNode(
         }
 
         pMesh->Indices.Assign(pNodeData->bufIndices.size());
-        for(size_t idxInd = 0; idxInd < pMesh->Indices.Length; ++idxInd){
+        for(size_t idxInd = 0u; idxInd < pMesh->Indices.Length; ++idxInd){
             auto& iInd = pMesh->Indices.Values[idxInd];
 
             CopyArrayData(iInd.Values, pNodeData->bufIndices[idxInd].raw);
         }
 
         pMesh->Vertices.Assign(pNodeData->bufPositions.size());
-        for(size_t idxVert = 0; idxVert < pMesh->Vertices.Length; ++idxVert){
+        for(size_t idxVert = 0u; idxVert < pMesh->Vertices.Length; ++idxVert){
             auto& iVert = pMesh->Vertices.Values[idxVert];
 
             CopyArrayData(iVert.Values, pNodeData->bufPositions[idxVert].mData);
         }
 
         pMesh->LayeredElements.Assign(pNodeData->bufLayers.size());
-        for(size_t idxLayer = 0; idxLayer < pMesh->LayeredElements.Length; ++idxLayer){
+        for(size_t idxLayer = 0u; idxLayer < pMesh->LayeredElements.Length; ++idxLayer){
             auto& iLayer = pMesh->LayeredElements.Values[idxLayer];
             const auto& nodeLayer = pNodeData->bufLayers[idxLayer];
 
@@ -164,10 +164,10 @@ static inline bool ins_addMeshNode(
                 const auto& nodeObject = nodeLayer.materials;
 
                 if(nodeObject.empty())
-                    iObject.Assign(0);
+                    iObject.Assign(0u);
                 else{
                     iObject.Assign(pNodeData->bufMeshAttribute.size());
-                    for(size_t idxMat = 0; idxMat < iObject.Length; ++idxMat){
+                    for(size_t idxMat = 0u; idxMat < iObject.Length; ++idxMat){
                         const auto idxOldMat = pMesh->Attributes.Values[idxMat].IndexStart;
                         iObject.Values[idxMat] = nodeObject[idxOldMat];
                     }
@@ -179,7 +179,7 @@ static inline bool ins_addMeshNode(
                 const auto& nodeObject = nodeLayer.colors;
 
                 iObject.Assign(nodeObject.size());
-                for(size_t idxElem = 0; idxElem < iObject.Length; ++idxElem)
+                for(size_t idxElem = 0u; idxElem < iObject.Length; ++idxElem)
                     CopyArrayData(iObject.Values[idxElem].Values, nodeObject[idxElem].mData);
             }
 
@@ -188,7 +188,7 @@ static inline bool ins_addMeshNode(
                 const auto& nodeObject = nodeLayer.normals;
 
                 iObject.Assign(nodeObject.size());
-                for(size_t idxElem = 0; idxElem < iObject.Length; ++idxElem)
+                for(size_t idxElem = 0u; idxElem < iObject.Length; ++idxElem)
                     CopyArrayData(iObject.Values[idxElem].Values, nodeObject[idxElem].mData);
             }
 
@@ -197,7 +197,7 @@ static inline bool ins_addMeshNode(
                 const auto& nodeObject = nodeLayer.binormals;
 
                 iObject.Assign(nodeObject.size());
-                for(size_t idxElem = 0; idxElem < iObject.Length; ++idxElem)
+                for(size_t idxElem = 0u; idxElem < iObject.Length; ++idxElem)
                     CopyArrayData(iObject.Values[idxElem].Values, nodeObject[idxElem].mData);
             }
 
@@ -206,7 +206,7 @@ static inline bool ins_addMeshNode(
                 const auto& nodeObject = nodeLayer.tangents;
 
                 iObject.Assign(nodeObject.size());
-                for(size_t idxElem = 0; idxElem < iObject.Length; ++idxElem)
+                for(size_t idxElem = 0u; idxElem < iObject.Length; ++idxElem)
                     CopyArrayData(iObject.Values[idxElem].Values, nodeObject[idxElem].mData);
             }
 
@@ -215,13 +215,13 @@ static inline bool ins_addMeshNode(
                 const auto& nodeObject = nodeLayer.texcoords.table;
 
                 iObject.Assign(nodeObject.size());
-                for(size_t idxElem = 0; idxElem < iObject.Length; ++idxElem)
+                for(size_t idxElem = 0u; idxElem < iObject.Length; ++idxElem)
                     CopyArrayData(iObject.Values[idxElem].Values, nodeObject[idxElem].mData);
             }
         }
 
         pMesh->Materials.Assign(pNodeData->bufMaterials.size());
-        for(size_t idxMaterial = 0; idxMaterial < pMesh->Materials.Length; ++idxMaterial){
+        for(size_t idxMaterial = 0u; idxMaterial < pMesh->Materials.Length; ++idxMaterial){
             auto& iMaterial = pMesh->Materials.Values[idxMaterial];
             const auto& nodeMaterial = pNodeData->bufMaterials[idxMaterial];
 
@@ -233,12 +233,12 @@ static inline bool ins_addMeshNode(
         auto* pMesh = static_cast<FBXSkinnedMesh*>(pNode);
 
         pMesh->BoneCombinations.Assign(pNodeData->bufBoneCombination.size());
-        for(size_t idxAttr = 0; idxAttr < pMesh->BoneCombinations.Length; ++idxAttr){
+        for(size_t idxAttr = 0u; idxAttr < pMesh->BoneCombinations.Length; ++idxAttr){
             auto& iAttr = pMesh->BoneCombinations.Values[idxAttr];
             const auto& nodeAttr = pNodeData->bufBoneCombination[idxAttr];
 
             iAttr.Assign(nodeAttr.size());
-            for(size_t idxBC = 0; idxBC < iAttr.Length; ++idxBC){
+            for(size_t idxBC = 0u; idxBC < iAttr.Length; ++idxBC){
                 auto*& iCluster = iAttr.Values[idxBC];
                 auto* nodeCluster = nodeAttr[idxBC];
 
@@ -250,12 +250,12 @@ static inline bool ins_addMeshNode(
         }
 
         pMesh->SkinInfos.Assign(pNodeData->bufSkinData.size());
-        for(size_t idxSkin = 0; idxSkin < pMesh->SkinInfos.Length; ++idxSkin){
+        for(size_t idxSkin = 0u; idxSkin < pMesh->SkinInfos.Length; ++idxSkin){
             auto& iSkin = pMesh->SkinInfos.Values[idxSkin];
             const auto& nodeSkin = pNodeData->bufSkinData[idxSkin];
 
             iSkin.Assign(nodeSkin.size());
-            for(size_t idxCluster = 0; idxCluster < iSkin.Length; ++idxCluster){
+            for(size_t idxCluster = 0u; idxCluster < iSkin.Length; ++idxCluster){
                 auto& iCluster = iSkin.Values[idxCluster];
                 const auto& nodeCluster = nodeSkin[idxCluster];
 

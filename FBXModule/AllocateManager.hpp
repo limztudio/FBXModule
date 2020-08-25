@@ -79,5 +79,83 @@ void FBXM_ALIGN_FREE(void* object){
 }
 
 
+void* operator new(std::size_t count){
+    auto* ptr = FBXM_ALLOC(count);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+void* operator new[](std::size_t count){
+    auto* ptr = FBXM_ALLOC(count);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+void* operator new(std::size_t count, const std::nothrow_t&)noexcept{
+    return FBXM_ALLOC(count);
+}
+void* operator new[](std::size_t count, const std::nothrow_t&)noexcept{
+    return FBXM_ALLOC(count);
+}
+
+void* operator new(std::size_t count, std::align_val_t al){
+    auto* ptr = FBXM_ALIGN_ALLOC(count, al);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+void* operator new[](std::size_t count, std::align_val_t al){
+    auto* ptr = FBXM_ALIGN_ALLOC(count, al);
+    if(!ptr)
+        throw std::bad_alloc{};
+    return ptr;
+}
+void* operator new(std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept{
+    return FBXM_ALIGN_ALLOC(count, al);
+}
+void* operator new[](std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept{
+    return FBXM_ALIGN_ALLOC(count, al);
+}
+
+
+void operator delete(void* ptr)noexcept{
+    FBXM_FREE(ptr);
+}
+void operator delete[](void* ptr)noexcept{
+    FBXM_FREE(ptr);
+}
+void operator delete(void* ptr, std::size_t sz)noexcept{
+    FBXM_FREE(ptr);
+}
+void operator delete[](void* ptr, std::size_t sz)noexcept{
+    FBXM_FREE(ptr);
+}
+void operator delete(void* ptr, const std::nothrow_t&)noexcept{
+    FBXM_FREE(ptr);
+}
+void operator delete[](void* ptr, const std::nothrow_t&)noexcept{
+    FBXM_FREE(ptr);
+}
+
+void operator delete(void* ptr, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+void operator delete[](void* ptr, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+void operator delete(void* ptr, std::size_t sz, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+void operator delete[](void* ptr, std::size_t sz, std::align_val_t al)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+void operator delete(void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+void operator delete[](void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept{
+    FBXM_ALIGN_FREE(ptr);
+}
+
+
 #endif // _ALLOCATEMANAGER_HPP_
 

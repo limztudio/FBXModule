@@ -154,82 +154,30 @@ _NODISCARD inline bool operator!=(const FBXM_ALLOCATOR<_Ty>&, const FBXM_ALLOCAT
 }
 
 
-inline void* operator new(std::size_t count){
-    auto* ptr = FBXM_ALLOC(count);
-    if(!ptr)
-        throw std::bad_alloc{};
-    return ptr;
-}
-inline void* operator new[](std::size_t count){
-    auto* ptr = FBXM_ALLOC(count);
-    if(!ptr)
-        throw std::bad_alloc{};
-    return ptr;
-}
-inline void* operator new(std::size_t count, const std::nothrow_t&)noexcept{
-    return FBXM_ALLOC(count);
-}
-inline void* operator new[](std::size_t count, const std::nothrow_t&)noexcept{
-    return FBXM_ALLOC(count);
-}
+extern void* operator new(std::size_t count);
+extern void* operator new[](std::size_t count);
+extern void* operator new(std::size_t count, const std::nothrow_t&)noexcept;
+extern void* operator new[](std::size_t count, const std::nothrow_t&)noexcept;
 
-inline void* operator new(std::size_t count, std::align_val_t al){
-    auto* ptr = FBXM_ALIGN_ALLOC(count, al);
-    if(!ptr)
-        throw std::bad_alloc{};
-    return ptr;
-}
-inline void* operator new[](std::size_t count, std::align_val_t al){
-    auto* ptr = FBXM_ALIGN_ALLOC(count, al);
-    if(!ptr)
-        throw std::bad_alloc{};
-    return ptr;
-}
-inline void* operator new(std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept{
-    return FBXM_ALIGN_ALLOC(count, al);
-}
-inline void* operator new[](std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept{
-    return FBXM_ALIGN_ALLOC(count, al);
-}
+extern void* operator new(std::size_t count, std::align_val_t al);
+extern void* operator new[](std::size_t count, std::align_val_t al);
+extern void* operator new(std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept;
+extern void* operator new[](std::size_t count, std::align_val_t al, const std::nothrow_t&)noexcept;
 
 
-inline void operator delete(void* ptr)noexcept{
-    FBXM_FREE(ptr);
-}
-inline void operator delete[](void* ptr)noexcept{
-    FBXM_FREE(ptr);
-}
-inline void operator delete(void* ptr, std::size_t sz)noexcept{
-    FBXM_FREE(ptr);
-}
-inline void operator delete[](void* ptr, std::size_t sz)noexcept{
-    FBXM_FREE(ptr);
-}
-inline void operator delete(void* ptr, const std::nothrow_t&)noexcept{
-    FBXM_FREE(ptr);
-}
-inline void operator delete[](void* ptr, const std::nothrow_t&)noexcept{
-    FBXM_FREE(ptr);
-}
+extern void operator delete(void* ptr)noexcept;
+extern void operator delete[](void* ptr)noexcept;
+extern void operator delete(void* ptr, std::size_t sz)noexcept;
+extern void operator delete[](void* ptr, std::size_t sz)noexcept;
+extern void operator delete(void* ptr, const std::nothrow_t&)noexcept;
+extern void operator delete[](void* ptr, const std::nothrow_t&)noexcept;
 
-inline void operator delete(void* ptr, std::align_val_t al)noexcept{
-    FBXM_ALIGN_FREE(ptr);
-}
-inline void operator delete[](void* ptr, std::align_val_t al)noexcept{
-    FBXM_ALIGN_FREE(ptr);
-}
-inline void operator delete(void* ptr, std::size_t sz, std::align_val_t al)noexcept{
-    FBXM_ALIGN_FREE(ptr);
-}
-inline void operator delete[](void* ptr, std::size_t sz, std::align_val_t al)noexcept{
-    FBXM_ALIGN_FREE(ptr);
-}
-inline void operator delete(void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept{
-    FBXM_ALIGN_FREE(ptr);
-}
-inline void operator delete[](void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept{
-    FBXM_ALIGN_FREE(ptr);
-}
+extern void operator delete(void* ptr, std::align_val_t al)noexcept;
+extern void operator delete[](void* ptr, std::align_val_t al)noexcept;
+extern void operator delete(void* ptr, std::size_t sz, std::align_val_t al)noexcept;
+extern void operator delete[](void* ptr, std::size_t sz, std::align_val_t al)noexcept;
+extern void operator delete(void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept;
+extern void operator delete[](void* ptr, std::align_val_t al, const std::nothrow_t&)noexcept;
 
 
 template<

@@ -16,6 +16,7 @@
 using namespace fbxsdk;
 
 
+static fbx_unordered_map<FbxCluster*, FbxDouble> ins_nodeDuplicateChecker;
 static fbx_unordered_set<const FbxCluster*, PointerHasher<const FbxCluster*>> ins_nodeUsageChecker;
 
 
@@ -416,6 +417,38 @@ static inline void ins_genOptimizeMesh(NodeData* pNodeData){
     }
 }
 
+static inline void ins_removeDuplicatedDeforms(NodeData* pNodeData){
+    if(pNodeData->bufSkinData.empty())
+        return;
+
+    for(auto& iSkinData : pNodeData->bufSkinData){
+        if(iSkinData.size() > 1u){
+            FbxDouble totalValue = 0.;
+            ins_nodeDuplicateChecker.clear();
+
+            for(auto& iSkin : iSkinData){
+                auto res = ins_nodeDuplicateChecker.emplace(iSkin.cluster, iSkin.weight);
+                if(!res.second)
+                    res.first->second += iSkin.weight;
+
+                totalValue += iSkin.weight;
+            }
+
+            iSkinData.clear();
+            for(const auto& iSkin : ins_nodeDuplicateChecker){
+                SkinInfo _new;
+                _new.cluster = iSkin.first;
+                _new.weight = iSkin.second / totalValue;
+                iSkinData.emplace_back(std::move(_new));
+            }
+
+            std::sort(iSkinData.begin(), iSkinData.end(), [](const SkinInfo& lhs, const SkinInfo& rhs)->bool{
+                return (lhs.weight > rhs.weight);
+            });
+        }
+    }
+}
+
 static inline void ins_removeUnusedDeforms(NodeData* pNodeData){
     if(pNodeData->bufSkinData.empty())
         return;
@@ -438,5 +471,6 @@ static inline void ins_removeUnusedDeforms(NodeData* pNodeData){
 void SHROptimizeMesh(NodeData* pNodeData){
     ins_fillAOSContainers(pNodeData);
     ins_genOptimizeMesh(pNodeData);
+    ins_removeDuplicatedDeforms(pNodeData);
     ins_removeUnusedDeforms(pNodeData);
 }
