@@ -168,6 +168,76 @@ static void exportFBX(const FBXRoot* fbxRoot, std::basic_string<TCHAR>&& strOut)
     }
 }
 
+static void modifierTest(FBXRoot* fbxRoot, std::basic_string<TCHAR>&& strOut){
+    std::vector<FBXSkinnedMesh*> meshes;
+    std::vector<FBXNode*> orgBones;
+
+    meshes.reserve(3);
+    orgBones.reserve(6);
+
+    FBXIterateNode(fbxRoot->Nodes, [&](FBXNode* pNode){
+        if(!_wcsicmp(pNode->Name.Values, TEXT("Root")))
+            orgBones.emplace_back(pNode);
+        if(!_wcsicmp(pNode->Name.Values, TEXT("body01")))
+            orgBones.emplace_back(pNode);
+        if(!_wcsicmp(pNode->Name.Values, TEXT("body02")))
+            orgBones.emplace_back(pNode);
+        if(!_wcsicmp(pNode->Name.Values, TEXT("spout01")))
+            orgBones.emplace_back(pNode);
+        if(!_wcsicmp(pNode->Name.Values, TEXT("spout02")))
+            orgBones.emplace_back(pNode);
+        if(!_wcsicmp(pNode->Name.Values, TEXT("spout03")))
+            orgBones.emplace_back(pNode);
+
+        if(pNode->getID() == FBXType::FBXType_SkinnedMesh)
+            meshes.emplace_back(static_cast<FBXSkinnedMesh*>(pNode));
+    });
+
+    std::vector<FBXSkinnedMesh*> meshOrdered = {
+        meshes[0],
+        meshes[2],
+        meshes[1],
+    };
+
+    std::vector<FBXNode*>& lod0Node = orgBones;
+    std::vector<FBXNode*> lod1Node = {
+        orgBones[1],
+        orgBones[1],
+        orgBones[2],
+        orgBones[3],
+        orgBones[4],
+        orgBones[5],
+    };
+    std::vector<FBXNode*> lod2Node = {
+        orgBones[3],
+        orgBones[3],
+        orgBones[3],
+        orgBones[3],
+        orgBones[4],
+        orgBones[5],
+    };
+
+    FBXCollapseBone(fbxRoot, &meshOrdered[1], (const FBXNode**)lod0Node.data(), (const FBXNode**)lod1Node.data(), lod0Node.size());
+    FBXCollapseBone(fbxRoot, &meshOrdered[2], (const FBXNode**)lod0Node.data(), (const FBXNode**)lod2Node.data(), lod0Node.size());
+
+    {
+        if(!FBXOpenFile(strOut.c_str(), TEXT("wb"), &setting)){
+            TOUT << getLastError();
+            return;
+        }
+
+        if(!FBXWriteScene(fbxRoot)){
+            TOUT << getLastError();
+            return;
+        }
+
+        if(!FBXCloseFile()){
+            TOUT << getLastError();
+            return;
+        }
+    }
+}
+
 
 static void task(const TCHAR* strIn, const TCHAR* strOut){
     static size_t _count = 0u;
@@ -185,7 +255,7 @@ static void task(const TCHAR* strIn, const TCHAR* strOut){
 
     const auto* pRoot = reinterpret_cast<const FBXRoot*>(FBXGetRoot());
 
-    exportOBJ(pRoot, std::basic_string<TCHAR>(strOut) + strCount + TEXT(".obj"));
+    //exportOBJ(pRoot, std::basic_string<TCHAR>(strOut) + strCount + TEXT(".obj"));
 
     std::unique_ptr<FBXRoot, fbx_remover<FBXRoot>> pCopiedRoot;
     {
@@ -201,7 +271,9 @@ static void task(const TCHAR* strIn, const TCHAR* strOut){
         return;
     }
 
-    exportFBX(pCopiedRoot.get(), std::basic_string<TCHAR>(strOut) + strCount + TEXT(".fbx"));
+    //exportFBX(pCopiedRoot.get(), std::basic_string<TCHAR>(strOut) + strCount + TEXT(".fbx"));
+
+    modifierTest(pCopiedRoot.get(), std::basic_string<TCHAR>(strOut) + TEXT(".fbx"));
 }
 
 

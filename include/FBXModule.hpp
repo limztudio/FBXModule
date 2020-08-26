@@ -47,6 +47,8 @@
 
 #endif
 
+#define __FBXM_MAKE_HIDDEN_FUNC(type, fid, name, ...) __FBXM_MAKE_FUNC(type, name, __VA_ARGS__)
+
 
 #include "FBXModuleDecl.hpp"
 
@@ -54,6 +56,7 @@
 #ifndef __FBXM_DLL_EXPORT
 
 #undef __FBXM_MAKE_FUNC
+#undef __FBXM_MAKE_HIDDEN_FUNC
 
 #endif
 

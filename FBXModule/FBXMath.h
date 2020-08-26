@@ -159,8 +159,8 @@ static inline fbxsdk::FbxDouble3 Normalize3(const fbxsdk::FbxDouble3& kVector3){
         xmm_xy = _mm_div_pd(xmm_xy, xmm_len);
         xmm_zw = _mm_div_pd(xmm_zw, xmm_len);
 
-        alignas(16) fbxsdk::FbxDouble3 kRet;
-        _mm_store_pd(kRet.Buffer(), xmm_xy);
+        fbxsdk::FbxDouble3 kRet;
+        _mm_storeu_pd(kRet.Buffer(), xmm_xy);
         kRet[2] = _mm_cvtsd_f64(xmm_zw);
 
         return kRet;

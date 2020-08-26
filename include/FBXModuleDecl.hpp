@@ -153,8 +153,8 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationLocalTranslation, void* pOutTranslatio
 __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTranslation, void* pOutTranslation, const void* pAnimationNode, float time);
 
 
-__FBXM_MAKE_FUNC(void, __hidden_FBXModule_DeleteInnerObject, void* pObj);
+__FBXM_MAKE_HIDDEN_FUNC(void, 2555, __hidden_FBXModule_DeleteInnerObject, void* pObj);
 
-__FBXM_MAKE_FUNC(void, __hidden_FBXModule_RebindRoot, void* pDest, const void* pSrc);
+__FBXM_MAKE_HIDDEN_FUNC(void, 2556, __hidden_FBXModule_RebindRoot, void* pDest, const void* pSrc);
 
-__FBXM_MAKE_FUNC(bool, __hidden_FBXModule_CollapseMesh, void** pDest, const void* pSrc, const void** pOldNodeList, const void** pNewerNodeList, unsigned long nodeCount);
+__FBXM_MAKE_HIDDEN_FUNC(bool, 2557, __hidden_FBXModule_CollapseMesh, void** pDest, const void* pSrc, const void** pOldNodeList, const void** pNewerNodeList, unsigned long nodeCount);

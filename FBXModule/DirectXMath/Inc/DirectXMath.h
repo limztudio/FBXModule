@@ -13,7 +13,7 @@
 #error DirectX Math requires C++
 #endif
 
-#define DIRECTX_MATH_VERSION 315
+#define DIRECTX_MATH_VERSION 316
 
 #if defined(_MSC_VER) && (_MSC_VER < 1910)
 #error DirectX Math requires Visual C++ 2017 or later.
@@ -196,7 +196,7 @@
 
 #if defined(_XM_ARM_NEON_INTRINSICS_) && !defined(_XM_NO_INTRINSICS_)
 
-#if defined(__clang__)
+#if defined(__clang__) || defined(__GNUC__)
 #define XM_PREFETCH( a ) __builtin_prefetch(a)
 #elif defined(_MSC_VER)
 #define XM_PREFETCH( a ) __prefetch(a)
@@ -337,11 +337,11 @@ namespace DirectX
     // Vector intrinsic: Four 32 bit floating point components aligned on a 16 byte
     // boundary and mapped to hardware vector registers
 #if defined(_XM_SSE_INTRINSICS_) && !defined(_XM_NO_INTRINSICS_)
-    typedef __m128 XMVECTOR;
+    using XMVECTOR = __m128;
 #elif defined(_XM_ARM_NEON_INTRINSICS_) && !defined(_XM_NO_INTRINSICS_)
-    typedef float32x4_t XMVECTOR;
+    using XMVECTOR = float32x4_t;
 #else
-    typedef __vector4 XMVECTOR;
+    using XMVECTOR = __vector4;
 #endif
 
     // Fix-up for (1st-3rd) XMVECTOR parameters that are pass-in-register for x86, ARM, ARM64, and vector call; by reference otherwise
@@ -351,8 +351,8 @@ namespace DirectX
     typedef const XMVECTOR& FXMVECTOR;
 #endif
 
-    // Fix-up for (4th) XMVECTOR parameter to pass in-register for ARM, ARM64, and x64 vector call; by reference otherwise
-#if ( defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || (_XM_VECTORCALL_ && !defined(_M_IX86) ) || __arm__ || __aarch64__ ) && !defined(_XM_NO_INTRINSICS_)
+    // Fix-up for (4th) XMVECTOR parameter to pass in-register for ARM, ARM64, and vector call; by reference otherwise
+#if ( defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || _XM_VECTORCALL_ || __arm__ || __aarch64__ ) && !defined(_XM_NO_INTRINSICS_)
     typedef const XMVECTOR GXMVECTOR;
 #else
     typedef const XMVECTOR& GXMVECTOR;
@@ -380,9 +380,13 @@ namespace DirectX
 
         inline operator XMVECTOR() const noexcept { return v; }
         inline operator const float* () const noexcept { return f; }
-#if !defined(_XM_NO_INTRINSICS_) && defined(_XM_SSE_INTRINSICS_)
+#ifdef _XM_NO_INTRINSICS_
+#elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+        inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
+        inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif
     };
 
@@ -395,9 +399,13 @@ namespace DirectX
         };
 
         inline operator XMVECTOR() const noexcept { return v; }
-#if !defined(_XM_NO_INTRINSICS_) && defined(_XM_SSE_INTRINSICS_)
+#ifdef _XM_NO_INTRINSICS_
+#elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+        inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
+        inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif
     };
 
@@ -410,9 +418,13 @@ namespace DirectX
         };
 
         inline operator XMVECTOR() const noexcept { return v; }
-#if !defined(_XM_NO_INTRINSICS_) && defined(_XM_SSE_INTRINSICS_)
+#ifdef _XM_NO_INTRINSICS_
+#elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+        inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
+        inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif
     };
 
@@ -425,9 +437,13 @@ namespace DirectX
         };
 
         inline operator XMVECTOR() const noexcept { return v; }
-#if !defined(_XM_NO_INTRINSICS_) && defined(_XM_SSE_INTRINSICS_)
+#ifdef _XM_NO_INTRINSICS_
+#elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+        inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
+        inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif
     };
 
@@ -1617,6 +1633,9 @@ namespace DirectX
     XMVECTOR    XM_CALLCONV     XMColorRGBToYUV_HD(FXMVECTOR rgb) noexcept;
     XMVECTOR    XM_CALLCONV     XMColorYUVToRGB_HD(FXMVECTOR yuv) noexcept;
 
+    XMVECTOR    XM_CALLCONV     XMColorRGBToYUV_UHD(FXMVECTOR rgb) noexcept;
+    XMVECTOR    XM_CALLCONV     XMColorYUVToRGB_UHD(FXMVECTOR yuv) noexcept;
+
     XMVECTOR    XM_CALLCONV     XMColorRGBToXYZ(FXMVECTOR rgb) noexcept;
     XMVECTOR    XM_CALLCONV     XMColorXYZToRGB(FXMVECTOR xyz) noexcept;
 
@@ -2166,7 +2185,7 @@ namespace DirectX
         // Convert DivExponent into 1.0f/(1<<DivExponent)
         uint32_t uScale = 0x3F800000U - (DivExponent << 23);
         // Splat the scalar value (It's really a float)
-        vScale = vdupq_n_u32(uScale);
+        vScale = vreinterpretq_s32_u32(vdupq_n_u32(uScale));
         // Multiply by the reciprocal (Perform a right shift by DivExponent)
         vResult = vmulq_f32(vResult, reinterpret_cast<const float32x4_t*>(&vScale)[0]);
         return vResult;
