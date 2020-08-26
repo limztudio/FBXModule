@@ -23,5 +23,5 @@ LIBRARY FBXModule
 	FBXComputeAnimationWorldTranslation  @21
 
 	__hidden_FBXModule_DeleteInnerObject  @2555  NONAME
-	__hidden_FBXModule_RebindRoot  @2556 NONAME
-	__hidden_FBXModule_CollapseMesh  @2557 NONAME
+	__hidden_FBXModule_RebindRoot  @2556  NONAME
+	__hidden_FBXModule_CollapseMesh  @2557  NONAME
