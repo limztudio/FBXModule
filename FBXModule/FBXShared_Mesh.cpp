@@ -751,22 +751,27 @@ break;
             auto& layers = pNodeData->bufLayers;
 
             decltype(pNodeData->bufMaterials) oldMaterials(materials);
-            fbx_unordered_map<unsigned int, unsigned int, CustomHasher<unsigned int>> matIndexer;
-            {
-                size_t maxInd = 0u;
-                for(const auto& iMat : materials)
-                    maxInd = std::max(maxInd, decltype(maxInd)(iMat));
-
-                matIndexer.rehash(maxInd + 1u);
-            }
-
             std::sort(materials.begin(), materials.end());
-            for(size_t edxMat = materials.size(), idxMat = 0u; idxMat < edxMat; ++idxMat)
-                matIndexer[oldMaterials[idxMat]] = materials[idxMat];
 
-            for(auto& iLayer : layers){
-                for(auto& iMat : iLayer.materials)
-                    iMat = matIndexer[iMat];
+            if(materials != oldMaterials){
+                decltype(pNodeData->bufMaterials) idxConverter(materials.size());
+                {
+                    fbx_unordered_map<unsigned int, unsigned int, CustomHasher<unsigned int>> matIndexer;
+                    {
+                        matIndexer.rehash(materials.size());
+
+                        for(size_t edxMat = materials.size(), idxMat = 0u; idxMat < edxMat; ++idxMat)
+                            matIndexer[materials[idxMat]] = idxMat;
+                    }
+
+                    for(size_t edxMat = idxConverter.size(), idxMat = 0u; idxMat < edxMat; ++idxMat)
+                        idxConverter[idxMat] = matIndexer[oldMaterials[idxMat]];
+                }
+
+                for(auto& iLayer : layers){
+                    for(auto& iMat : iLayer.materials)
+                        iMat = idxConverter[iMat];
+                }
             }
         }
     }

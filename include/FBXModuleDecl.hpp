@@ -39,8 +39,8 @@ __FBXM_MAKE_FUNC(int, FBXGetLastWarning, FBX_CHAR* szMessage);
  * @brief Open/Create selected FBX file.
  * @param szFilePath FBX file path.
  * @param mode "rb": Open file. "wb": Create file.
- * @param ioSetting Setting confuguration. Must be passed by "const FBXIOSetting*".
- * @return Return true if successfully openend/created file, and false otherwise.
+ * @param ioSetting Setting configuration. Must be passed by "const FBXIOSetting*".
+ * @return Return true if successfully opened/created file, and false otherwise.
  */
 __FBXM_MAKE_FUNC(bool, FBXOpenFile, const FBX_CHAR* szFilePath, const FBX_CHAR* mode, const void* ioSetting);
 /**
