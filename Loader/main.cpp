@@ -52,7 +52,7 @@ static inline std::basic_string<TCHAR> getLastError(){
 }
 
 
-static inline void loadLib(){
+static inline bool loadLib(){
 #ifdef _DEBUG
     library = LoadLibrary(TEXT("FBXModuleD.dll"));
 #else
@@ -60,6 +60,8 @@ static inline void loadLib(){
 #endif
 
     FBXBindFunction(library);
+
+    return FBXCheckCompatibility();
 }
 static inline void closeLib(){
     if(!FreeLibrary(library))
@@ -271,9 +273,9 @@ static void task(const TCHAR* strIn, const TCHAR* strOut){
         return;
     }
 
-    //exportFBX(pCopiedRoot.get(), std::basic_string<TCHAR>(strOut) + strCount + TEXT(".fbx"));
+    exportFBX(pCopiedRoot.get(), std::basic_string<TCHAR>(strOut) + strCount + TEXT(".fbx"));
 
-    modifierTest(pCopiedRoot.get(), std::basic_string<TCHAR>(strOut) + TEXT(".fbx"));
+    //modifierTest(pCopiedRoot.get(), std::basic_string<TCHAR>(strOut) + TEXT(".fbx"));
 }
 
 
@@ -289,10 +291,9 @@ int _tmain(int argc, TCHAR* argv[]){
 #endif
 
     setting.AxisSystem = FBXAxisSystem::FBXAxisSystem_Preset_Max;
+    //setting.UnitScale = 1.;
 
-    loadLib();
-
-    {
+    if(loadLib()){
         std::filesystem::path rootPath(argv[1]);
         for(auto& p : std::filesystem::directory_iterator(rootPath)){
             auto curPath = p.path();

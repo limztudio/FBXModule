@@ -510,7 +510,6 @@ static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxAnimEvaluator* kA
     return fbxsdk::FbxAMatrix(kAnimEvaluator->GetNodeGlobalTransform(kNode) * GetGeometry(kNode));
 }
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    fbxsdk::FbxAMatrix kMatGeometry = GetGeometry(kNode);
     return fbxsdk::FbxAMatrix(kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime) * GetGeometry(kNode));
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode){

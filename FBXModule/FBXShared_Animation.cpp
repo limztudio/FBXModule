@@ -81,7 +81,8 @@ static inline void ins_updateTimestamp(const FbxTime& kEndTime, FbxAnimCurve* kA
         return;
 
     for(auto e = kAnimCurve->KeyGetCount(), i = 0; i < e; ++i){
-        auto kCurTime = kAnimCurve->KeyGet(i).GetTime();
+        //const auto& kCurveKey = kAnimCurve->KeyGet(i);
+        auto kCurTime = kAnimCurve->KeyGetTime(i);
         if(kCurTime <= kEndTime)
             ins_animationKeyFrames[idx].emplace(kCurTime);
     }
@@ -157,6 +158,10 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
         iAnimStack.nodes.reserve(kNodeTable.size());
 
         for(auto* kNode : kNodeTable){
+#ifdef _DEBUG
+            const auto* strNodeName = kNode->GetName();
+#endif
+
             for(auto& keyTable : ins_animationKeyFrames)
                 keyTable.clear();
 
@@ -199,30 +204,39 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                 }
             }
 
+            FbxVector4 kDefaultTranslation;
+            FbxQuaternion kDefaultQuaternion;
+            FbxVector4 kDefaultScaling;
+            {
+                FbxAMatrix kDefaultMat(
+                    kNode->LclTranslation.Get(),
+                    kNode->LclRotation.Get(),
+                    kNode->LclScaling.Get()
+                );
+                kDefaultMat *= GetGeometry(kNode);
+
+                kDefaultTranslation = kDefaultMat.GetT();
+                kDefaultQuaternion = kDefaultMat.GetQ();
+                kDefaultScaling = kDefaultMat.GetS();
+            }
+
             FbxTime kDefaultTime;
-            std::pair<FbxDouble3, FbxDouble3> kDefaultTranslation;
-            std::pair<FbxDouble4, FbxDouble4> kDefaultQuaternion;
-            std::pair<FbxDouble3, FbxDouble3> kDefaultScaling;
+            std::pair<FbxDouble3, FbxDouble3> kDefaultTranslationPair;
+            std::pair<FbxDouble4, FbxDouble4> kDefaultQuaternionPair;
+            std::pair<FbxDouble3, FbxDouble3> kDefaultScalingPair;
             {
                 kDefaultTime.SetSecondDouble(0.);
 
-                {
-                    auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kDefaultTime);
+                kDefaultTranslationPair.first = kDefaultTranslation;
+                kDefaultTranslationPair.second = kDefaultTranslation;
 
-                    kDefaultTranslation.first = kMat.GetT();
-                    kDefaultQuaternion.first = kMat.GetQ();
-                    kDefaultScaling.first = kMat.GetS();
-                }
-                {
-                    auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kDefaultTime);
+                kDefaultQuaternionPair.first = kDefaultQuaternion;
+                kDefaultQuaternionPair.second = kDefaultQuaternion;
 
-                    kDefaultTranslation.second = kMat.GetT();
-                    kDefaultQuaternion.second = kMat.GetQ();
-                    kDefaultScaling.second = kMat.GetS();
-                }
+                kDefaultScalingPair.first = kDefaultScaling;
+                kDefaultScalingPair.second = kDefaultScaling;
             }
 
-            auto kDefaultMat = GetLocalTransform(kNode);
             AnimationNode newNodes;
 
             newNodes.bindNode = kNode;
@@ -234,11 +248,21 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     std::pair<FbxDouble3, FbxDouble3> kVal;
                     {
                         auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
-                        kVal.first = kMat.GetT();
+                        auto kVec = kMat.GetT();
+
+                        if((!_isnan(kVec.mData[0])) || (!_finite(kVec.mData[0])))
+                            kVal.first = kVec;
+                        else
+                            kVal.first = kDefaultTranslation;
                     }
                     {
                         auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kTime);
-                        kVal.second = kMat.GetT();
+                        auto kVec = kMat.GetT();
+
+                        if((!_isnan(kVec.mData[0])) || (!_finite(kVec.mData[0])))
+                            kVal.second = kVec;
+                        else
+                            kVal.second = kDefaultTranslation;
                     }
                     newNodes.translationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.translationKeys, kVal);
@@ -248,7 +272,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                 if(newNodes.translationKeys.empty()){
                     newNodes.translationKeys.reserve(1);
-                    newNodes.translationKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultTranslation);
+                    newNodes.translationKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultTranslationPair);
                 }
             }
 
@@ -259,11 +283,21 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     std::pair<FbxDouble4, FbxDouble4> kVal;
                     {
                         auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
-                        kVal.first = kMat.GetQ();
+                        auto kVec = kMat.GetQ();
+
+                        if(kDefaultQuaternion.DotProduct(kVec) < 0)
+                            kVec *= -1;
+
+                        kVal.first = kVec;
                     }
                     {
                         auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kTime);
-                        kVal.second = kMat.GetQ();
+                        auto kVec = kMat.GetQ();
+
+                        if(kDefaultQuaternion.DotProduct(kVec) < 0)
+                            kVec *= -1;
+
+                        kVal.second = kVec;
                     }
                     newNodes.rotationKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.rotationKeys, kVal);
@@ -273,7 +307,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                 if(newNodes.rotationKeys.empty()){
                     newNodes.rotationKeys.reserve(1);
-                    newNodes.rotationKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultQuaternion);
+                    newNodes.rotationKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultQuaternionPair);
                 }
             }
 
@@ -284,11 +318,15 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     std::pair<FbxDouble3, FbxDouble3> kVal;
                     {
                         auto kMat = GetLocalTransform(kAnimEvaluator, kNode, kTime);
-                        kVal.first = kMat.GetS();
+                        auto kVec = kMat.GetS();
+
+                        kVal.first = kVec;
                     }
                     {
                         auto kMat = GetGlobalTransform(kAnimEvaluator, kNode, kTime);
-                        kVal.second = kMat.GetS();
+                        auto kVec = kMat.GetS();
+
+                        kVal.second = kVec;
                     }
                     newNodes.scalingKeys.emplace_back(kTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Linear, kVal);
                     ins_keyTypeOptimze(newNodes.scalingKeys, kVal);
@@ -298,7 +336,7 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                 if(newNodes.scalingKeys.empty()){
                     newNodes.scalingKeys.reserve(1);
-                    newNodes.scalingKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultScaling);
+                    newNodes.scalingKeys.emplace_back(kDefaultTime, FBXAnimationInterpolationType::FBXAnimationInterpolationType_Stepped, kDefaultScalingPair);
                 }
             }
 
