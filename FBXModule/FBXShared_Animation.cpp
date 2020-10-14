@@ -213,7 +213,6 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
                     kNode->LclRotation.Get(),
                     kNode->LclScaling.Get()
                 );
-                kDefaultMat *= GetGeometry(kNode);
 
                 kDefaultTranslation = kDefaultMat.GetT();
                 kDefaultQuaternion = kDefaultMat.GetQ();

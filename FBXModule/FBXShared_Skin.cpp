@@ -207,8 +207,6 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         }
     }
 
-    auto kMatNodeGeometry = GetGeometry(kNode);
-
     for(auto* iCluster : clusterFinder){
         if(!iCluster)
             continue;
@@ -219,7 +217,6 @@ bool SHRLoadSkinFromNode(const ControlPointRemap& controlPointRemap, FbxNode* kN
         iCluster->GetTransformMatrix(kMatNodeTM);
         iCluster->GetTransformLinkMatrix(kMatClusterTM);
 
-        kMatNodeTM *= kMatNodeGeometry;
         kMatClusterTM *= kMatClusterGeometry;
 
         boneOffsetMatrixMap.emplace(iCluster, std::make_pair(std::move(kMatNodeTM), std::move(kMatClusterTM)));

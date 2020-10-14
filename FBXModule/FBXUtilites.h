@@ -507,67 +507,71 @@ template<typename VALUE>
 static inline fbx_basic_string<wchar_t> ToString(VALUE v){ return fbx_to_wstring(v); }
 
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode){
-    return fbxsdk::FbxAMatrix(kAnimEvaluator->GetNodeGlobalTransform(kNode) * GetGeometry(kNode));
+    return kAnimEvaluator->GetNodeGlobalTransform(kNode);
 }
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    return fbxsdk::FbxAMatrix(kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime) * GetGeometry(kNode));
+    return kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode){
-    return fbxsdk::FbxAMatrix(kAnimEvaluator->GetNodeLocalTransform(kNode) * GetGeometry(kNode));
+    return kAnimEvaluator->GetNodeLocalTransform(kNode);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxAnimEvaluator* kAnimEvaluator, fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    return fbxsdk::FbxAMatrix(kAnimEvaluator->GetNodeLocalTransform(kNode, kTime) * GetGeometry(kNode));
+    return kAnimEvaluator->GetNodeLocalTransform(kNode, kTime);
 }
 
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxNode* kNode){
-    auto kMatGeometry = GetGeometry(kNode);
+    fbxsdk::FbxAMatrix kMatDefault;
+    kMatDefault.SetIdentity();
 
     auto* kScene = kNode->GetScene();
     if(!kScene)
-        return kMatGeometry;
+        return kMatDefault;
 
     auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
     if(!kAnimEvaluator)
-        return kMatGeometry;
+        return kMatDefault;
 
-    return (kAnimEvaluator->GetNodeGlobalTransform(kNode) * kMatGeometry);
+    return kAnimEvaluator->GetNodeGlobalTransform(kNode);
 }
 static inline fbxsdk::FbxAMatrix GetGlobalTransform(fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    auto kMatGeometry = GetGeometry(kNode);
+    fbxsdk::FbxAMatrix kMatDefault;
+    kMatDefault.SetIdentity();
 
     auto* kScene = kNode->GetScene();
     if(!kScene)
-        return kMatGeometry;
+        return kMatDefault;
 
     auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
     if(!kAnimEvaluator)
-        return kMatGeometry;
+        return kMatDefault;
 
-    return (kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime) * kMatGeometry);
+    return kAnimEvaluator->GetNodeGlobalTransform(kNode, kTime);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode){
-    auto kMatGeometry = GetGeometry(kNode);
+    fbxsdk::FbxAMatrix kMatDefault;
+    kMatDefault.SetIdentity();
 
     auto* kScene = kNode->GetScene();
     if(!kScene)
-        return kMatGeometry;
+        return kMatDefault;
 
     auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
     if(!kAnimEvaluator)
-        return kMatGeometry;
+        return kMatDefault;
 
-    return (kAnimEvaluator->GetNodeLocalTransform(kNode) * kMatGeometry);
+    return kAnimEvaluator->GetNodeLocalTransform(kNode);
 }
 static inline fbxsdk::FbxAMatrix GetLocalTransform(fbxsdk::FbxNode* kNode, const fbxsdk::FbxTime& kTime){
-    auto kMatGeometry = GetGeometry(kNode);
+    fbxsdk::FbxAMatrix kMatDefault;
+    kMatDefault.SetIdentity();
 
     auto* kScene = kNode->GetScene();
     if(!kScene)
-        return kMatGeometry;
+        return kMatDefault;
 
     auto* kAnimEvaluator = kScene->GetAnimationEvaluator();
     if(!kAnimEvaluator)
-        return kMatGeometry;
+        return kMatDefault;
 
-    return (kAnimEvaluator->GetNodeLocalTransform(kNode, kTime) * kMatGeometry);
+    return kAnimEvaluator->GetNodeLocalTransform(kNode, kTime);
 }

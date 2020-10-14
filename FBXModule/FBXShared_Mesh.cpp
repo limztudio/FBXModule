@@ -123,6 +123,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
 
     const fbx_string strName = ConvertString<FBX_CHAR>(kNode->GetName());
 
+    const auto kMatGeometry = GetGeometry(kNode);
     auto* kMesh = (FbxMesh*)kNode->GetNodeAttribute();
 
     const auto polyCount = kMesh->GetPolygonCount();
@@ -237,6 +238,8 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                     auto& pos = ctrlPoints[ctrlPointIndex];
 
                     CopyArrayData(vert.mData, pos.mData);
+
+                    vert = Transform44(kMatGeometry, vert);
                 }
             }
         }
