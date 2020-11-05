@@ -96,19 +96,19 @@ __FBXM_MAKE_FUNC(bool, __hidden_FBXModule_CollapseMesh, void** pDest, const void
 
             cGenLayer.colors.resize(cOldLayer.Color.Length);
             for(size_t idxElem = 0u; idxElem < cOldLayer.Color.Length; ++idxElem)
-                CopyArrayData(cGenLayer.colors[idxElem].mData, cOldLayer.Color.Values->Values);
+                CopyArrayData(cGenLayer.colors[idxElem].mData, cOldLayer.Color.Values[idxElem].Values);
 
             cGenLayer.normals.resize(cOldLayer.Normal.Length);
             for(size_t idxElem = 0u; idxElem < cOldLayer.Normal.Length; ++idxElem)
-                CopyArrayData(cGenLayer.normals[idxElem].mData, cOldLayer.Normal.Values->Values);
+                CopyArrayData(cGenLayer.normals[idxElem].mData, cOldLayer.Normal.Values[idxElem].Values);
 
             cGenLayer.binormals.resize(cOldLayer.Binormal.Length);
             for(size_t idxElem = 0u; idxElem < cOldLayer.Binormal.Length; ++idxElem)
-                CopyArrayData(cGenLayer.binormals[idxElem].mData, cOldLayer.Binormal.Values->Values);
+                CopyArrayData(cGenLayer.binormals[idxElem].mData, cOldLayer.Binormal.Values[idxElem].Values);
 
             cGenLayer.tangents.resize(cOldLayer.Tangent.Length);
             for(size_t idxElem = 0u; idxElem < cOldLayer.Tangent.Length; ++idxElem)
-                CopyArrayData(cGenLayer.tangents[idxElem].mData, cOldLayer.Tangent.Values->Values);
+                CopyArrayData(cGenLayer.tangents[idxElem].mData, cOldLayer.Tangent.Values[idxElem].Values);
 
             cGenLayer.texcoords.name = fbx_to_string(idxLayer);
             cGenLayer.texcoords.table.resize(cOldLayer.Texcoord.Length);
