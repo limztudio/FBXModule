@@ -51,8 +51,8 @@ __FBXM_MAKE_FUNC(bool, __hidden_FBXModule_CollapseMesh, void** pDest, const void
             for(FBX_SIZE idxDeform = 0u; idxDeform < edxDeform; ++idxDeform)
                 skinNodes.emplace(pOldMesh->SkinDeforms.Values[idxDeform].TargetNode);
 
-            for(auto* pNode : collapseNodes){
-                if(skinNodes.find(pNode) == skinNodes.cend()){
+            for(auto* pNode : skinNodes){
+                if(collapseNodes.find(pNode) == collapseNodes.cend()){
                     SHRPushErrorMessage(FBX_TEXT("Collapsed node must be one of the clusters of collapse mesh"), __name_of_this_func);
                     return false;
                 }
@@ -113,7 +113,7 @@ __FBXM_MAKE_FUNC(bool, __hidden_FBXModule_CollapseMesh, void** pDest, const void
             cGenLayer.texcoords.name = fbx_to_string(idxLayer);
             cGenLayer.texcoords.table.resize(cOldLayer.Texcoord.Length);
             for(size_t idxElem = 0u; idxElem < cOldLayer.Texcoord.Length; ++idxElem)
-                CopyArrayData(cGenLayer.texcoords.table[idxElem].mData, cOldLayer.Texcoord.Values->Values);
+                CopyArrayData(cGenLayer.texcoords.table[idxElem].mData, cOldLayer.Texcoord.Values[idxElem].Values);
         }
 
         genNodeData.bufSkinData.resize(genNodeData.bufPositions.size());
