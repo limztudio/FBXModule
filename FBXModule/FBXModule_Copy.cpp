@@ -53,7 +53,11 @@ __FBXM_MAKE_FUNC(bool, __hidden_FBXModule_CollapseMesh, void** pDest, const void
 
             for(auto* pNode : skinNodes){
                 if(collapseNodes.find(pNode) == collapseNodes.cend()){
-                    SHRPushErrorMessage(FBX_TEXT("Collapsed node must be one of the clusters of collapse mesh"), __name_of_this_func);
+                    fbx_string msg = FBX_TEXT("Collapsed node must be one of the clusters of collapse mesh. ");
+                    msg += FBX_TEXT("Node \"");
+                    msg += pNode->Name.Values;
+                    msg += FBX_TEXT("\" must be included.");
+                    SHRPushErrorMessage(std::move(msg), __name_of_this_func);
                     return false;
                 }
             }

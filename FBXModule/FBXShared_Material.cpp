@@ -34,12 +34,20 @@ bool SHRLoadMaterials(const MaterialTable& materialTable, FBXDynamicArray<FBXMat
 
         CopyString(iMaterial.Name, ConvertString<FBX_CHAR>(kMaterial->GetName()));
 
-        { // diffuse
-            auto kProperty = kMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
-            auto* kTexture = kProperty.GetSrcObject<FbxFileTexture>();
-            if(kTexture)
+        for(auto kProperty = kMaterial->GetFirstProperty(); kProperty.IsValid(); kProperty = kMaterial->GetNextProperty(kProperty)){
+            int edxTex = kProperty.GetSrcObjectCount<FbxTexture>();
+            for(auto idxTex = decltype(edxTex){ 0 }; idxTex < edxTex; ++idxTex){
+                auto* kTexture = kProperty.GetSrcObject<FbxFileTexture>(idxTex);
+                if(!kTexture)
+                    continue;
+
                 CopyString(iMaterial.DiffuseTexturePath, ConvertString<FBX_CHAR>(kTexture->GetFileName()));
+                goto END_LOAD_MATERIAL;
+            }
         }
+
+    END_LOAD_MATERIAL:
+        ;
     }
 
     return true;
