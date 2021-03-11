@@ -32,7 +32,7 @@ namespace __hidden_FBXModule{
 
 /**
  * @brief Check if "target" contains "find".
- * @tparam Anytype which has bit operation.
+ * @param Any type which has bit operation.
  * @return Return true if "target" contains "find", and false otherwise.
  */
 template<typename T>
