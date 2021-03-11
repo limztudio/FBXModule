@@ -1146,5 +1146,10 @@ bool SHRInitMeshNode(FbxManager* kSDKManager, FbxScene* kScene, ControlPointMerg
         }
     }
 
+    { // compute smoothing groups
+        FbxGeometryConverter kGeomConverter(kSDKManager);
+        kGeomConverter.ComputeEdgeSmoothingFromNormals(kMesh);
+    }
+
     return true;
 }
