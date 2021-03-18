@@ -88,6 +88,34 @@ static inline void ins_updateTimestamp(const FbxTime& kEndTime, FbxAnimCurve* kA
     }
 }
 
+static void ins_unrollQuaternions(FbxAnimEvaluator* kAnimEvaluator, FbxNode* kNode, size_t idx){
+    auto& keyFrames = ins_animationKeyFrames[idx];
+    if(keyFrames.size() < 2)
+        return;
+
+    auto itPrev = keyFrames.begin();
+    auto itCur = itPrev;
+    auto itEnd = keyFrames.end();
+    for(++itCur; itCur != itEnd; ++itPrev, ++itCur){
+        auto kMatPrev = GetLocalTransform(kAnimEvaluator, kNode, *itPrev);
+        auto kMatCur = GetLocalTransform(kAnimEvaluator, kNode, *itCur);
+
+        auto kQuaPrev = kMatPrev.GetQ();
+        auto kQuaCur = kMatCur.GetQ();
+
+        kQuaPrev.Inverse();
+        auto fDotBetween = abs(kQuaPrev.DotProduct(kQuaCur));
+
+        if((fDotBetween < 0.0001) || (fDotBetween > 0.9998)){
+            FbxTime kTime;
+            kTime.SetSecondDouble((itPrev->GetSecondDouble() + itCur->GetSecondDouble()) * 0.5);
+            keyFrames.emplace(kTime);
+            ins_unrollQuaternions(kAnimEvaluator, kNode, idx);
+            return;
+        }
+    }
+}
+
 static void ins_collectNodes(AnimationNodes& nodeTable, FbxNode* kNode){
     if(kNode){
         nodeTable.emplace_back(kNode);
@@ -190,6 +218,8 @@ bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const Animation
 
                     auto* kCurveZ = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
                     ins_updateTimestamp(iAnimStack.endTime, kCurveZ, 1);
+
+                    ins_unrollQuaternions(kAnimEvaluator, kNode, 1);
                 }
 
                 { // scaling
