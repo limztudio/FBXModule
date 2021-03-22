@@ -20,6 +20,7 @@ using namespace fbxsdk;
 static fbx_vector<AnimationStack> ins_animationStacks;
 
 static fbx_set<FbxTime> ins_animationKeyFrames[3];
+static fbx_unordered_set<double> ins_unrollKeyFrame;
 
 
 template<typename KEY_TABLE, typename VALUE>
@@ -93,27 +94,44 @@ static void ins_unrollQuaternions(FbxAnimEvaluator* kAnimEvaluator, FbxNode* kNo
     if(keyFrames.size() < 2)
         return;
 
+    ins_unrollKeyFrame.clear();
+    ins_unrollKeyFrame.rehash(1 << 20);
+
     auto itPrev = keyFrames.begin();
     auto itCur = itPrev;
     auto itEnd = keyFrames.end();
     for(++itCur; itCur != itEnd; ++itPrev, ++itCur){
-        auto kMatPrev = GetLocalTransform(kAnimEvaluator, kNode, *itPrev);
-        auto kMatCur = GetLocalTransform(kAnimEvaluator, kNode, *itCur);
+        const auto& kTimePrev = *itPrev;
+        const auto& kTimeCur = *itCur;
+
+        if((kTimeCur - kTimePrev).GetSecondDouble() < 0.0001)
+            continue;
+
+        auto kMatPrev = GetLocalTransform(kAnimEvaluator, kNode, kTimePrev);
+        auto kMatCur = GetLocalTransform(kAnimEvaluator, kNode, kTimeCur);
 
         auto kQuaPrev = kMatPrev.GetQ();
         auto kQuaCur = kMatCur.GetQ();
 
         kQuaPrev.Inverse();
-        auto fDotBetween = abs(kQuaPrev.DotProduct(kQuaCur));
+        auto fDotBetween = kQuaPrev.DotProduct(kQuaCur);
 
-        if((fDotBetween < 0.0001) || (fDotBetween > 0.9998)){
-            FbxTime kTime;
-            kTime.SetSecondDouble((itPrev->GetSecondDouble() + itCur->GetSecondDouble()) * 0.5);
-            keyFrames.emplace(kTime);
-            ins_unrollQuaternions(kAnimEvaluator, kNode, idx);
-            return;
+        if((fDotBetween < -0.9998) || ((-0.0001 < fDotBetween) && (fDotBetween < 0.0001))){
+            auto fTime = (kTimePrev.GetSecondDouble() + kTimeCur.GetSecondDouble()) * 0.5;
+            ins_unrollKeyFrame.emplace(fTime);
         }
     }
+
+    if(ins_unrollKeyFrame.empty())
+        return;
+
+    for(const auto& fTime : ins_unrollKeyFrame){
+        FbxTime kTime;
+        kTime.SetSecondDouble(fTime);
+        keyFrames.emplace(kTime);
+    }
+
+    ins_unrollQuaternions(kAnimEvaluator, kNode, idx);
 }
 
 static void ins_collectNodes(AnimationNodes& nodeTable, FbxNode* kNode){
