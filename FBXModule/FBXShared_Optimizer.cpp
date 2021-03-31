@@ -75,7 +75,7 @@ public:
 
 
 public:
-    fbxsdk::FbxDouble3 position;
+    FbxDouble3 position;
 
     fbx_vector<SkinInfo> skinData;
 
@@ -85,7 +85,7 @@ public:
     Unit3Container layeredBinormal;
     Unit3Container layeredTangent;
 
-    fbx_vector<std::pair<fbx_basic_string<char>, fbxsdk::FbxDouble2>> layeredUV;
+    fbx_vector<std::pair<fbx_basic_string<char>, FbxDouble2>> layeredUV;
 };
 static inline bool operator==(const _VertexInfo& lhs, const _VertexInfo& rhs){
     {

@@ -524,7 +524,7 @@ bool SHRGenerateNodeTree(FbxManager* kSDKManager, FbxScene* kScene, MaterialTabl
         });
 
         if(matRef.size() != oldSize){
-            fbx_vector<fbxsdk::FbxSurfaceMaterial*> matOldData(materialTable.getTable());
+            fbx_vector<FbxSurfaceMaterial*> matOldData(materialTable.getTable());
             fbx_vector<unsigned long> matIndexer(oldSize, (unsigned long)(-1));
 
             materialTable.clear();
