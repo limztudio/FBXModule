@@ -91,11 +91,12 @@ static inline void ins_updateTimestamp(const FbxTime& kEndTime, FbxAnimCurve* kA
 
 static void ins_unrollQuaternions(FbxAnimEvaluator* kAnimEvaluator, FbxNode* kNode, size_t idx){
     auto& keyFrames = ins_animationKeyFrames[idx];
-    if(keyFrames.size() < 2)
+    const auto uKeyCount = keyFrames.size();
+    if(uKeyCount < 2)
         return;
 
     ins_unrollKeyFrame.clear();
-    ins_unrollKeyFrame.rehash(1 << 20);
+    ins_unrollKeyFrame.rehash(uKeyCount << 3);
 
     auto itPrev = keyFrames.begin();
     auto itCur = itPrev;
@@ -800,7 +801,7 @@ bool SHRStoreAnimation(FbxManager* kSDKManager, FbxScene* kScene, const ImportNo
 
     return true;
 }
-bool SHRStoreAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXDynamicArray<FBXAnimation>& animStacks){
+bool SHRStoreAnimations(FbxManager* kSDKManager, FbxScene* kScene, const ImportNodeToFbxNode& importNodeToFbxNode, const FBXDynamicArray<FBXAnimation>& animStacks){
     //static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRStoreAnimations(FbxManager*, FbxScene*, const ImportNodeToFbxNode&, const FBXDynamicArray<FBXAnimation>&)");
 
 

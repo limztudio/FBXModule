@@ -21,6 +21,7 @@
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
+#include <robin_hood.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -233,14 +234,14 @@ using fbx_multimap = std::multimap<_Kty, _Ty, _Pr, FBXM_ALLOCATOR<std::pair<cons
 
 template<
     class _Kty,
-    class _Hasher = std::hash<_Kty>,
+    class _Hasher = robin_hood::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
-using fbx_unordered_set = std::unordered_set<_Kty, _Hasher, _Keyeq, FBXM_ALLOCATOR<_Kty>>;
+using fbx_unordered_set = robin_hood::unordered_set<_Kty, _Hasher, _Keyeq>;
 
 template<
     class _Kty,
-    class _Hasher = std::hash<_Kty>,
+    class _Hasher = robin_hood::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
 using fbx_unordered_multiset = std::unordered_multiset<_Kty, _Hasher, _Keyeq, FBXM_ALLOCATOR<_Kty>>;
@@ -248,15 +249,15 @@ using fbx_unordered_multiset = std::unordered_multiset<_Kty, _Hasher, _Keyeq, FB
 template<
     class _Kty,
     class _Ty,
-    class _Hasher = std::hash<_Kty>,
+    class _Hasher = robin_hood::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
-using fbx_unordered_map = std::unordered_map<_Kty, _Ty, _Hasher, _Keyeq, FBXM_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
+using fbx_unordered_map = robin_hood::unordered_map<_Kty, _Ty, _Hasher, _Keyeq>;
 
 template<
     class _Kty,
     class _Ty,
-    class _Hasher = std::hash<_Kty>,
+    class _Hasher = robin_hood::hash<_Kty>,
     class _Keyeq = std::equal_to<_Kty>
 >
 using fbx_unordered_multimap = std::unordered_multimap<_Kty, _Ty, _Hasher, _Keyeq, FBXM_ALLOCATOR<std::pair<const _Kty, _Ty>>>;
