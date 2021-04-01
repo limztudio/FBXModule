@@ -177,7 +177,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void*
         CopyArrayData<pConvAnimationNode->BindNode->TransformMatrix.Length>((double*)matRef, (float*)&matFlt);
     }
 
-    if(!pConvAnimationNode->ScalingKeys.Length) {
+    if(!pConvAnimationNode->ScalingKeys.Length){
         auto vValue = matRef.GetS();
         CopyArrayData(pConvOutScale->raw, vValue.mData);
     }
@@ -186,7 +186,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void*
         ins_computeWorldByTime(pConvOutScale->raw, fTime, &pConvAnimationNode->ScalingKeys);
     }
 
-    if(!pConvAnimationNode->RotationKeys.Length) {
+    if(!pConvAnimationNode->RotationKeys.Length){
         auto vValue = matRef.GetQ();
         CopyArrayData(pConvOutRotation->raw, vValue.mData);
     }
@@ -195,7 +195,7 @@ __FBXM_MAKE_FUNC(void, FBXComputeAnimationWorldTransform, void* pOutScale, void*
         ins_computeWorldByTime(pConvOutRotation->raw, fTime, &pConvAnimationNode->RotationKeys);
     }
 
-    if(!pConvAnimationNode->TranslationKeys.Length) {
+    if(!pConvAnimationNode->TranslationKeys.Length){
         auto vValue = matRef.GetT();
         CopyArrayData(pConvOutTranslation->raw, vValue.mData);
     }
