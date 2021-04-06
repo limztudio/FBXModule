@@ -13,7 +13,7 @@
 #include "FBXShared.h"
 
 
-__FBXM_MAKE_FUNC(bool, FBXReduceKeyframe, const FBX_CHAR** szNames, unsigned long uNameCount, unsigned char cMask, double fPrecision){
+__FBXM_MAKE_FUNC(bool, FBXReduceKeyframe, const FBX_CHAR** szExcludeNames, unsigned long uExcludeNameCount, unsigned char cMask, double fPrecision){
     static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("FBXReduceKeyframe(const FBX_CHAR**, unsigned long, unsigned char, double)");
 
 
@@ -23,9 +23,11 @@ __FBXM_MAKE_FUNC(bool, FBXReduceKeyframe, const FBX_CHAR** szNames, unsigned lon
     }
 
     shr_tmpNodeNameList.clear();
-    shr_tmpNodeNameList.rehash(uNameCount << 2);
-    for(auto i = decltype(uNameCount){ 0 }; i < uNameCount; ++i)
-        shr_tmpNodeNameList.emplace(fbx_string(szNames[i]));
+    if((szExcludeNames != nullptr) && (uExcludeNameCount > 0)){
+        shr_tmpNodeNameList.rehash(uExcludeNameCount << 2);
+        for(auto i = decltype(uExcludeNameCount){ 0 }; i < uExcludeNameCount; ++i)
+            shr_tmpNodeNameList.emplace(fbx_string(szExcludeNames[i]));
+    }
 
     if(!SHRReduceAnimation(shr_SDKManager, shr_scene, shr_tmpNodeNameList, (TransformMask)cMask, fPrecision)){
         SHRPushErrorMessage(FBX_TEXT("failed reduce animations"), __name_of_this_func);

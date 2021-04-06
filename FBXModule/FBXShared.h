@@ -321,7 +321,7 @@ extern bool SHRCreateBindPose(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene*
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
 
-extern bool SHRReduceAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const NodeNameList& boneNameList, TransformMask eMask, double fPrecision);
+extern bool SHRReduceAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const NodeNameList& excludeNameList, TransformMask eMask, double fPrecision);
 
 extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const AnimationNodes& kNodeTable);
 extern bool SHRLoadAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode, FBXDynamicArray<FBXAnimation>* pAnimations);

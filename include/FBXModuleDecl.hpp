@@ -37,13 +37,13 @@ __FBXM_MAKE_FUNC(int, FBXGetLastWarning, FBX_CHAR* szMessage);
 
 /**
  * @brief Estimate contained animations to reduce key frames.
- * @param szNames Bone name list which need to be estimated.
- * @param uNameCount Bone name list element count.
+ * @param szExcludeNames Bone name list which need to be excluded from reduction.
+ * @param uExcludeNameCount Bone name list element count.
  * @param cMask A curve whose selected bit will be processed the reduction. (0x01 = translation; 0x02 = rotation; 0x04 = scaling)
  * @param fPrecision Default is 1.0
  * @return Return true if successfully reduced.
  */
-__FBXM_MAKE_FUNC(bool, FBXReduceKeyframe, const FBX_CHAR** szNames, unsigned long uNameCount, unsigned char cMask, double fPrecision);
+__FBXM_MAKE_FUNC(bool, FBXReduceKeyframe, const FBX_CHAR** szExcludeNames, unsigned long uExcludeNameCount, unsigned char cMask, double fPrecision);
 
 /**
  * @brief Open/Create selected FBX file.

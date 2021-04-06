@@ -46,6 +46,7 @@ static inline std::basic_string<TCHAR> getLastError(){
         std::basic_string<TCHAR> msg;
         msg.resize(len);
         FBXGetLastError(&msg[0]);
+        return msg;
     }
 
     return TEXT("");
@@ -251,52 +252,7 @@ static void task(const TCHAR* strIn, const TCHAR* strOut){
     }
 
     const FBX_CHAR* boneList[] = {
-        TEXT("Bip01"),
-
-        TEXT("Bip01 Footsteps"),
-
-        TEXT("Bip01 Pelvis"),
-        TEXT("Bip01 Spine"),
-        TEXT("Bip01 Spine1"),
-        TEXT("Bip01 Spine2"),
-        TEXT("Bip01 Neck"),
-        TEXT("Bip01 Neck1"),
-        TEXT("Bip01 Head"),
-        TEXT("Bip01 HeadNub"),
-
-        TEXT("Bip01 L Thigh"),
-        TEXT("Bip01 L Calf"),
-        TEXT("Bip01 L Foot"),
-        TEXT("Bip01 L Toe0"),
-
-        TEXT("Bip01 R Thigh"),
-        TEXT("Bip01 R Calf"),
-        TEXT("Bip01 R Foot"),
-        TEXT("Bip01 R Toe0"),
-
-        TEXT("Bip01 L Clavicle"),
-        TEXT("Bip01 L UpperArm"),
-        TEXT("Bip01 L Forearm"),
-
-        TEXT("Bip01 R Clavicle"),
-        TEXT("Bip01 R UpperArm"),
-        TEXT("Bip01 R Forearm"),
-
-        TEXT("Bip01 L Hand"),
-        TEXT("Bip01 L Finger0"),
-        TEXT("Bip01 L Finger1"),
-        TEXT("Bip01 L Finger2"),
-        TEXT("Bip01 L Finger01"),
-        TEXT("Bip01 L Finger11"),
-        TEXT("Bip01 L Finger21"),
-
-        TEXT("Bip01 R Hand"),
-        TEXT("Bip01 R Finger0"),
-        TEXT("Bip01 R Finger1"),
-        TEXT("Bip01 R Finger2"),
-        TEXT("Bip01 R Finger01"),
-        TEXT("Bip01 R Finger11"),
-        TEXT("Bip01 R Finger21"),
+        TEXT("XXX"),
     };
     if(!FBXReduceKeyframe(boneList, _countof(boneList), 0x07, 1.)){
         TOUT << getLastError();
