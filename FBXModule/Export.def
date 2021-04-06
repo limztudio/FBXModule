@@ -7,20 +7,21 @@ LIBRARY FBXModule
 	FBXGetLastWarning  @5
 	FBXOpenFile  @6
 	FBXCloseFile  @7
-	FBXReadScene  @8
-	FBXWriteScene  @9
-	FBXGetRoot  @10
-	FBXGetWorldMatrix  @11
-	FBXTransformCoord  @12
-	FBXTransformNormal  @13
-	FBXComputeAnimationLocalTransform  @14
-	FBXComputeAnimationWorldTransform  @15
-	FBXComputeAnimationLocalScale  @16
-	FBXComputeAnimationWorldScale  @17
-	FBXComputeAnimationLocalRotation  @18
-	FBXComputeAnimationWorldRotation  @19
-	FBXComputeAnimationLocalTranslation  @20
-	FBXComputeAnimationWorldTranslation  @21
+	FBXReduceKeyframe @8
+	FBXReadScene  @9
+	FBXWriteScene  @10
+	FBXGetRoot  @11
+	FBXGetWorldMatrix  @12
+	FBXTransformCoord  @13
+	FBXTransformNormal  @14
+	FBXComputeAnimationLocalTransform  @15
+	FBXComputeAnimationWorldTransform  @16
+	FBXComputeAnimationLocalScale  @17
+	FBXComputeAnimationWorldScale  @18
+	FBXComputeAnimationLocalRotation  @19
+	FBXComputeAnimationWorldRotation  @20
+	FBXComputeAnimationLocalTranslation  @21
+	FBXComputeAnimationWorldTranslation  @22
 
 	__hidden_FBXModule_DeleteInnerObject  @2555  NONAME
 	__hidden_FBXModule_RebindRoot  @2556  NONAME

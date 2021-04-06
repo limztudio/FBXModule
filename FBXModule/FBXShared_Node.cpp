@@ -659,6 +659,17 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
 
 
     importNodeToFbxNode.clear();
+    poseNodeList.clear();
+
+    {
+        size_t iNodeCount = 0u;
+        FBXIterateNode(pRootNode, [&iNodeCount](const FBXNode*){ ++iNodeCount; });
+        if(!iNodeCount)
+            ++iNodeCount;
+
+        importNodeToFbxNode.rehash(iNodeCount << 2);
+        poseNodeList.rehash(iNodeCount << 2);
+    }
 
     if(pRootNode){
         // if the first node has no sibling, treat it as root node
@@ -691,8 +702,6 @@ bool SHRStoreNodes(FbxManager* kSDKManager, FbxScene* kScene, ImportNodeToFbxNod
                 return false;
         }
     }
-
-    poseNodeList.clear();
 
     for(auto& i : importNodeToFbxNode){
         const auto curID = i.first->getID();

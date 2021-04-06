@@ -25,6 +25,7 @@
     <ClCompile Include="FBXModule_Utilites.cpp" />
     <ClCompile Include="FBXShared_Copy.cpp" />
     <ClCompile Include="FBXModule_Copy.cpp" />
+    <ClCompile Include="FBXModule_Option.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

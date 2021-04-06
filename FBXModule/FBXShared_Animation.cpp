@@ -17,11 +17,26 @@
 using namespace fbxsdk;
 
 
+static fbx_unordered_map<FbxNode*, bool> ins_tmpNodeList;
+
 static fbx_vector<AnimationStack> ins_animationStacks;
 
 static fbx_set<FbxTime> ins_animationKeyFrames[3];
 static fbx_unordered_set<double> ins_unrollKeyFrame;
 
+
+NodeNameList shr_tmpNodeNameList;
+
+
+static void ins_findNodeRecursive(FbxManager* kSDKManager, FbxNode* kNode){
+    if(!kNode)
+        return;
+
+    ins_tmpNodeList.emplace(kNode, false);
+
+    for(auto e = kNode->GetChildCount(), i = 0; i < e; ++i)
+        ins_findNodeRecursive(kSDKManager, kNode->GetChild(i));
+}
 
 template<typename KEY_TABLE, typename VALUE>
 static inline void ins_keyTypeOptimze(KEY_TABLE& keyTable, const VALUE& kVal){
@@ -164,6 +179,84 @@ static inline FbxAnimCurveDef::EInterpolationType ins_convInterpolationType(FBXA
     return FbxAnimCurveDef::eInterpolationConstant;
 }
 
+
+bool SHRReduceAnimation(FbxManager* kSDKManager, FbxScene* kScene, const NodeNameList& boneNameList, TransformMask eMask, double fPrecision){
+    static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRReduceAnimation(FbxManager*, FbxScene*, const NodeNameList&, TransformMask, double)");
+
+
+    const auto edxAnimStack = kScene->GetSrcObjectCount<FbxAnimStack>();
+    if(!edxAnimStack)
+        return true;
+
+    FbxAnimCurveFilterKeyReducer kFilterReducer;
+    kFilterReducer.SetPrecision(fPrecision);
+
+    ins_tmpNodeList.clear();
+    ins_tmpNodeList.rehash(size_t(std::max(1, kScene->GetNodeCount()) << 2));
+    ins_findNodeRecursive(kSDKManager, kScene->GetRootNode());
+
+    if(ins_tmpNodeList.empty())
+        return true;
+
+    fbx_string tmpString;
+    for(auto& iPair : ins_tmpNodeList){
+        tmpString = ConvertString<FBX_CHAR>(iPair.first->GetName());
+        auto itFind = boneNameList.find(tmpString);
+        if(itFind == boneNameList.cend())
+            continue;
+
+        iPair.second = true;
+    }
+
+    for(auto idxAnimStack = decltype(edxAnimStack){ 0 }; idxAnimStack < edxAnimStack; ++idxAnimStack){
+        auto* kAnimStack = kScene->GetSrcObject<FbxAnimStack>(idxAnimStack);
+        if(!kAnimStack)
+            continue;
+
+        for(const auto& iPair : ins_tmpNodeList){
+            if(!iPair.second)
+                continue;
+
+            auto* kNode = iPair.first;
+            FbxAnimCurve* kCurves[3];
+
+            for(auto edxAnimLayer = kAnimStack->GetMemberCount<FbxAnimLayer>(), idxAnimLayer = 0; idxAnimLayer < edxAnimLayer; ++idxAnimLayer){
+                auto* kAnimLayer = kAnimStack->GetMember<FbxAnimLayer>(idxAnimLayer);
+                if(!kAnimLayer)
+                    continue;
+
+                if(FBXTypeHasMember(eMask, TransformMask::TransformMask_Translation)){
+                    kCurves[0] = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+                    kCurves[1] = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+                    kCurves[2] = kNode->LclTranslation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+
+                    kFilterReducer.SetKeySync(false);
+                    kFilterReducer.Apply(kCurves, _countof(kCurves));
+                }
+
+                if(FBXTypeHasMember(eMask, TransformMask::TransformMask_Scaling)){
+                    kCurves[0] = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+                    kCurves[1] = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+                    kCurves[2] = kNode->LclScaling.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+
+                    kFilterReducer.SetKeySync(false);
+                    kFilterReducer.Apply(kCurves, _countof(kCurves));
+                }
+
+                if(FBXTypeHasMember(eMask, TransformMask::TransformMask_Rotation)){
+                    kCurves[0] = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+                    kCurves[1] = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+                    kCurves[2] = kNode->LclRotation.GetCurve(kAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+
+                    kFilterReducer.SetKeySync(true);
+                    kFilterReducer.Apply(kCurves, _countof(kCurves));
+                }
+            }
+        }
+    }
+
+    return true;
+}
 
 bool SHRLoadAnimation(FbxManager* kSDKManager, FbxScene* kScene, const AnimationNodes& kNodeTable){
     static const FBX_CHAR __name_of_this_func[] = FBX_TEXT("SHRLoadAnimation(FbxManager*, FbxScene*, const AnimationNodes&)");

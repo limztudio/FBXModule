@@ -250,6 +250,59 @@ static void task(const TCHAR* strIn, const TCHAR* strOut){
         return;
     }
 
+    const FBX_CHAR* boneList[] = {
+        TEXT("Bip01"),
+
+        TEXT("Bip01 Footsteps"),
+
+        TEXT("Bip01 Pelvis"),
+        TEXT("Bip01 Spine"),
+        TEXT("Bip01 Spine1"),
+        TEXT("Bip01 Spine2"),
+        TEXT("Bip01 Neck"),
+        TEXT("Bip01 Neck1"),
+        TEXT("Bip01 Head"),
+        TEXT("Bip01 HeadNub"),
+
+        TEXT("Bip01 L Thigh"),
+        TEXT("Bip01 L Calf"),
+        TEXT("Bip01 L Foot"),
+        TEXT("Bip01 L Toe0"),
+
+        TEXT("Bip01 R Thigh"),
+        TEXT("Bip01 R Calf"),
+        TEXT("Bip01 R Foot"),
+        TEXT("Bip01 R Toe0"),
+
+        TEXT("Bip01 L Clavicle"),
+        TEXT("Bip01 L UpperArm"),
+        TEXT("Bip01 L Forearm"),
+
+        TEXT("Bip01 R Clavicle"),
+        TEXT("Bip01 R UpperArm"),
+        TEXT("Bip01 R Forearm"),
+
+        TEXT("Bip01 L Hand"),
+        TEXT("Bip01 L Finger0"),
+        TEXT("Bip01 L Finger1"),
+        TEXT("Bip01 L Finger2"),
+        TEXT("Bip01 L Finger01"),
+        TEXT("Bip01 L Finger11"),
+        TEXT("Bip01 L Finger21"),
+
+        TEXT("Bip01 R Hand"),
+        TEXT("Bip01 R Finger0"),
+        TEXT("Bip01 R Finger1"),
+        TEXT("Bip01 R Finger2"),
+        TEXT("Bip01 R Finger01"),
+        TEXT("Bip01 R Finger11"),
+        TEXT("Bip01 R Finger21"),
+    };
+    if(!FBXReduceKeyframe(boneList, _countof(boneList), 0x07, 1.)){
+        TOUT << getLastError();
+        return;
+    }
+
     if(!FBXReadScene()){
         TOUT << getLastError();
         return;
@@ -279,6 +332,41 @@ static void task(const TCHAR* strIn, const TCHAR* strOut){
 }
 
 
+static void exportBoneList(TCHAR* strFBX){
+    if(!FBXOpenFile(strFBX, TEXT("rb"), &setting)){
+        TOUT << getLastError();
+        return;
+    }
+
+    if(!FBXReadScene()){
+        TOUT << getLastError();
+        return;
+    }
+
+    std::TSTRING strTXT(strFBX);
+    strTXT += TEXT(".txt");
+
+    std::wofstream fs(strTXT, std::wofstream::out);
+
+    FBXIterateNode(reinterpret_cast<const FBXRoot*>(FBXGetRoot())->Nodes, [&](FBXNode* pNode){
+        if(FBXTypeHasMember(pNode->getID(), FBXType::FBXType_Mesh))
+            return;
+
+        std::TSTRING strName(pNode->Name.Values);
+        fs << L"\"";
+        fs << strName;
+        fs << L"\",\n";
+    });
+
+    fs.close();
+
+    if(!FBXCloseFile()){
+        TOUT << getLastError();
+        return;
+    }
+}
+
+
 int _tmain(int argc, TCHAR* argv[]){
 #ifdef _DEBUG
     {
@@ -291,9 +379,17 @@ int _tmain(int argc, TCHAR* argv[]){
 #endif
 
     setting.AxisSystem = FBXAxisSystem::FBXAxisSystem_Preset_Max;
-    //setting.UnitScale = 1.;
+    setting.UnitScale = 1.;
 
     if(loadLib()){
+        //exportBoneList(argv[1]);
+
+        //{
+        //    std::TSTRING str = argv[1];
+        //    str += TEXT(".fbx");
+        //    task(argv[1], str.c_str());
+        //}
+
         std::filesystem::path rootPath(argv[1]);
         for(auto& p : std::filesystem::directory_iterator(rootPath)){
             auto curPath = p.path();
@@ -304,12 +400,11 @@ int _tmain(int argc, TCHAR* argv[]){
 
             task(curPath.c_str(), argv[2]);
         }
-    }
 
-    //for(size_t i = 0; i < 1000; ++i)
-    //task(argv[1], argv[2]);
+        closeLib();
+    }
     
-    closeLib();
+
 
 #ifdef _DEBUG
     {

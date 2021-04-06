@@ -33,6 +33,27 @@ namespace __hidden_FBXModule{
 };
 
 
+enum TransformMask : unsigned char{
+    TransformMask_None = 0u,
+
+    TransformMask_Translation = 1u << 0,
+    TransformMask_Rotation = 1u << 1,
+    TransformMask_Scaling = 1u << 2,
+};
+
+template<typename T>
+class FbxDeleter{
+    inline void operator()(T* p)const{
+        if(p)
+            p->Destroy();
+    }
+};
+
+template<template<typename> typename KEY, typename CHAR>
+class StringHasher{
+public:
+    inline size_t operator()(const KEY<CHAR>& k)const{ return ((size_t)robin_hood::hash_bytes(k.data(), sizeof(CHAR) * k.size())); }
+};
 template<typename KEY>
 class CustomHasher{
 public:

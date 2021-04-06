@@ -763,7 +763,7 @@ break;
                     {
                         matIndexer.rehash(materials.size());
 
-                        for(size_t edxMat = materials.size(), idxMat = 0u; idxMat < edxMat; ++idxMat)
+                        for(auto edxMat = (unsigned int)(materials.size()), idxMat = 0u; idxMat < edxMat; ++idxMat)
                             matIndexer[materials[idxMat]] = idxMat;
                     }
 

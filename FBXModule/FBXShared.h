@@ -190,6 +190,7 @@ struct AnimationStack{
 };
 
 using AnimationNodes = fbx_vector<fbxsdk::FbxNode*>;
+using NodeNameList = fbx_unordered_set<fbx_string, StringHasher<fbx_basic_string, FBX_CHAR>>;
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
@@ -240,6 +241,8 @@ extern ImportNodeToFbxNode shr_importNodeToFbxNode;
 extern PoseNodeList shr_poseNodeList;
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
+
+extern NodeNameList shr_tmpNodeNameList;
 
 // FBXShared_Optimizer ///////////////////////////////////////////////////////////////////////////////
 
@@ -317,6 +320,8 @@ extern bool SHRStoreNodes(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kSc
 extern bool SHRCreateBindPose(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const PoseNodeList& poseNodeList);
 
 // FBXShared_Animation ///////////////////////////////////////////////////////////////////////////////
+
+extern bool SHRReduceAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const NodeNameList& boneNameList, TransformMask eMask, double fPrecision);
 
 extern bool SHRLoadAnimation(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const AnimationNodes& kNodeTable);
 extern bool SHRLoadAnimations(fbxsdk::FbxManager* kSDKManager, fbxsdk::FbxScene* kScene, const FbxNodeToExportNode& fbxNodeToExportNode, FBXDynamicArray<FBXAnimation>* pAnimations);
