@@ -648,7 +648,7 @@ bool SHRLoadMeshFromNode(MaterialTable& materialTable, ControlPointRemap& contro
                             vert = Normalize3(vert);
                         }
                     }
-break;
+                    break;
 
                 default:
                 {
