@@ -123,16 +123,25 @@ static void ins_unrollQuaternions(FbxAnimEvaluator* kAnimEvaluator, FbxNode* kNo
         if((kTimeCur - kTimePrev).GetSecondDouble() < 0.0001)
             continue;
 
+        // rotation as euler
+        auto kRotPrev = kAnimEvaluator->GetNodeLocalRotation(kNode, kTimePrev);
+        auto kRotCur = kAnimEvaluator->GetNodeLocalRotation(kNode, kTimeCur);
+
+        auto kRotDiff = kRotPrev - kRotCur;
+        if((abs(kRotDiff.mData[0]) < 0.0001) && (abs(kRotDiff.mData[1]) < 0.0001) && (abs(kRotDiff.mData[2]) < 0.0001))
+            continue;
+
         auto kMatPrev = GetLocalTransform(kAnimEvaluator, kNode, kTimePrev);
         auto kMatCur = GetLocalTransform(kAnimEvaluator, kNode, kTimeCur);
 
+        // rotation as quaternion
         auto kQuaPrev = kMatPrev.GetQ();
         auto kQuaCur = kMatCur.GetQ();
 
         kQuaPrev.Inverse();
-        auto fDotBetween = kQuaPrev.DotProduct(kQuaCur);
+        auto fDotBetween = abs(kQuaPrev.DotProduct(kQuaCur));
 
-        if((fDotBetween < -0.9998) || ((-0.0001 < fDotBetween) && (fDotBetween < 0.0001))){
+        if((fDotBetween < 0.0001) || (fDotBetween > 0.9998)){
             auto fTime = (kTimePrev.GetSecondDouble() + kTimeCur.GetSecondDouble()) * 0.5;
             ins_unrollKeyFrame.emplace(fTime);
         }
